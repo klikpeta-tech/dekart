@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -12,6 +13,9 @@ import (
 	"dekart/src/server/user"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/golang-migrate/migrate/v4"
+	migratesqlite3 "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -292,4 +296,62 @@ func TestUpdateWorkspaceUser_RejectsMixedCaseSelfUpdate(t *testing.T) {
 		})
 		require.Equal(t, codes.InvalidArgument, status.Code(err))
 	}
+}
+
+// newMigratedSqliteDB opens a file-backed SQLite database with the real production migrations applied.
+func newMigratedSqliteDB(t *testing.T) *sql.DB {
+	db, err := sql.Open("sqlite3", filepath.Join(t.TempDir(), "dekart.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { db.Close() })
+	driver, err := migratesqlite3.WithInstance(db, &migratesqlite3.Config{})
+	require.NoError(t, err)
+	migrationsDir, err := filepath.Abs("../../../sqlite/migrations")
+	require.NoError(t, err)
+	m, err := migrate.NewWithDatabaseInstance("file://"+migrationsDir, "sqlite3", driver)
+	require.NoError(t, err)
+	require.NoError(t, m.Up())
+	return db
+}
+
+// Role changes that land in the same SQLite second must resolve to the last one written (ENG-2146).
+func TestWorkspaceRoleChangesInSameSecondResolveToLatest(t *testing.T) {
+	t.Setenv("DEKART_CLOUD", "")
+	t.Setenv("DEKART_ALLOW_WORKSPACE_CREATION", "")
+	t.Setenv("DEKART_LICENSE_KEY", "")
+	t.Setenv("DEKART_SQLITE_DB_PATH", "")
+	t.Setenv("DEKART_DEFAULT_WORKSPACE_ADMIN", "admin@example.com")
+	t.Setenv("DEKART_DEFAULT_WORKSPACE_ROLE", "viewer")
+
+	db := newMigratedSqliteDB(t)
+	server := NewServer(db, nil, nil)
+	withClaims := func(email string) context.Context {
+		ctx := context.WithValue(context.Background(), user.ContextKey, &user.Claims{Email: email})
+		return server.SetWorkspaceContext(ctx, nil)
+	}
+	adminCtx := withClaims("admin@example.com")
+	// The first request of a new user joins the default workspace with the default viewer role.
+	require.Equal(t, proto.UserRole_ROLE_VIEWER, user.CheckWorkspaceCtx(withClaims("member@example.com")).UserRole)
+
+	for _, role := range []proto.UserRole{proto.UserRole_ROLE_EDITOR, proto.UserRole_ROLE_VIEWER} {
+		_, err := server.UpdateWorkspaceUser(adminCtx, &proto.UpdateWorkspaceUserRequest{
+			Email:          "member@example.com",
+			UserUpdateType: proto.UpdateWorkspaceUserRequest_USER_UPDATE_TYPE_UPDATE,
+			Role:           role,
+		})
+		require.NoError(t, err)
+	}
+	// Collapse every log row into one second, the resolution of SQLite CURRENT_TIMESTAMP.
+	_, err := db.Exec(`UPDATE workspace_log SET created_at = '2026-01-01 00:00:00'`)
+	require.NoError(t, err)
+
+	require.Equal(t, proto.UserRole_ROLE_VIEWER, user.CheckWorkspaceCtx(withClaims("member@example.com")).UserRole)
+	response, err := server.GetWorkspace(adminCtx, &proto.GetWorkspaceRequest{})
+	require.NoError(t, err)
+	var memberRoles []proto.UserRole
+	for _, member := range response.Users {
+		if member.Email == "member@example.com" {
+			memberRoles = append(memberRoles, member.Role)
+		}
+	}
+	require.Equal(t, []proto.UserRole{proto.UserRole_ROLE_VIEWER}, memberRoles)
 }
