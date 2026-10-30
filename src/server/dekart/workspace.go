@@ -25,56 +25,52 @@ func isTrialGatedWorkspace(isCloud bool, planType proto.PlanType) bool {
 	return isCloud && planType == proto.PlanType_TYPE_PERSONAL
 }
 
+// workspaceLogLatestOrder sorts workspace_log rows newest first. SQLite timestamps have second resolution, so insert order resolves ties.
+func workspaceLogLatestOrder() string {
+	if IsSqlite() {
+		return "created_at DESC, rowid DESC"
+	}
+	return "created_at DESC"
+}
+
 func (s Server) getUserWorkspaces(ctx context.Context, email string) ([]*proto.Workspace, error) {
+	order := workspaceLogLatestOrder()
 	rows, err := s.db.QueryContext(ctx, `
 		WITH last_status AS (
-			SELECT
-				wl.workspace_id,
-				wl.email,
-				wl.status,
-				wl.created_at,
-				wl.authored_by,
-				wl.id
-			FROM
-				workspace_log wl
-			JOIN (
+			SELECT workspace_id, email, status, created_at, authored_by, id
+			FROM (
 				SELECT
 					workspace_id,
-					MAX(created_at) AS created_at
+					email,
+					status,
+					created_at,
+					authored_by,
+					id,
+					ROW_NUMBER() OVER (PARTITION BY workspace_id ORDER BY `+order+`) AS row_num
 				FROM
 					workspace_log
 				WHERE
 					-- REVIEW: Match login and invitation emails regardless of capitalization.
 					LOWER(email) = LOWER($1)
 					AND status IN (1, 2)
-				GROUP BY
-					workspace_id
-			) AS ls2 ON wl.workspace_id = ls2.workspace_id AND wl.created_at = ls2.created_at
-			WHERE
-				LOWER(wl.email) = LOWER($1)
+			) AS ranked
+			WHERE row_num = 1
 		),
 		user_role AS (
-			SELECT
-				ol.role,
-				ol.email,
-				ol.workspace_id
-			FROM
-				workspace_log ol
-			JOIN (
+			SELECT role, email, workspace_id
+			FROM (
 				SELECT
+					role,
+					email,
 					workspace_id,
-					MAX(created_at) AS created_at
+					ROW_NUMBER() OVER (PARTITION BY workspace_id ORDER BY `+order+`) AS row_num
 				FROM
 					workspace_log
 				WHERE
 					LOWER(email) = LOWER($1)
 					AND status IN (1, 3)
-				GROUP BY
-					workspace_id
-			) AS oll ON ol.workspace_id = oll.workspace_id AND ol.created_at = oll.created_at
-			WHERE
-				LOWER(ol.email) = LOWER($1)
-				AND ol.status IN (1, 3)
+			) AS ranked
+			WHERE row_num = 1
 		),
 		latest_subscription AS (
 			SELECT
@@ -313,8 +309,8 @@ func (s Server) countActiveWorkspaceUsers(ctx context.Context, workspaceID strin
 
 func (s Server) getWorkspaceUsers(ctx context.Context, workspaceID string) ([]*proto.User, error) {
 	users := make([]*proto.User, 0)
-	// In this query, the subquery (aliased as subq) gets the maximum created_at for each email.
-	//The main query then joins workspace_log with this subquery on email and created_at, effectively getting the active value at the time of the last log for each user.
+	// Each CTE ranks a user's log rows newest first and keeps exactly one, so rows sharing a timestamp cannot multiply the result.
+	order := workspaceLogLatestOrder()
 	rows, err := s.db.QueryContext(ctx, `
 		WITH status AS (
 		SELECT
@@ -326,44 +322,40 @@ func (s Server) getWorkspaceUsers(ctx context.Context, workspaceID string) ([]*p
 			ol.id,
 			ol.role
 		FROM
-			workspace_log ol
-		JOIN
 			(SELECT
 				email,
-				max(created_at) as max_created_at
+				status,
+				created_at,
+				authored_by,
+				id,
+				role,
+				ROW_NUMBER() OVER (PARTITION BY email ORDER BY `+order+`) AS row_num
 			FROM
 				workspace_log
 			WHERE
 				workspace_id = $1
-				and status in (1, 2)
-			GROUP BY
-				email) subq
-		ON
-			ol.email = subq.email AND ol.created_at = subq.max_created_at
+				and status in (1, 2)) ol
 		LEFT JOIN confirmation_log AS cl ON ol.id = cl.workspace_log_id
+		WHERE
+			ol.row_num = 1
 		ORDER BY
 			ol.created_at DESC
 		), role AS (
 		SELECT
-			ol.email,
-			ol.role,
-			ol.created_at,
-			ol.authored_by
+			email,
+			role
 		FROM
-			workspace_log ol
-		JOIN
 			(SELECT
 				email,
-				max(created_at) as max_created_at
+				role,
+				ROW_NUMBER() OVER (PARTITION BY email ORDER BY `+order+`) AS row_num
 			FROM
 				workspace_log
 			WHERE
 				workspace_id = $1
-				and status in (1, 3)
-			GROUP BY
-				email) subq
-		ON
-			ol.email = subq.email AND ol.created_at = subq.max_created_at and ol.workspace_id = $1
+				and status in (1, 3)) ranked
+		WHERE
+			row_num = 1
 		)
 		SELECT
 			status.email,
@@ -673,6 +665,7 @@ func (s Server) UpdateWorkspaceUser(ctx context.Context, req *proto.UpdateWorksp
 }
 
 func (s Server) getInvites(ctx context.Context, email string) ([]*proto.WorkspaceInvite, error) {
+	order := workspaceLogLatestOrder()
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT
 			ol.created_at,
@@ -681,23 +674,23 @@ func (s Server) getInvites(ctx context.Context, email string) ([]*proto.Workspac
 			o.name,
 			ol.authored_by
 		FROM
-			workspace_log ol
-		JOIN
 			(SELECT
 				workspace_id,
-				max(created_at) as max_created_at
+				created_at,
+				id,
+				email,
+				status,
+				authored_by,
+				ROW_NUMBER() OVER (PARTITION BY workspace_id ORDER BY `+order+`) AS row_num
 			FROM
 				workspace_log
 			WHERE
 				-- REVIEW: Match login and invitation emails regardless of capitalization.
 				LOWER(email) = LOWER($1)
-				AND status in (1, 2)
-			GROUP BY
-				workspace_id) subq
-		ON ol.workspace_id=subq.workspace_id AND ol.created_at = subq.max_created_at
+				AND status in (1, 2)) ol
 		JOIN workspaces AS o ON ol.workspace_id = o.id
 		LEFT JOIN confirmation_log AS cl ON ol.id = cl.workspace_log_id AND LOWER(cl.authored_by) = LOWER(ol.email)
-		WHERE ol.status = 1 AND LOWER(ol.authored_by) != LOWER($1) AND cl.accepted is null
+		WHERE ol.row_num = 1 AND ol.status = 1 AND LOWER(ol.authored_by) != LOWER($1) AND cl.accepted is null
 		ORDER BY ol.created_at DESC
 		`, email)
 	if err != nil {
