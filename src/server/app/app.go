@@ -359,6 +359,13 @@ func Configure(dekartServer *dekart.Server, db *sql.DB) *http.Server {
 		OIDCJWKSURL:             os.Getenv("DEKART_OIDC_JWKS_URL"),
 		OIDCIssuer:              os.Getenv("DEKART_OIDC_ISSUER"),
 		OIDCAudience:            os.Getenv("DEKART_OIDC_AUDIENCE"),
+
+		RequireVerifiedLogin:        os.Getenv("DEKART_REQUIRE_VERIFIED_LOGIN") == "1",
+		VerifiedLoginJWKSURL:        os.Getenv("DEKART_VERIFIED_LOGIN_JWKS_URL"),
+		VerifiedLoginIssuer:         os.Getenv("DEKART_VERIFIED_LOGIN_ISSUER"),
+		VerifiedLoginAudience:       os.Getenv("DEKART_VERIFIED_LOGIN_AUDIENCE"),
+		VerifiedLoginAllowedEmails:  os.Getenv("DEKART_VERIFIED_LOGIN_ALLOWED_EMAILS"),
+		VerifiedLoginAllowedDomains: os.Getenv("DEKART_VERIFIED_LOGIN_ALLOWED_DOMAINS"),
 	}, db)
 
 	grpcServer := configureGRPC(dekartServer)
@@ -370,7 +377,16 @@ func Configure(dekartServer *dekart.Server, db *sql.DB) *http.Server {
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			reqWithClaims := r
 			if r.Method != http.MethodOptions {
-				reqWithClaims = r.WithContext(dekartServer.SetWorkspaceContext(claimsCheck.GetContext(r), r))
+				if claimsCheck.RequireVerifiedLogin {
+					user.RemoveUntrustedIdentityHeaders(r)
+				}
+				ctx := claimsCheck.GetContext(r)
+				// Verified login never falls back to an anonymous identity; only the health check stays open.
+				if claimsCheck.RequireVerifiedLogin && user.GetClaims(ctx) == nil && r.URL.Path != "/health" {
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				}
+				reqWithClaims = r.WithContext(dekartServer.SetWorkspaceContext(ctx, r))
 			}
 			if grpcServer.IsAcceptableGrpcCorsRequest(r) || grpcServer.IsGrpcWebRequest(r) {
 				grpcServer.ServeHTTP(w, reqWithClaims)

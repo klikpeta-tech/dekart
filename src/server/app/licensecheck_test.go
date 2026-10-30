@@ -16,6 +16,7 @@ func clearStartupLicenseEnv(t *testing.T) {
 		"DEKART_REQUIRE_GOOGLE_OAUTH",
 		"DEKART_REQUIRE_IAP",
 		"DEKART_REQUIRE_AMAZON_OIDC",
+		"DEKART_REQUIRE_VERIFIED_LOGIN",
 	} {
 		key := key
 		value, ok := os.LookupEnv(key)
@@ -45,6 +46,21 @@ func TestValidateStartupLicenseAllowsSQLiteWithoutKey(t *testing.T) {
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+// Verified login is the keyless login mode, so it must start without a license key.
+func TestValidateStartupLicenseAllowsVerifiedLoginWithoutKey(t *testing.T) {
+	clearStartupLicenseEnv(t)
+	os.Setenv("DEKART_REQUIRE_VERIFIED_LOGIN", "1")
+
+	state, err := ValidateStartupLicense(StartupLicenseConfig{}, validTestLicense)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if state.Required {
+		t.Fatalf("expected no license requirement for verified login")
 	}
 }
 

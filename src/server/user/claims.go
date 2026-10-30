@@ -63,6 +63,13 @@ type ClaimsCheckConfig struct {
 	OIDCJWKSURL             string
 	OIDCIssuer              string
 	OIDCAudience            string
+	// RequireVerifiedLogin accepts only a verified ID token forwarded by the login layer, never an anonymous identity.
+	RequireVerifiedLogin        bool
+	VerifiedLoginJWKSURL        string
+	VerifiedLoginIssuer         string
+	VerifiedLoginAudience       string
+	VerifiedLoginAllowedEmails  string
+	VerifiedLoginAllowedDomains string
 }
 
 // ClaimsCheck factory to add user claims to context
@@ -165,10 +172,19 @@ var oauthExchangeCache = newOAuthCodeExchangeCache(oauthCodeExchangeCacheTTL)
 var b2i = map[bool]int{false: 0, true: 1}
 
 func validateConfig(c ClaimsCheckConfig) {
-	if b2i[c.RequireIAP]+b2i[c.RequireAmazonOIDC]+b2i[c.RequireOIDC]+b2i[c.RequireGoogleOAuth]+b2i[c.RequireSnowflakeContext] > 1 {
-		log.Fatal().Msg("DEKART_REQUIRE_IAP, DEKART_REQUIRE_AMAZON_OIDC, DEKART_REQUIRE_OIDC, DEKART_REQUIRE_GOOGLE_OAUTH and DEKART_REQUIRE_SNOWFLAKE_CONTEXT are mutually exclusive")
+	if b2i[c.RequireIAP]+b2i[c.RequireAmazonOIDC]+b2i[c.RequireOIDC]+b2i[c.RequireGoogleOAuth]+b2i[c.RequireSnowflakeContext]+b2i[c.RequireVerifiedLogin] > 1 {
+		log.Fatal().Msg("DEKART_REQUIRE_IAP, DEKART_REQUIRE_AMAZON_OIDC, DEKART_REQUIRE_OIDC, DEKART_REQUIRE_GOOGLE_OAUTH, DEKART_REQUIRE_SNOWFLAKE_CONTEXT and DEKART_REQUIRE_VERIFIED_LOGIN are mutually exclusive")
 	}
 	switch {
+	case c.RequireVerifiedLogin:
+		log.Info().Msgf("Dekart configured to require verified login")
+		if c.VerifiedLoginJWKSURL == "" || c.VerifiedLoginIssuer == "" || c.VerifiedLoginAudience == "" {
+			log.Fatal().Msgf("DEKART_VERIFIED_LOGIN_JWKS_URL, DEKART_VERIFIED_LOGIN_ISSUER and DEKART_VERIFIED_LOGIN_AUDIENCE are required for verified login")
+		}
+		// A client-controlled identity header would defeat the verified identity.
+		if c.DevClaims {
+			log.Fatal().Msgf("DEKART_DEV_CLAIMS cannot be used with DEKART_REQUIRE_VERIFIED_LOGIN")
+		}
 	case c.RequireSnowflakeContext:
 		log.Info().Msgf("Dekart configured to require Snowflake context")
 	case c.RequireOIDC:
@@ -205,6 +221,13 @@ func NewClaimsCheck(c ClaimsCheckConfig, db *sql.DB) ClaimsCheck {
 	var oidcJWT *oidcJWTVerifier
 	if c.RequireOIDC {
 		oidcJWT = newOIDCJWTVerifier(c)
+	}
+	if c.RequireVerifiedLogin {
+		oidcJWT = newOIDCJWTVerifier(ClaimsCheckConfig{
+			OIDCJWKSURL:  c.VerifiedLoginJWKSURL,
+			OIDCIssuer:   c.VerifiedLoginIssuer,
+			OIDCAudience: c.VerifiedLoginAudience,
+		})
 	}
 	return ClaimsCheck{
 		c,
@@ -282,6 +305,10 @@ func (c ClaimsCheck) GetContext(r *http.Request) context.Context {
 	var claims *Claims
 	reportID := strings.TrimSpace(r.Header.Get("X-Dekart-Report-Id"))
 
+	if c.RequireVerifiedLogin {
+		// Only the verified token counts; claims stay nil (rejected by the caller) when it is missing or invalid.
+		return context.WithValue(ctx, ContextKey, c.validateVerifiedLogin(r))
+	}
 	if c.DevClaims {
 		email := strings.TrimSpace(r.Header.Get("X-Dekart-Claim-Email"))
 		if email != "" {

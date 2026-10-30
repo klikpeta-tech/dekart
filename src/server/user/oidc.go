@@ -77,28 +77,9 @@ func (c ClaimsCheck) validateJWTFromOIDCHeader(r *http.Request) *Claims {
 		return nil
 	}
 
-	token, err := jwt.Parse(tokenString, c.oidcJWT.getPublicKey)
-	if err != nil {
-		// Retry once when JWKS fetch did not provide the key yet (rotation/eventual consistency).
-		if strings.Contains(err.Error(), "OIDC key not found for kid") || strings.Contains(err.Error(), "no valid keys in JWKS response") {
-			token, err = jwt.Parse(tokenString, c.oidcJWT.getPublicKey)
-		}
-	}
+	claims, err := c.oidcJWT.verifyToken(tokenString)
 	if err != nil {
 		log.Warn().Err(err).Msg("OIDC token verification failed")
-		return nil
-	}
-	if !token.Valid {
-		log.Warn().Msg("OIDC token is invalid")
-		return nil
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		log.Warn().Msg("OIDC token claims have unexpected type")
-		return nil
-	}
-	if err := c.oidcJWT.validateClaims(claims); err != nil {
-		log.Warn().Err(err).Msg("OIDC token claims validation failed")
 		return nil
 	}
 	email, ok := claims[defaultOIDCEmailClaim].(string)
@@ -109,6 +90,31 @@ func (c ClaimsCheck) validateJWTFromOIDCHeader(r *http.Request) *Claims {
 	return &Claims{
 		Email: email,
 	}
+}
+
+// verifyToken checks the JWT signature against the JWKS, its time claims, issuer and audience, and returns its claims.
+func (v *oidcJWTVerifier) verifyToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, v.getPublicKey)
+	if err != nil {
+		// Retry once when JWKS fetch did not provide the key yet (rotation/eventual consistency).
+		if strings.Contains(err.Error(), "OIDC key not found for kid") || strings.Contains(err.Error(), "no valid keys in JWKS response") {
+			token, err = jwt.Parse(tokenString, v.getPublicKey)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, fmt.Errorf("token is invalid")
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("token claims have unexpected type")
+	}
+	if err := v.validateClaims(claims); err != nil {
+		return nil, err
+	}
+	return claims, nil
 }
 
 var allowedOIDCAlgs = map[string]bool{
