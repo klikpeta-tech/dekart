@@ -20,7 +20,8 @@ On every request the forwarded token (`Authorization: Bearer <id token>`) must b
 - for an email or domain on the allow lists, when either list is set.
 
 A request that fails any check gets `401 Unauthorized`. There is no anonymous fallback and no playground access: every
-request except `GET /health` needs a valid token. In this mode Dekart ignores and removes the client-controlled identity
+request except `GET /health` needs a valid token, whatever the HTTP method. The only other exception is a CORS preflight
+(`OPTIONS`) answered by the gRPC or `/api/v1/` handlers, which return headers only. In this mode Dekart ignores and removes the client-controlled identity
 inputs of other modes (`X-Dekart-Claim-Email`, `Sf-Context-Current-User`, `X-Dekart-Playground`), and refuses to start
 with `DEKART_DEV_CLAIMS=1` or any other `DEKART_REQUIRE_*` identity mode.
 
@@ -86,6 +87,4 @@ history:
 - `src/server/user/verifiedlogin.go`, `src/server/user/oidc.go`, `src/server/user/claims.go`, `src/server/app/app.go`:
   the verified login mode described above. The license checks in `src/server/app/licensecheck.go` are unchanged.
 - `src/server/dekart/workspace.go`: role, member and invite queries resolve rows that share a timestamp to the latest one.
-- `src/server/dekart/connection.go`: the connection test no longer checks a Google Cloud Storage bucket for server-wide
-  storage backends.
 - `.github/workflows`: upstream-only build jobs run only in `dekart-xyz/dekart`; a PR declaration check was added.
