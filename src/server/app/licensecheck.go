@@ -81,19 +81,13 @@ func ValidateStartupLicense(config StartupLicenseConfig, validate TokenValidator
 	return state, nil
 }
 
-func RequireValidStartupLicense(config StartupLicenseConfig) StartupLicenseState {
-	validate := license.ValidateToken
-	if config.AllowExpiredKeyStartup {
-		validate = license.ValidateTokenAllowExpired
-	}
-	state, err := ValidateStartupLicense(config, validate)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Startup license validation failed")
-	}
-	if config.AllowExpiredKeyStartup && state.ExpiresAt != nil && state.ExpiresAt.Before(time.Now()) {
-		log.Warn().Time("license_expires_at", *state.ExpiresAt).Msg("Accepted expired DEKART_LICENSE_KEY because DEKART_DEV_ALLOW_EXPIRED_LICENSE_KEY_STARTUP=1")
-	}
-	return state
+// RequireValidStartupLicense is the startup entry point for license checks.
+// Fork change (docs/licence-key-gates-removed.md): no license key is required or validated, so stock SSO and
+// Postgres metadata start without one and no workspace becomes read-only because of a key. The empty state means
+// not required and no expiry, which keeps the runtime expiry enforcement in dekart.Server inert.
+func RequireValidStartupLicense(_ StartupLicenseConfig) StartupLicenseState {
+	log.Info().Msg("License key checks are disabled in this build; DEKART_LICENSE_KEY is not required or validated")
+	return StartupLicenseState{}
 }
 
 // ValidateLicenseForSSO validates license key requirements for SSO-enabled deployments.
