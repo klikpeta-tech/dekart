@@ -26,6 +26,16 @@ Authentication itself is not weakened. Each stock mode still needs its own confi
 `src/server/app/licensegates_test.go` checks startup without a key for each mode, that an absent, invalid or expired key does not lock
 a workspace, and that anonymous callers are refused when Google OAuth is required.
 
+## Other changes in this fork
+
+Besides removing the licence-key gate, this fork differs from upstream in these ways:
+
+- Role, member and invite queries resolve rows that share a SQLite timestamp to the latest one (`src/server/dekart/workspace.go`).
+- A PR declaration workflow was added (`.github/workflows/require-no-mistakes.yml`).
+- The upstream-only build and e2e jobs run only in `dekart-xyz/dekart` (`.github/workflows/pull_request.yaml` and `push.yaml`).
+- The connection test no longer checks a Google Cloud Storage bucket for the server-wide storage backends `S3`, `PG` and
+  `SNOWFLAKE` (`src/server/dekart/connection.go`).
+
 ## Why
 
 The fork runs a self-hosted instance with Dekart's built-in Google sign-in and per-user roles, which upstream gates behind a
