@@ -23,8 +23,10 @@ jobs:
     uses: ./.github/workflows/go_test.yaml
     secrets: inherit
 
+  # Fork note: build and e2e jobs need upstream's self-hosted runner and registry secrets.
   build_e2e:
-    if: needs.changes.outputs.e2e == 'true' &&
+    if: github.repository == 'dekart-xyz/dekart' &&
+      needs.changes.outputs.e2e == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     needs: [changes]
     with:
@@ -37,7 +39,8 @@ jobs:
     secrets: inherit
 
   e2e_tests:
-    if: needs.changes.outputs.e2e == 'true' &&
+    if: github.repository == 'dekart-xyz/dekart' &&
+      needs.changes.outputs.e2e == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     needs: [build_e2e]
     uses: ./.github/workflows/e2e.yaml

@@ -21,7 +21,9 @@ jobs:
     needs: [changes]
     uses: ./.github/workflows/go_test.yaml
     secrets: inherit
+  # Fork note: build jobs need upstream's self-hosted runner and registry secrets; dependants skip with them.
   build_e2e:
+    if: github.repository == 'dekart-xyz/dekart'
     needs: [changes]
     uses: ./.github/workflows/build.yaml
     with:
@@ -42,6 +44,7 @@ jobs:
       packages: write
     secrets: inherit
   build_cloud:
+    if: github.repository == 'dekart-xyz/dekart'
     needs: [changes, build_e2e]
     uses: ./.github/workflows/build.yaml
     with:
