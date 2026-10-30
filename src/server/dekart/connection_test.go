@@ -1,7 +1,9 @@
 package dekart
 
 import (
+	"context"
 	"dekart/src/proto"
+	"dekart/src/server/job"
 	"dekart/src/server/user"
 	"testing"
 
@@ -71,4 +73,35 @@ func TestUpdateConnection_BigQueryAllowsMetadataOnlyServiceAccountEdit(t *testin
 	require.NoError(t, err)
 	require.Equal(t, connectionID, response.GetConnection().GetId())
 	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+// passingConnectionJobs is a job store whose datasource test always succeeds.
+type passingConnectionJobs struct{ job.Store }
+
+func (passingConnectionJobs) TestConnection(context.Context, *proto.TestConnectionRequest) (*proto.TestConnectionResponse, error) {
+	return &proto.TestConnectionResponse{Success: true}, nil
+}
+
+// Server-wide storage backends must not make a Postgres connection test fail on a Google Cloud Storage bucket check.
+func TestTestConnection_PostgresPassesWithServerWideStorage(t *testing.T) {
+	for _, storageBackend := range []string{"S3", "PG", "SNOWFLAKE"} {
+		t.Run(storageBackend, func(t *testing.T) {
+			t.Setenv("DEKART_STORAGE", storageBackend)
+			server := Server{jobs: passingConnectionJobs{}}
+			ctx := context.WithValue(context.Background(), user.ContextKey, &user.Claims{Email: "user@example.com"})
+
+			res, err := server.TestConnection(ctx, &proto.TestConnectionRequest{Connection: &proto.Connection{
+				ConnectionName:   "Postgres",
+				ConnectionType:   proto.ConnectionType_CONNECTION_TYPE_POSTGRES,
+				PostgresHost:     "db.example.com",
+				PostgresPort:     5432,
+				PostgresUsername: "reader",
+				PostgresPassword: &proto.Secret{ClientEncrypted: "encrypted"},
+				PostgresDatabase: "maps",
+			}})
+
+			require.NoError(t, err)
+			require.True(t, res.Success, res.Error)
+		})
+	}
 }
