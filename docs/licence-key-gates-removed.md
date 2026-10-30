@@ -16,7 +16,8 @@ disabled and returns an empty state (not required, no expiry). Nothing else in t
   count as self-hosted and behave the same.
 
 `ValidateStartupLicense`, `enabledSSOEnvVars` and their tests are kept as upstream wrote them but are no longer called at startup.
-This keeps the diff to one function body, so merges from upstream stay small.
+The call site in `src/server/main.go` and the `AllowExpiredKeyStartup` option are also unchanged, so
+`DEKART_DEV_ALLOW_EXPIRED_LICENSE_KEY_STARTUP` is now inert. This keeps the diff to one function body, so merges from upstream stay small.
 
 ## What stays the same
 
