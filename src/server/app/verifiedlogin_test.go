@@ -14,6 +14,7 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -58,6 +59,10 @@ func newVerifiedLoginInstance(t *testing.T) *verifiedLoginInstance {
 	t.Setenv("DEKART_VERIFIED_LOGIN_JWKS_URL", jwksServer.URL)
 	t.Setenv("DEKART_VERIFIED_LOGIN_ISSUER", verifiedLoginIssuer)
 	t.Setenv("DEKART_VERIFIED_LOGIN_AUDIENCE", verifiedLoginAudience)
+	staticDir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(staticDir, "index.html"), []byte("<html><title>Dekart</title></html>"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(staticDir, "app.js"), []byte("console.log(1)"), 0o600))
+	t.Setenv("DEKART_STATIC_FILES", staticDir)
 	t.Setenv("DEKART_DEFAULT_WORKSPACE_ADMIN", "admin@example.com")
 	t.Setenv("DEKART_DEFAULT_WORKSPACE_ROLE", "viewer")
 	t.Setenv("DEKART_SQLITE_DB_PATH", "")
@@ -177,11 +182,12 @@ func TestVerifiedLoginRejectsMissingForgedAndExpiredLogins(t *testing.T) {
 		"X-Forwarded-Email":       "admin@example.com",
 	}
 	logins := map[string]string{
-		"missing":        "",
-		"forged":         forged.token("admin@example.com", nil),
-		"expired":        instance.token("admin@example.com", map[string]any{"exp": time.Now().Add(-time.Minute).Unix()}),
-		"wrong audience": instance.token("admin@example.com", map[string]any{"aud": "another-client"}),
-		"email unproven": instance.token("admin@example.com", map[string]any{"email_verified": false}),
+		"missing":                  "",
+		"forged":                   forged.token("admin@example.com", nil),
+		"expired":                  instance.token("admin@example.com", map[string]any{"exp": time.Now().Add(-time.Minute).Unix()}),
+		"wrong audience":           instance.token("admin@example.com", map[string]any{"aud": "another-client"}),
+		"email unproven":           instance.token("admin@example.com", map[string]any{"email_verified": false}),
+		"email verified as string": instance.token("admin@example.com", map[string]any{"email_verified": "true"}),
 	}
 
 	for name, token := range logins {
@@ -189,6 +195,10 @@ func TestVerifiedLoginRejectsMissingForgedAndExpiredLogins(t *testing.T) {
 			for _, path := range []string{"/api/v1/mcp/tools", "/", "/reports/00000000-0000-0000-0000-000000000000"} {
 				status, _, _ := instance.do(http.MethodGet, path, token, nil, forgedIdentity)
 				require.Equal(t, http.StatusUnauthorized, status, path)
+			}
+			for _, path := range []string{"/", "/app.js", "/reports/00000000-0000-0000-0000-000000000000"} {
+				status, _, _ := instance.do(http.MethodOptions, path, token, nil, forgedIdentity)
+				require.Equal(t, http.StatusUnauthorized, status, "OPTIONS "+path)
 			}
 			status, _ := instance.mcp(token, "create_report", map[string]any{}, forgedIdentity)
 			require.Equal(t, http.StatusUnauthorized, status)
@@ -232,4 +242,18 @@ func TestVerifiedLoginAppliesWorkspaceRoles(t *testing.T) {
 	status, _ = instance.mcp(member, "update_report_title", map[string]any{"report_id": reportID, "title": "editor edit"}, nil)
 	require.Equal(t, http.StatusOK, status)
 	instance.createReport(member)
+}
+
+// Browsers send CORS preflights without credentials, so the gRPC-web and API preflights stay answerable.
+func TestVerifiedLoginAnswersCORSPreflights(t *testing.T) {
+	instance := newVerifiedLoginInstance(t)
+	status, _, _ := instance.do(http.MethodOptions, "/api/v1/mcp/call", "", nil, map[string]string{
+		"Origin": "http://localhost:3000", "Access-Control-Request-Method": "POST",
+	})
+	require.Less(t, status, http.StatusBadRequest)
+	status, _, _ = instance.do(http.MethodOptions, "/Dekart/GetEnv", "", nil, map[string]string{
+		"Origin": "http://localhost:3000", "Access-Control-Request-Method": "POST",
+		"Access-Control-Request-Headers": "content-type,x-grpc-web",
+	})
+	require.Less(t, status, http.StatusBadRequest)
 }

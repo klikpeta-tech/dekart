@@ -44,17 +44,6 @@ func emailAllowed(email string, allowedEmails, allowedDomains []string) bool {
 	return false
 }
 
-// emailVerified accepts the OIDC boolean claim and the string form some providers emit.
-func emailVerified(value interface{}) bool {
-	switch verified := value.(type) {
-	case bool:
-		return verified
-	case string:
-		return verified == "true"
-	}
-	return false
-}
-
 // validateVerifiedLogin returns claims only for a signed, unexpired ID token of an allowed, verified email; otherwise nil.
 // The request never falls back to an anonymous identity.
 func (c ClaimsCheck) validateVerifiedLogin(r *http.Request) *Claims {
@@ -78,7 +67,7 @@ func (c ClaimsCheck) validateVerifiedLogin(r *http.Request) *Claims {
 		log.Warn().Msg("Verified login token has no email claim")
 		return nil
 	}
-	if !emailVerified(claims["email_verified"]) {
+	if verified, _ := claims["email_verified"].(bool); !verified {
 		log.Warn().Msg("Verified login token email is not verified")
 		return nil
 	}

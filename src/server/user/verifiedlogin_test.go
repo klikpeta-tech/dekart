@@ -91,6 +91,7 @@ func TestVerifiedLoginRejectsInvalidLogins(t *testing.T) {
 		{"wrong audience", createOIDCToken(t, key, validIDToken(map[string]interface{}{"aud": "other-client"}))},
 		{"no audience", createOIDCToken(t, key, validIDToken(map[string]interface{}{"aud": nil}))},
 		{"email not verified", createOIDCToken(t, key, validIDToken(map[string]interface{}{"email_verified": false}))},
+		{"email_verified as string", createOIDCToken(t, key, validIDToken(map[string]interface{}{"email_verified": "true"}))},
 		{"email_verified missing", createOIDCToken(t, key, validIDToken(map[string]interface{}{"email_verified": nil}))},
 		{"no email", createOIDCToken(t, key, validIDToken(map[string]interface{}{"email": nil}))},
 	}

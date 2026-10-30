@@ -376,7 +376,7 @@ func Configure(dekartServer *dekart.Server, db *sql.DB) *http.Server {
 	return &http.Server{
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			reqWithClaims := r
-			if r.Method != http.MethodOptions {
+			if r.Method != http.MethodOptions || (claimsCheck.RequireVerifiedLogin && !isAPIOrGrpcPreflight(httpServer, grpcServer, r)) {
 				if claimsCheck.RequireVerifiedLogin {
 					user.RemoveUntrustedIdentityHeaders(r)
 				}
@@ -398,6 +398,19 @@ func Configure(dekartServer *dekart.Server, db *sql.DB) *http.Server {
 		WriteTimeout: getHTTPWriteTimeout(),
 		ReadTimeout:  60 * time.Second,
 	}
+}
+
+// isAPIOrGrpcPreflight reports whether an OPTIONS request is answered by a gRPC or API preflight handler, which return headers only.
+func isAPIOrGrpcPreflight(router *mux.Router, grpcServer *grpcweb.WrappedGrpcServer, r *http.Request) bool {
+	if grpcServer.IsAcceptableGrpcCorsRequest(r) {
+		return true
+	}
+	var match mux.RouteMatch
+	if !router.Match(r, &match) || match.Route == nil {
+		return false
+	}
+	template, err := match.Route.GetPathTemplate()
+	return err == nil && strings.HasPrefix(template, "/api/v1/")
 }
 
 // setOriginHeaderIfExists avoids CORS-origin warnings for clients that do not send Origin header.
