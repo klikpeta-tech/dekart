@@ -28,11 +28,9 @@ a workspace, and that anonymous callers are refused when Google OAuth is require
 
 ## Other changes in this fork
 
-Besides removing the licence-key gate, this fork differs from upstream in these ways:
+Besides removing the licence-key gate, this production line (`release/v0.26-klikpeta`, upstream v0.26.0 plus these fixes) differs from upstream in these ways:
 
 - Role, member and invite queries resolve rows that share a SQLite timestamp to the latest one (`src/server/dekart/workspace.go`).
-- A PR declaration workflow was added (`.github/workflows/require-no-mistakes.yml`).
-- The upstream-only build and e2e jobs run only in `dekart-xyz/dekart` (`.github/workflows/pull_request.yaml` and `push.yaml`).
 - The connection test no longer checks a Google Cloud Storage bucket for the server-wide storage backends `S3`, `PG` and
   `SNOWFLAKE` (`src/server/dekart/connection.go`).
 
