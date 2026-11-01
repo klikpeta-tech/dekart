@@ -28,11 +28,11 @@ a workspace, and that anonymous callers are refused when Google OAuth is require
 
 ## Other changes in this fork
 
-Besides removing the licence-key gate, this production line (`release/v0.26-klikpeta`, upstream v0.26.0 plus these fixes) differs from upstream in these ways:
+Besides removing the licence-key gate, this production line (`release/v0.26-klikpeta`, upstream v0.26.0 plus these fixes) delivers two further fixes through separate PRs. They are not part of this change and apply once those PRs merge:
 
-- Role, member and invite queries resolve rows that share a SQLite timestamp to the latest one (`src/server/dekart/workspace.go`).
+- Role, member and invite queries resolve rows that share a SQLite timestamp to the latest one ([PR #7](https://github.com/klikpeta-tech/dekart/pull/7)).
 - The connection test no longer checks a Google Cloud Storage bucket for the server-wide storage backends `S3`, `PG` and
-  `SNOWFLAKE` (`src/server/dekart/connection.go`).
+  `SNOWFLAKE` ([PR #8](https://github.com/klikpeta-tech/dekart/pull/8)).
 
 ## Why
 
