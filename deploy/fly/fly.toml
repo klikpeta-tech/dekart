@@ -1,0 +1,60 @@
+# Dekart on Fly.io - app klikpeta-geo (geo.klikpeta.com), region sin.
+# Production line of the klikpeta-tech/dekart fork: branch release/v0.26-klikpeta (upstream v0.26.0 plus our fixes).
+# Deploy from the repository root, see deploy/fly/README.md:
+#   touch .npmrc
+#   flyctl deploy . --config deploy/fly/fly.toml --dockerfile Dockerfile --app klikpeta-geo --ha=false --remote-only
+
+app = "klikpeta-geo"
+primary_region = "sin"
+
+[build]
+  # Relative to this file; --dockerfile Dockerfile on the command line wins. Built from the fork's source, not the stock image.
+  dockerfile = "../../Dockerfile"
+
+[env]
+  DEKART_PORT = "8080"
+  DEKART_SQLITE_DB_PATH = "/data/dekart.db"
+  # Uploads and query results in the Tigris bucket. S3 storage plus a bucket
+  # also turns on Dekart's SQLite backup to <bucket>/sqlite-backups/ every
+  # DEKART_BACKUP_FREQUENCY_MIN, and restore-on-start when /data/dekart.db is
+  # missing (src/server/dekart/backup.go). AWS_ACCESS_KEY_ID and
+  # AWS_SECRET_ACCESS_KEY are app secrets from `flyctl storage create`; Dekart's
+  # S3 client reads AWS_ENDPOINT, not the AWS_ENDPOINT_URL_S3 secret.
+  DEKART_STORAGE = "S3"
+  DEKART_CLOUD_STORAGE_BUCKET = "klikpeta-geo-backup"
+  AWS_ENDPOINT = "https://fly.storage.tigris.dev"
+  DEKART_DATASOURCE = "USER"
+  # The ticker restarts on every auto-start, so a long interval would rarely
+  # fire on an idle-stopped machine; unchanged databases are skipped.
+  DEKART_BACKUP_FREQUENCY_MIN = "5"
+  DEKART_MAX_BACKUPS_AGE_DAYS = "30"
+  DEKART_CORS_ORIGIN = "https://geo.klikpeta.com"
+  # Dekart reads DEKART_REQUIRE_GOOGLE_OAUTH (src/server/app/app.go); the
+  # repo's .env.example name DEKART_REQUIRE_GOOGLE_OAUTH2 is silently ignored
+  # and leaves Dekart anonymous.
+  DEKART_REQUIRE_GOOGLE_OAUTH = "1"
+  # Any Google account may sign in; new users join the default workspace as
+  # viewers. Only the admin below can create extra workspaces, so client
+  # data goes in per-client workspaces and the default workspace stays empty.
+  DEKART_DEFAULT_WORKSPACE_ADMIN = "mfhanif@klikpeta.com"
+  DEKART_DEFAULT_WORKSPACE_ROLE = "viewer"
+  # Secrets set with `fly secrets set` (never in this file):
+  #   DEKART_GOOGLE_OAUTH_CLIENT_ID, DEKART_GOOGLE_OAUTH_SECRET, and for now DEKART_LICENSE_KEY.
+  # This build ignores DEKART_LICENSE_KEY (docs/licence-key-gates-removed.md); it stays set so the stock
+  # dekartxyz/dekart:0.26 image keeps working for a rollback until the key expires on 2026-11-29.
+
+[mounts]
+  source = "dekart_data"
+  destination = "/data"
+  snapshot_retention = 7
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
