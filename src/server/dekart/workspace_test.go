@@ -292,6 +292,8 @@ func newMigratedSqliteDB(t *testing.T) *sql.DB {
 // Role changes that land in the same SQLite second must resolve to the last one written (ENG-2146).
 func TestWorkspaceRoleChangesInSameSecondResolveToLatest(t *testing.T) {
 	t.Setenv("DEKART_CLOUD", "")
+	// make test exports DEKART_POSTGRES_PORT, which would select Postgres and drop the SQLite rowid tie-breaker under test.
+	clearMetadataEnv(t)
 	t.Setenv("DEKART_ALLOW_WORKSPACE_CREATION", "")
 	t.Setenv("DEKART_LICENSE_KEY", "")
 	t.Setenv("DEKART_SQLITE_DB_PATH", "")
