@@ -65,7 +65,15 @@ func (s Server) TestConnection(ctx context.Context, req *proto.TestConnectionReq
 	if !res.Success {
 		return res, nil
 	}
-	if req.Connection.CloudStorageBucket == "" && os.Getenv("DEKART_STORAGE") == "USER" {
+	storageBackend := os.Getenv("DEKART_STORAGE")
+	// Only USER and GCS storage read results from a Google Cloud Storage bucket of the connection;
+	// S3, PG and SNOWFLAKE storage are server-wide and ignore the connection bucket.
+	if storageBackend != "USER" && storageBackend != "GCS" {
+		return &proto.TestConnectionResponse{
+			Success: true,
+		}, nil
+	}
+	if req.Connection.CloudStorageBucket == "" && storageBackend == "USER" {
 		// if no bucket is provided, temp storage is used
 		return &proto.TestConnectionResponse{
 			Success: true,
