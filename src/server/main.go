@@ -254,8 +254,7 @@ func waitForInterrupt() chan os.Signal {
 func main() {
 	configureLogger()
 	validateStorageConfig()
-	// Removing or bypassing this check is a modification under AGPL and requires publishing your changed source code.
-	// Get a free license key at https://mailchi.mp/dekart/upgrade-to-sso
+	// This fork neutralises the check inside RequireValidStartupLicense and publishes its source under AGPL (see docs/licence-key-gates-removed.md).
 	licenseState := app.RequireValidStartupLicense(app.StartupLicenseConfig{
 		RequireForPostgresMetadata: dekart.SelectedMetadataBackend() == dekart.MetadataBackendPostgres,
 		AllowExpiredKeyStartup:     os.Getenv("DEKART_DEV_ALLOW_EXPIRED_LICENSE_KEY_STARTUP") == "1",

@@ -29,7 +29,6 @@ Create beautiful data-driven maps and share them with your team:
 
 * Google Cloud Storage or AWS S3 bucket for storing cache
 * PostgreSQL or similar (Cloud SQL, Amazon RDS, etc) when using Postgres metadata
-* Dekart license key when using Postgres metadata. Get one from the [Dekart license key form](https://mailchi.mp/dekart/upgrade-to-sso).
 * Mapbox Token
 
 ## Running docker
