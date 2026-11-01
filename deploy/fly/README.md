@@ -52,17 +52,5 @@ flyctl deploy --app klikpeta-geo --config deploy/fly/fly.toml --image dekartxyz/
 
 This works while the licence key in `DEKART_LICENSE_KEY` is valid (until 2026-11-29). The data stays on the same volume.
 
-Only if the volume itself must be reverted, restore it from the recorded snapshot. A machine stays bound to the volume it was
-created with, so the machine has to be recreated to pick up the restored volume:
-
-```sh
-flyctl volumes create dekart_data --snapshot-id <id> --region sin --app klikpeta-geo
-flyctl machines list --app klikpeta-geo
-flyctl machine destroy <machine-id> --force --app klikpeta-geo
-flyctl deploy --app klikpeta-geo --config deploy/fly/fly.toml --image dekartxyz/dekart:0.26 --ha=false
-flyctl volumes list --app klikpeta-geo
-```
-
-With no machine left, the deploy creates a new one that attaches the unattached `dekart_data` volume. Use `flyctl volumes list`
-to confirm the new volume is the one attached to the machine. Keep the old volume until the restored data is verified, then delete
-it deliberately.
+Restoring data from the pre-deploy snapshot is a manual, captain-approved recovery done case by case. It is never scripted here,
+and never done by deleting a volume.
