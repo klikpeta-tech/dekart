@@ -58,6 +58,8 @@ Workspace-level operations that have no report capability use their existing end
 | `complete_file_upload_session` | Report structure | `CanWrite` through file-to-report lookup | Denied | Allowed only with report edit access |
 | `abort_file_upload_session` | Report structure | `CanWrite` through file-to-report lookup | Denied | Allowed only with report edit access |
 
+`create_query`, `create_file`, and `replace_file` (and their gRPC counterparts) additionally require that the supplied `connection_id` is the system connection or belongs to the report's workspace, because jobs run with the stored credentials of the bound connection. A missing connection and a connection of another workspace both return `PermissionDenied`. See `requireConnectionInReportWorkspace`.
+
 ## Current Inconsistencies
 
 ### MCP-only report updates

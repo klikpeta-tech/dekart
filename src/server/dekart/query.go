@@ -178,20 +178,24 @@ func (s Server) createQuery(ctx context.Context, req *proto.CreateQueryRequest, 
 	if err := s.requireReportWorkspaceWrite(ctx, *reportID); err != nil {
 		return nil, err
 	}
-	if validate != nil {
-		if err := validate(ctx, req); err != nil {
-			return nil, err
-		}
-	}
 
 	switch req.ExecutionEngine {
 	case proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION:
+		if err := s.requireConnectionInReportWorkspace(ctx, *reportID, req.ConnectionId); err != nil {
+			return nil, err
+		}
 	case proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_DUCKDB:
 		if req.ConnectionId != "" {
 			return nil, status.Error(codes.InvalidArgument, "DuckDB query cannot reference a connection")
 		}
 	default:
 		return nil, status.Error(codes.InvalidArgument, "execution_engine is required")
+	}
+
+	if validate != nil {
+		if err := validate(ctx, req); err != nil {
+			return nil, err
+		}
 	}
 
 	queryID, created, err := s.createDatasetQueryRecord(ctx, *reportID, req.DatasetId, req.ConnectionId, req.ExecutionEngine, claims.Email)

@@ -139,6 +139,34 @@ func (s Server) requireReportWorkspaceWrite(ctx context.Context, reportID string
 	return s.requireWorkspaceIDWrite(ctx, workspaceID.String)
 }
 
+// requireConnectionInReportWorkspace refuses a connection that is neither the system connection nor owned by the
+// workspace of the report. Jobs run with the stored credentials of the bound connection, so binding a dataset to
+// another workspace's connection would run its queries and uploads with that workspace's credentials.
+func (s Server) requireConnectionInReportWorkspace(ctx context.Context, reportID string, connectionID string) error {
+	if conn.IsSystemConnectionID(connectionID) {
+		return nil
+	}
+	var reportWorkspaceID, connectionWorkspaceID sql.NullString
+	// Placeholders appear in argument order: SQLite numbers $N by first appearance.
+	err := s.db.QueryRowContext(ctx, `
+		SELECT
+			(SELECT workspace_id FROM reports WHERE id = $1),
+			(SELECT workspace_id FROM connections WHERE id = $2)
+	`, reportID, connectionID).Scan(&reportWorkspaceID, &connectionWorkspaceID)
+	if err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+	if !reportWorkspaceID.Valid || !connectionWorkspaceID.Valid || reportWorkspaceID.String != connectionWorkspaceID.String {
+		// Same answer for a missing connection and one of another workspace, so ids cannot be probed.
+		log.Warn().
+			Str("report_id", reportID).
+			Str("connection_id", connectionID).
+			Msg("connection does not belong to the report workspace")
+		return status.Error(codes.PermissionDenied, "connection does not belong to the workspace of this map")
+	}
+	return nil
+}
+
 func (s Server) requireRuntimeLicenseWrite() error {
 	if s.runtimeLicenseReadOnly() {
 		return workspaceReadOnlyError(user.WorkspaceInfo{
