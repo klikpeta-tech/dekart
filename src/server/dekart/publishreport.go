@@ -440,6 +440,14 @@ func (s Server) PublishReport(ctx context.Context, req *proto.PublishReportReque
 
 	// Check if user is trying to publish and if they have a freemium plan
 	if req.Publish {
+		// Library data is licensed to the grant of one workspace and never goes to public storage.
+		hasLibrary, err := s.reportHasLibraryDataset(ctx, req.ReportId)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		if hasLibrary {
+			return nil, status.Error(codes.FailedPrecondition, "a map with Data Library datasets cannot be published")
+		}
 		if os.Getenv("DEKART_STORAGE") == "PG" {
 			return nil, status.Error(codes.InvalidArgument, "public publishing is not supported for DEKART_STORAGE=PG yet")
 		}

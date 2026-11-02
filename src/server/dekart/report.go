@@ -930,6 +930,13 @@ func (s Server) ForkReport(ctx context.Context, req *proto.ForkReportRequest) (*
 	for queryID := range libraryQueryIDs {
 		connectionUpdatedQueryIDs[queryID] = true
 	}
+	// Library data never goes to public storage, so a copy of a map that holds it starts unpublished.
+	for _, dataset := range datasets {
+		if isLibraryConnection(dataset.ConnectionId) {
+			report.IsPublic = false
+			break
+		}
+	}
 	jobs, err := s.getDatasetsQueryJobs(ctx, datasets)
 	if err != nil {
 		errtype.LogError(err, "Cannot retrieve query jobs")

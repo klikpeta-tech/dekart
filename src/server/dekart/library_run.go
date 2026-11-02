@@ -104,17 +104,6 @@ func (s Server) startLibraryQuery(ctx context.Context, reportID, queryID string)
 	if claims == nil {
 		return Unauthenticated
 	}
-	queryText, err := s.libraryQueryText(ctx, reportID, queryID)
-	if err != nil {
-		return err
-	}
-	report, err := s.getReport(ctx, reportID)
-	if err != nil {
-		return err
-	}
-	if report == nil {
-		return status.Error(codes.NotFound, "report not found")
-	}
 	connection, err := s.getConnection(ctx, library.ConnectionID())
 	if err != nil {
 		return err
@@ -125,10 +114,8 @@ func (s Server) startLibraryQuery(ctx context.Context, reportID, queryID string)
 	_, err = s.runQuery(ctx, runQueryOptions{
 		reportID:       reportID,
 		queryID:        queryID,
-		queryText:      queryText,
 		connection:     connection,
 		userBucketName: s.getBucketNameFromConnection(connection),
-		isPublic:       report.IsPublic,
 		changedBy:      claims.Email,
 	})
 	return err
@@ -191,6 +178,17 @@ func (s Server) decorateLibraryDatasets(ctx context.Context, reportID string, da
 		}
 	}
 	return nil
+}
+
+// reportHasLibraryDataset reports whether the map holds a dataset on the library connection.
+func (s Server) reportHasLibraryDataset(ctx context.Context, reportID string) (bool, error) {
+	libraryConnectionID := library.ConnectionID()
+	if libraryConnectionID == "" {
+		return false, nil
+	}
+	var count int
+	err := s.db.QueryRowContext(ctx, `select count(*) from datasets where report_id=$1 and connection_id=$2`, reportID, libraryConnectionID).Scan(&count)
+	return count > 0, err
 }
 
 // libraryQueriesOfOtherWorkspace returns the query ids of the library datasets among datasets when a copy is made

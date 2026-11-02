@@ -32,7 +32,7 @@ Server side of the Klikpeta Data Library (ENG-2164). The design and decisions ar
 
 ## Running a library dataset
 
-`RunQuery` (including the MCP run path), `RunAllQueries` and the first run after `AddLibraryDataset` or `UpdateLibraryDatasetSelection` all end in `runQuery`. For a query on the library connection, the SQL comes only from the dataset's binding: the grant of the map's workspace is checked, then `library.BuildSQL` builds the statement. Stored and supplied text are ignored.
+`RunQuery` (including the MCP run path), `RunAllQueries` and the first run after `AddLibraryDataset` or `UpdateLibraryDatasetSelection` all end in `runQuery`, as does DuckDB source preparation. For a query on the library connection, the SQL comes only from the dataset's binding: the grant of the map's workspace is checked, then `library.BuildSQL` builds the statement. Stored and supplied text are ignored.
 
 - A missing binding, an ended or revoked grant, or a selection with no granted category left answers `FailedPrecondition` ("library access ended <date>" for an ended grant). The last stored result stays.
 - `RunAllQueries` skips such a dataset instead of failing the whole map.
@@ -42,6 +42,7 @@ Server side of the Klikpeta Data Library (ENG-2164). The design and decisions ar
 
 - The report stream (and the MCP report properties tool) sends each library dataset with `Dataset.library` set (item, selection, binding `version`, `access_ends_at`, `access_ended`) and blanks its `connection_id`, `Query.query_text` and `QueryJob.query_text`. A map whose workspace holds no active grant reads as ended. The job returned by `RunQuery` and the MCP `run_query` tool, and the one the MCP `check_job_status` tool returns, carry no SQL for a library dataset either.
 - `ForkReport` copies each library dataset's binding at version 1 and keeps the library connection on it. A copy made in another workspace than the source's does not reuse the source's stored results, which were read under the source's grants; the copy runs only once its own workspace is granted.
+- Library data is licensed to the grant of one workspace, so it never goes to public storage. `runQuery` always writes a library dataset's result to private storage, `PublishReport` refuses a map that holds a library dataset (`FailedPrecondition`), `AddLibraryDataset` refuses a map that is already published, and a `ForkReport` copy of such a map starts unpublished.
 
 ## Not in this slice
 

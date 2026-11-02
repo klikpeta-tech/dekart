@@ -271,6 +271,16 @@ func (s Server) AddLibraryDataset(ctx context.Context, req *proto.AddLibraryData
 	if err != nil {
 		return nil, err
 	}
+	report, err := s.getReport(ctx, reportID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if report == nil {
+		return nil, status.Error(codes.NotFound, "report not found")
+	}
+	if report.IsPublic {
+		return nil, status.Error(codes.FailedPrecondition, "a published map cannot hold Data Library datasets")
+	}
 	catalogue, err := s.libraryCatalogueOrUnavailable()
 	if err != nil {
 		return nil, err

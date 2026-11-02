@@ -288,7 +288,7 @@ func (s Server) RunAllQueries(ctx context.Context, req *proto.RunAllQueriesReque
 		if executionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 			return nil, status.Errorf(codes.FailedPrecondition, "query %s has no execution engine", queryID)
 		}
-		// Library datasets are built by the server only; user text never runs on the library connection.
+		// A library dataset whose grant ended is skipped here; runQuery builds the SQL of the others.
 		if isLibraryConnection(connectionID.String) {
 			queryText, err = s.libraryQueryText(ctx, req.ReportId, queryID)
 			var refusal libraryAccessRefusal
@@ -436,6 +436,16 @@ func loadReportQueryParamsTx(ctx context.Context, tx *sql.Tx, reportID string) (
 }
 
 func (s Server) runQuery(ctx context.Context, o runQueryOptions) (*proto.QueryJob, error) {
+	// Library datasets are built by the server only: stored and supplied text are ignored, a map whose grant
+	// ended cannot refresh, and the staff-owned result never goes to public storage.
+	isLibrary := isLibraryConnection(o.connection.Id)
+	if isLibrary {
+		libraryText, err := s.libraryQueryText(ctx, o.reportID, o.queryID)
+		if err != nil {
+			return nil, libraryRunStatus(err)
+		}
+		o.queryText, o.updateQuery, o.isPublic = libraryText, false, false
+	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
@@ -451,7 +461,7 @@ func (s Server) runQuery(ctx context.Context, o runQueryOptions) (*proto.QueryJo
 		return nil, err
 	}
 	queryText := savedQueryText
-	if o.updateQuery || queryText == "" {
+	if o.updateQuery || queryText == "" || isLibrary {
 		queryText = o.queryText
 	}
 	queryParams := o.queryParams
@@ -889,15 +899,6 @@ func (s Server) runQueryRequest(ctx context.Context, req *proto.RunQueryRequest,
 	updateQuery := report.CanWrite && req.QueryText != ""
 	if updateQuery {
 		queryText = req.QueryText
-	}
-	// Library datasets are built by the server only: stored and supplied text are ignored, and a map whose
-	// grant ended cannot refresh.
-	if isLibraryConnection(q.ConnectionID) {
-		queryText, err = s.libraryQueryText(ctx, q.ReportID, queryID)
-		if err != nil {
-			return nil, libraryRunStatus(err)
-		}
-		updateQuery = false
 	}
 	queryJob, err := s.runQuery(ctx, runQueryOptions{
 		reportID:         q.ReportID,

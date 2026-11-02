@@ -291,9 +291,10 @@ func TestForkReportOfAnotherWorkspaceKeepsBindingButNotResultsOrAccess(t *testin
 	require.NoError(t, f.server.db.QueryRow(`select count(*) from query_jobs where query_id=$1`, copiedQueryID).Scan(&jobs))
 	require.Zero(t, jobs, "results read under another workspace's grant are not copied")
 
-	// A copy of a public map is public too; the test has no public storage, so it is made private to run.
-	_, err = f.server.db.Exec(`update reports set is_public=false where id=$1`, res.ReportId)
-	require.NoError(t, err)
+	// A copy of a map with library data starts unpublished, whatever the source was.
+	var copyIsPublic bool
+	require.NoError(t, f.server.db.QueryRow(`select is_public from reports where id=$1`, res.ReportId).Scan(&copyIsPublic))
+	require.False(t, copyIsPublic)
 	before := len(f.jobs.statements())
 	_, err = f.server.RunQuery(ctxB, &proto.RunQueryRequest{QueryId: copiedQueryID})
 	requireCode(t, err, codes.FailedPrecondition)
@@ -304,4 +305,55 @@ func TestForkReportOfAnotherWorkspaceKeepsBindingButNotResultsOrAccess(t *testin
 	_, err = f.server.RunQuery(ctxB, &proto.RunQueryRequest{QueryId: copiedQueryID})
 	require.NoError(t, err)
 	require.Equal(t, placesKafeBandungSQL, f.jobs.statements()[before])
+}
+
+func TestLibraryRunGoesThroughTheGrantCheckWhateverTheCaller(t *testing.T) {
+	f := newLibraryFixture(t)
+	f.grant(t, libWorkspaceA, itemPlaces, libFarFuture, `["kafe"]`)
+	queryID := f.addPlaces(t)
+	connection := &proto.Connection{Id: libConnection, ConnectionType: proto.ConnectionType_CONNECTION_TYPE_POSTGRES}
+	before := len(f.jobs.statements())
+
+	// A caller that supplies no SQL at all, as DuckDB source preparation does, still runs the built SQL.
+	_, err := f.server.runQuery(f.editor(), runQueryOptions{reportID: libReportA, queryID: queryID, connection: connection})
+	require.NoError(t, err)
+	require.Equal(t, placesKafeBandungSQL, f.jobs.statements()[before])
+
+	// Once the grant ended the same caller is refused and the last result stays.
+	_, err = f.server.RevokeLibraryGrant(f.staff(), &proto.RevokeLibraryGrantRequest{ItemId: itemPlaces})
+	require.NoError(t, err)
+	_, err = f.server.runQuery(f.editor(), runQueryOptions{reportID: libReportA, queryID: queryID, connection: connection})
+	requireCode(t, err, codes.FailedPrecondition)
+	require.Len(t, f.jobs.statements(), before+1)
+}
+
+func TestLibraryResultsNeverGoToPublicStorage(t *testing.T) {
+	f := newLibraryFixture(t)
+	f.grant(t, libWorkspaceA, itemPlaces, libFarFuture, `["kafe"]`)
+	queryID := f.addPlaces(t)
+
+	// Publishing a map that holds library data is refused.
+	_, err := f.server.PublishReport(f.editor(), &proto.PublishReportRequest{ReportId: libReportA, Publish: true})
+	requireCode(t, err, codes.FailedPrecondition)
+	var isPublic bool
+	require.NoError(t, f.server.db.QueryRow(`select is_public from reports where id=$1`, libReportA).Scan(&isPublic))
+	require.False(t, isPublic)
+
+	// A map that was published before it held library data still runs its library dataset into private storage:
+	// the test has no public storage, so a run that tried to use it would fail.
+	_, err = f.server.db.Exec(`update reports set is_public=true where id=$1`, libReportA)
+	require.NoError(t, err)
+	before := len(f.jobs.statements())
+	_, err = f.server.RunQuery(f.editor(), &proto.RunQueryRequest{QueryId: queryID})
+	require.NoError(t, err)
+	_, err = f.server.RunAllQueries(f.editor(), &proto.RunAllQueriesRequest{ReportId: libReportA})
+	require.NoError(t, err)
+	require.Len(t, f.jobs.statements(), before+2)
+
+	// A published map cannot take a library dataset.
+	_, err = f.server.AddLibraryDataset(f.editor(), &proto.AddLibraryDatasetRequest{
+		DatasetId: libDatasetA2, ItemId: itemPlaces,
+		Selection: &proto.LibrarySelection{AreaCode: "3273", CategoryIds: []string{"kafe"}},
+	})
+	requireCode(t, err, codes.FailedPrecondition)
 }
