@@ -64,6 +64,11 @@ func (s Server) sendReportMessage(reportID string, srv proto.Dekart_GetReportStr
 		return GRPCError("Cannot retrieve query jobs", err)
 	}
 
+	// The browser gets each library dataset's binding instead of its connection and SQL.
+	if err := s.decorateLibraryDatasets(ctx, reportID, datasets, queries, queryJobs); err != nil {
+		return GRPCError("Cannot retrieve library datasets", err)
+	}
+
 	directAccessEmails, err := s.getDirectAccessEmails(ctx, reportID)
 	if err != nil {
 		return GRPCError("Cannot retrieve direct access emails", err)

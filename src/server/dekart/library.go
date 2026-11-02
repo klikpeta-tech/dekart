@@ -322,6 +322,7 @@ func (s Server) AddLibraryDataset(ctx context.Context, req *proto.AddLibraryData
 		return nil, libraryStatus(err)
 	}
 	s.reportStreams.Ping(reportID)
+	s.runLibraryQuery(ctx, reportID, newQueryID)
 	return &proto.AddLibraryDatasetResponse{DatasetId: req.GetDatasetId(), QueryId: newQueryID}, nil
 }
 
@@ -370,6 +371,11 @@ func (s Server) UpdateLibraryDatasetSelection(ctx context.Context, req *proto.Up
 		return nil, libraryStatus(err)
 	}
 	s.reportStreams.Ping(reportID)
+	// A bound dataset always has its query; the new selection runs at once, as a refresh would.
+	var queryID sql.NullString
+	if err := s.db.QueryRowContext(ctx, `select query_id from datasets where id=$1`, req.GetDatasetId()).Scan(&queryID); err == nil && queryID.Valid {
+		s.runLibraryQuery(ctx, reportID, queryID.String)
+	}
 	return &proto.UpdateLibraryDatasetSelectionResponse{DatasetId: req.GetDatasetId(), Version: version}, nil
 }
 

@@ -918,6 +918,10 @@ func (s *Server) callGetReportPropertiesTool(ctx context.Context, raw json.RawMe
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	// MCP clients see the same library bindings as the browser, never the library connection or its SQL.
+	if err := s.decorateLibraryDatasets(ctx, request.ReportId, datasets, queries, nil); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	return mcp.MarshalProtoJSON(&proto.GetReportPropertiesResponse{
 		Report:   report,
 		Datasets: datasets,

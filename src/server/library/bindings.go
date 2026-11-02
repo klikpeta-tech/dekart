@@ -62,6 +62,27 @@ func (Bindings) Insert(ctx context.Context, q queryer, binding Binding) error {
 	return err
 }
 
+// Copy stores a version 1 binding for newDatasetID in newReportID with the item and selection of the binding of
+// sourceDatasetID, so a copied map keeps its library datasets. It returns ErrBindingNotFound when the source has none.
+func (Bindings) Copy(ctx context.Context, q queryer, sourceDatasetID, newDatasetID, newReportID string) error {
+	result, err := q.ExecContext(ctx,
+		`insert into library_dataset_bindings (dataset_id, report_id, item_id, area_code, category_ids, brand_ids, created_by)
+		select $1, $2, item_id, area_code, category_ids, brand_ids, created_by
+		from library_dataset_bindings where dataset_id=$3`,
+		newDatasetID, newReportID, sourceDatasetID)
+	if err != nil {
+		return err
+	}
+	copied, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if copied == 0 {
+		return ErrBindingNotFound
+	}
+	return nil
+}
+
 // Get returns the binding of a dataset, or ErrBindingNotFound.
 func (Bindings) Get(ctx context.Context, q queryer, datasetID string) (Binding, error) {
 	var binding Binding

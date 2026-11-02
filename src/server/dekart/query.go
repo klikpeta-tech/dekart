@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"dekart/src/server/bqutils"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -288,8 +289,16 @@ func (s Server) RunAllQueries(ctx context.Context, req *proto.RunAllQueriesReque
 			return nil, status.Errorf(codes.FailedPrecondition, "query %s has no execution engine", queryID)
 		}
 		// Library datasets are built by the server only; user text never runs on the library connection.
-		if err := refuseLibraryConnection(connectionID.String); err != nil {
-			return nil, err
+		if isLibraryConnection(connectionID.String) {
+			queryText, err = s.libraryQueryText(ctx, req.ReportId, queryID)
+			var refusal libraryAccessRefusal
+			if errors.As(err, &refusal) {
+				// An ended grant refuses the refresh of this dataset only; its last result stays and the others still run.
+				continue
+			}
+			if err != nil {
+				return nil, libraryRunStatus(err)
+			}
 		}
 		connection, err := s.getConnection(ctx, connectionID.String)
 		if err != nil {
@@ -859,10 +868,6 @@ func (s Server) runQueryRequest(ctx context.Context, req *proto.RunQueryRequest,
 	if q.ExecutionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 		return nil, status.Error(codes.FailedPrecondition, "query has no execution engine")
 	}
-	// Library datasets are built by the server only; user text never runs on the library connection.
-	if err := refuseLibraryConnection(q.ConnectionID); err != nil {
-		return nil, err
-	}
 	connection, err := s.getConnection(ctx, q.ConnectionID)
 
 	if err != nil {
@@ -879,6 +884,15 @@ func (s Server) runQueryRequest(ctx context.Context, req *proto.RunQueryRequest,
 	updateQuery := report.CanWrite && req.QueryText != ""
 	if updateQuery {
 		queryText = req.QueryText
+	}
+	// Library datasets are built by the server only: stored and supplied text are ignored, and a map whose
+	// grant ended cannot refresh.
+	if isLibraryConnection(q.ConnectionID) {
+		queryText, err = s.libraryQueryText(ctx, q.ReportID, queryID)
+		if err != nil {
+			return nil, libraryRunStatus(err)
+		}
+		updateQuery = false
 	}
 	queryJob, err := s.runQuery(ctx, runQueryOptions{
 		reportID:         q.ReportID,
