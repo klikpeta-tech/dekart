@@ -113,7 +113,7 @@ export function ForkOnboarding ({ requireOnboarding: { requireWorkspace, missing
               title: 'Create Workspace',
               description: '10 seconds'
             }
-          ].concat(alreadyConnectedTypes.concat(missingConnectionTypes).map(getDatasourceMeta).map(({ name, style, usageStatsId }) => ({
+          ].concat(alreadyConnectedTypes.concat(missingConnectionTypes).map(getDatasourceMeta).map(({ name }) => ({
             title: `Connect ${name}`,
             description: '15 seconds'
           }))).concat({

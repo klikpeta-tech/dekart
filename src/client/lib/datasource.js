@@ -35,8 +35,7 @@ SELECT
     ROUND(uniform(-180::float, 180::float, random()), 6) AS lon  -- Generate random longitude between -180 and 180
 FROM
     TABLE(GENERATOR(ROWCOUNT => 100));  -- Create 100 rows
-`,
-        usageStatsId: 3
+`
       }
     case 'BQ':
     case ConnectionType.CONNECTION_TYPE_BIGQUERY:
@@ -45,7 +44,6 @@ FROM
         name: 'BigQuery',
         style: 'bigquery',
         completer: bigQueryCustomCompleter,
-        usageStatsId: 2,
         sampleQuery: `-- Select a random 0.1% sample of crimes from the Chicago crime dataset
 SELECT
     primary_type,  -- Type of crime
@@ -63,8 +61,7 @@ WHERE
     case 'ATHENA':
       return {
         name: 'Athena',
-        style: 'athena',
-        usageStatsId: 1
+        style: 'athena'
       }
     case ConnectionType.CONNECTION_TYPE_POSTGRES:
     case 'PG':
@@ -72,7 +69,6 @@ WHERE
       return {
         name: 'Postgres',
         style: 'postgres',
-        usageStatsId: 5,
         sampleQuery: `-- Generate 100 random latitude and longitude points
 SELECT
     ROUND((random() * 180 - 90)::numeric, 6) AS latitude,
@@ -85,7 +81,6 @@ FROM
       return {
         name: 'Wherobots',
         style: 'wherobots',
-        usageStatsId: 4,
         completer: wherobotsCustomCompleter,
         sampleQuery: `SELECT
     latitude,
@@ -99,19 +94,16 @@ LIMIT 1000;`
       }
     case ConnectionType.CONNECTION_TYPE_LOCAL:
       return {
-        name: 'Local Files',
-        usageStatsId: 5
+        name: 'Local Files'
       }
     case 'DUCKDB':
       return {
         name: 'DuckDB',
-        style: 'duckdb',
-        usageStatsId: 6
+        style: 'duckdb'
       }
     default:
       return {
-        name: 'Unknown',
-        usageStatsId: 0
+        name: 'Unknown'
       }
   }
 }

@@ -351,11 +351,7 @@ func (s *Server) callCreateReportTool(ctx context.Context) (json.RawMessage, err
 	response, err := s.CreateReport(ctx, &proto.CreateReportRequest{})
 	if err != nil {
 		if checkWorkspace(ctx).ReadOnlyReason == proto.GetWorkspaceResponse_READ_ONLY_REASON_TRIAL_NOT_STARTED {
-			trialURL := "/workspace/trial"
-			if frontendBaseURL := device.RequestFrontendBaseURL(nil); frontendBaseURL != "" {
-				trialURL = fmt.Sprintf("%s/workspace/trial", frontendBaseURL)
-			}
-			return nil, status.Errorf(codes.FailedPrecondition, "trial not started; ask the user to open %s and start the 14-day trial", trialURL)
+			return nil, status.Errorf(codes.FailedPrecondition, "workspace is read-only; ask the user to enable editing for this workspace")
 		}
 		return nil, err
 	}
