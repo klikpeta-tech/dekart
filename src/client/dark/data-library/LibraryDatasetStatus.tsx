@@ -26,7 +26,7 @@ export interface LibraryDatasetStatusProps {
   onRefresh: () => void
   /** Called when "Retry" is pressed in the failed state. */
   onRetry: () => void
-  /** Called when "Open in Library" is pressed. Without it the button is not shown. */
+  /** Called when "Open in Library" is pressed. Without it, or once access has ended, the button is not shown. */
   onOpenLibrary?: () => void
 }
 
@@ -35,7 +35,7 @@ export interface LibraryDatasetStatusProps {
  *
  * Shows `Ready`, `Loading…`, a failure with a Retry button, or `Access ended <date>` with a pointer to the user's
  * Klikpeta contact. After access ended the data that was already loaded stays, but Refresh and the change buttons are
- * disabled. No query text or connection detail is ever shown.
+ * disabled and Open in Library is hidden. No query text or connection detail is ever shown.
  *
  * @param props - See {@link LibraryDatasetStatusProps}.
  * @returns The panel element.
@@ -60,7 +60,7 @@ export function LibraryDatasetStatus ({ title, state, error = '', accessEndedAt 
         {canChange && hasCategories && <button type='button' className={styles.secondary} disabled={ended} onClick={onChangeCategory}>Change category</button>}
         {canChange && <button type='button' className={styles.secondary} disabled={ended} onClick={onChangeArea}>Change area</button>}
         {canRefresh && <button type='button' className={styles.secondary} disabled={ended || state === 'loading'} onClick={onRefresh}>Refresh</button>}
-        {onOpenLibrary !== undefined && <button type='button' className={styles.secondary} onClick={onOpenLibrary}>Open in Library</button>}
+        {onOpenLibrary !== undefined && !ended && <button type='button' className={styles.secondary} onClick={onOpenLibrary}>Open in Library</button>}
       </div>
     </div>
   )

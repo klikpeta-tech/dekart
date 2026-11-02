@@ -285,7 +285,7 @@ describe('data library item detail', () => {
     cy.contains('button', 'Refresh').should('be.disabled')
     cy.contains('button', 'Change area').should('be.disabled')
     cy.contains('button', 'Change category').should('be.disabled')
-    cy.contains('button', 'Open in Library').should('not.be.disabled')
+    cy.contains('button', 'Open in Library').should('not.exist')
     cy.screenshot('library-access-ended')
   })
 })

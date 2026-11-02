@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import {
   AreaPicker,
@@ -33,6 +33,8 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
   const [sample, setSample] = useState(null)
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
+  // Counts sample requests and selection changes, so a reply for an older selection is dropped.
+  const sampleRequest = useRef(0)
   const showArea = mode === 'add' || mode === 'area'
   const showCategory = mode === 'add' || mode === 'category'
 
@@ -48,7 +50,7 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
         setDetail({
           item: toItemDetail(response.item),
           taxonomy: toTaxonomy(response.taxonomy),
-          // Counts over the whole country, shown until an estimate gives counts for the selection.
+          // Counts over the whole country, shown only while no area is picked and no estimate exists.
           nationwide: counts(response.taxonomy?.categoriesList)
         })
       }
@@ -88,6 +90,7 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
 
   // Any change of the selection drops the preview and the last refusal, which no longer describe it.
   const changeSelection = (change) => {
+    sampleRequest.current += 1
     setSample(null)
     setNotice('')
     setSelection(current => ({ ...current, ...change }))
@@ -114,6 +117,10 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
   const pickedIds = selection.brandIds.length > 0 ? selection.brandIds : selection.categoryIds
   const titles = new Map([...taxonomy.categories, ...taxonomy.brands].map(({ id, title }) => [id, title]))
   const name = tabName(item.title, pickedIds.map(id => titles.get(id) ?? id), areaName)
+  // Nationwide counts only describe an unrestricted area; once an estimate exists, a category it omits has no rows there.
+  const categoryCounts = estimate
+    ? { ...Object.fromEntries(taxonomy.categories.map(({ id }) => [id, 0])), ...counts(estimate.byCategoryList) }
+    : (selection.areaCode === '' ? detail.nationwide : {})
   const ready = issues.length === 0 && estimate !== null && !busy
 
   const submit = async () => {
@@ -132,7 +139,11 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
     // After a successful add the report stream replaces this pane with the dataset's status.
   }
   const previewSample = async () => {
+    const request = ++sampleRequest.current
     const { response, error } = await dispatch(fetchLibrarySample(itemId, selection))
+    if (request !== sampleRequest.current) {
+      return
+    }
     if (error) {
       setNotice(error)
     } else {
@@ -174,12 +185,12 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
             taxonomy={taxonomy}
             categoryIds={selection.categoryIds}
             brandIds={selection.brandIds}
-            categoryCounts={{ ...detail.nationwide, ...counts(estimate?.byCategoryList) }}
+            categoryCounts={categoryCounts}
             brandCounts={counts(estimate?.byBrandList)}
             onChange={next => changeSelection(next)}
           />
         )}
-        {mode !== 'view' && <div className={styles.libraryHint}>Tab name: {name}</div>}
+        {showArea && <div className={styles.libraryHint}>Tab name: {name}</div>}
       </LibraryItemDetail>
     </div>
   )

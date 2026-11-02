@@ -229,13 +229,13 @@ describe('LibraryDatasetStatus', () => {
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
 
-  it('shows access ended with its date and disables refresh and changes, but not opening the item', () => {
+  it('shows access ended with its date and disables refresh and changes, and hides opening the item', () => {
     render(<LibraryDatasetStatus {...base} state='ended' accessEndedAt={Date.UTC(2026, 10, 2) / 1000} />)
     expect(screen.getByRole('status').textContent).toBe('Access ended 2 November 2026. Your Klikpeta contact can extend it.')
     for (const name of ['Change category', 'Change area', 'Refresh']) {
       expect(screen.getByRole<HTMLButtonElement>('button', { name }).disabled).toBe(true)
     }
-    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Open in Library' }).disabled).toBe(false)
+    expect(screen.queryByRole('button', { name: 'Open in Library' })).toBeNull()
   })
 
   it('leaves out the date when unknown, and hides actions the user may not take', () => {

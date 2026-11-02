@@ -315,7 +315,7 @@ Props of [LibraryDatasetStatus](#api-librarydatasetstatus).
 | <a id="api-hascategories"></a> `hasCategories` | `boolean` | True when the dataset has categories, so the "Change category" button is shown. |
 | <a id="api-onchangearea"></a> `onChangeArea` | () => `void` | Called when "Change area" is pressed. |
 | <a id="api-onchangecategory"></a> `onChangeCategory` | () => `void` | Called when "Change category" is pressed. |
-| <a id="api-onopenlibrary"></a> `onOpenLibrary?` | () => `void` | Called when "Open in Library" is pressed. Without it the button is not shown. |
+| <a id="api-onopenlibrary"></a> `onOpenLibrary?` | () => `void` | Called when "Open in Library" is pressed. Without it, or once access has ended, the button is not shown. |
 | <a id="api-onrefresh"></a> `onRefresh` | () => `void` | Called when "Refresh" is pressed. |
 | <a id="api-onretry"></a> `onRetry` | () => `void` | Called when "Retry" is pressed in the failed state. |
 | <a id="api-state-1"></a> `state` | `"ended"` \| `"loading"` \| `"failed"` \| `"ready"` | `ready` when the data is loaded, `loading` while it is being fetched, `failed` after an error, `ended` when access to the item has ended. `ended` wins over what the data itself is doing. |
@@ -862,7 +862,7 @@ Status panel of a dataset that comes from a catalogue: a status bar and the acti
 
 Shows `Ready`, `Loading…`, a failure with a Retry button, or `Access ended <date>` with a pointer to the user's
 Klikpeta contact. After access ended the data that was already loaded stays, but Refresh and the change buttons are
-disabled. No query text or connection detail is ever shown.
+disabled and Open in Library is hidden. No query text or connection detail is ever shown.
 
 #### Parameters
 
