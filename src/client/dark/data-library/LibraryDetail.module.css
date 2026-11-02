@@ -1,0 +1,287 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 720px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.paragraph {
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.fact {
+  display: contents;
+}
+
+.meta dt {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.meta dd {
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.column {
+  border-radius: 4px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 0 6px;
+}
+
+.attribution {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 0;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.selectLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.selectLabel select {
+  min-width: 200px;
+  height: 28px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0 6px;
+}
+
+.group {
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.group summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 12px;
+  padding-top: 6px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.brands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip,
+.chipOn {
+  border: 1px solid #d9d9d9;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 10px;
+}
+
+.chipOn {
+  border-color: #1890ff;
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.hint {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.issues {
+  margin: 0;
+  padding-left: 18px;
+  color: #cf1322;
+  font-size: 13px;
+}
+
+.notice {
+  border: 1px solid #ffccc7;
+  background: #fff2f0;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.primary,
+.secondary {
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.primary {
+  border: 1px solid #1890ff;
+  background: #1890ff;
+  color: #fff;
+}
+
+.secondary {
+  border: 1px solid #d9d9d9;
+  background: #fff;
+}
+
+.primary:disabled,
+.secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.sample {
+  overflow-x: auto;
+  font-size: 12px;
+}
+
+.sample table {
+  border-collapse: collapse;
+}
+
+.sample th,
+.sample td {
+  border: 1px solid #f0f0f0;
+  padding: 2px 8px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 720px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.barReady {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+}
+
+.barLoading {
+  background: #f5f5f5;
+  border: 1px solid #d9d9d9;
+}
+
+.barFailed {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+}
+
+.barEnded {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+}
+
+.barText {
+  flex: 1;
+}
+
+.link {
+  border: 0;
+  background: transparent;
+  color: #1890ff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.link:disabled {
+  color: rgba(0, 0, 0, 0.35);
+  cursor: not-allowed;
+}

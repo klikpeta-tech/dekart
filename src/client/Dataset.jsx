@@ -17,6 +17,7 @@ import { isSystemConnectionID } from './actions/connection'
 import { ConnectionType, QueryExecutionEngine } from 'dekart-proto/dekart_pb'
 import { DUCKDB_DATASOURCE } from './lib/duckdb/constants'
 import LibraryPane from './LibraryPane'
+import LibraryDatasetPane from './LibraryDatasetPane'
 import { formatCount } from './dark/data-library/index'
 import { loadLibraryItems } from './actions/library'
 import { canBrowseLibrary } from './lib/libraryItems'
@@ -89,7 +90,7 @@ function DatasetSelector ({ dataset }) {
   }
 
   if (browsingLibrary) {
-    return <LibraryPane onBack={() => setBrowsingLibrary(false)} />
+    return <LibraryPane datasetId={dataset.id} onBack={() => setBrowsingLibrary(false)} />
   }
 
   const allowFileUpload = ALLOW_FILE_UPLOAD && fileUploadConnection
@@ -219,6 +220,10 @@ export default function Dataset ({ dataset }) {
     query = queries.find(q => q.id === dataset.queryId)
   } else if (dataset.fileId) {
     file = files.find(f => f.id === dataset.fileId)
+  }
+  // A library dataset has no editor: the server holds its query and the browser only sees the binding.
+  if (dataset.library) {
+    return <LibraryDatasetPane dataset={dataset} />
   }
   return (
     <>
