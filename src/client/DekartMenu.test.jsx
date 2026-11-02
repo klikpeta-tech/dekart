@@ -29,8 +29,14 @@ describe('DekartMenu Connections item', () => {
     expect(screen.queryByText('Connections')).toBeNull()
   })
 
-  it('is shown to an Editor', async () => {
-    renderMenu({ stream: {}, isViewer: false, isPlayground: false })
+  it('is hidden from an Editor', async () => {
+    renderMenu({ stream: {}, isViewer: false, isAdmin: false, isPlayground: false })
+    await screen.findByText('My Maps')
+    expect(screen.queryByText('Connections')).toBeNull()
+  })
+
+  it('is shown to an Admin', async () => {
+    renderMenu({ stream: {}, isViewer: false, isAdmin: true, isPlayground: false })
     expect(await screen.findByText('Connections')).toBeTruthy()
   })
 })

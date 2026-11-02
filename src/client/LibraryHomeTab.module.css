@@ -1,0 +1,31 @@
+.tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* the centered parent shrinks the tab to its content, which wraps the filters when no rows are loaded */
+  width: 100%;
+  max-width: 860px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.search {
+  max-width: 320px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+}

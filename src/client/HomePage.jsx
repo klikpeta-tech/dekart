@@ -23,6 +23,8 @@ import { getRelativeTime } from './lib/relativeTime'
 import { getMapCenterCoordinates } from './lib/mapPreviewState'
 import CreateConnection from './CreateConnection'
 import { canViewConnections } from './lib/connectionsAccess'
+import { canManageLibraryAccess } from './lib/libraryAccess'
+import LibraryHomeTab from './LibraryHomeTab'
 import { Loading } from './Loading'
 import classnames from 'classnames'
 import { UNKNOWN_EMAIL } from './lib/constants'
@@ -208,6 +210,7 @@ function ReportsHeader (
   const user = useSelector(state => state.user)
   const { isAdmin, isViewer } = user
   const showConnectionsTab = canViewConnections(user)
+  const showLibraryTab = canManageLibraryAccess(user)
   const readOnly = useSelector(state => state.workspace.readOnly)
 
   const userStream = useSelector(state => state.user.stream)
@@ -232,6 +235,9 @@ function ReportsHeader (
                   case 'connections':
                     history.push('/connections')
                     break
+                  case 'library':
+                    history.push('/library')
+                    break
                   default:
                   // do nothing
                 }
@@ -241,6 +247,9 @@ function ReportsHeader (
               <Radio.Button value='discoverable'>Shared Maps</Radio.Button>
               {
                 showConnectionsTab && connectionList && userDefinedConnection ? <Radio.Button value='connections'>Connections</Radio.Button> : null
+              }
+              {
+                showLibraryTab ? <Radio.Button value='library'>Data Library</Radio.Button> : null
               }
             </Radio.Group>
 
@@ -523,6 +532,18 @@ function Reports ({ createReportButton, reportFilter }) {
       </div>
     )
   }
+  if (reportFilter === 'library') {
+    return (
+      <div className={styles.reports}>
+        <ReportsHeader
+          reportFilter={reportFilter}
+          archived={archived}
+          setArchived={setArchived}
+        />
+        <LibraryHomeTab />
+      </div>
+    )
+  }
   const noMapsYet = reportsList.my.length === 0 && reportsList.discoverable.length === 0 && reportsList.archived.length === 0
   const isFirstLaunchSelfHosted = reportFilter === 'my' &&
     !isCloud &&
@@ -637,6 +658,8 @@ function getPageTitle (reportFilter) {
   switch (reportFilter) {
     case 'connections':
       return 'Connections'
+    case 'library':
+      return 'Data Library'
     case 'discoverable':
       return 'Shared Maps'
     case 'my':
