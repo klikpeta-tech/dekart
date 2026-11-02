@@ -287,6 +287,10 @@ func (s Server) RunAllQueries(ctx context.Context, req *proto.RunAllQueriesReque
 		if executionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 			return nil, status.Errorf(codes.FailedPrecondition, "query %s has no execution engine", queryID)
 		}
+		// Library datasets are built by the server only; user text never runs on the library connection.
+		if err := refuseLibraryConnection(connectionID.String); err != nil {
+			return nil, err
+		}
 		connection, err := s.getConnection(ctx, connectionID.String)
 		if err != nil {
 			log.Err(err).Send()
@@ -854,6 +858,10 @@ func (s Server) runQueryRequest(ctx context.Context, req *proto.RunQueryRequest,
 	}
 	if q.ExecutionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 		return nil, status.Error(codes.FailedPrecondition, "query has no execution engine")
+	}
+	// Library datasets are built by the server only; user text never runs on the library connection.
+	if err := refuseLibraryConnection(q.ConnectionID); err != nil {
+		return nil, err
 	}
 	connection, err := s.getConnection(ctx, q.ConnectionID)
 

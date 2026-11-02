@@ -51,7 +51,7 @@ func newTestCatalogue() *testCatalogue {
 	return &testCatalogue{
 		items: []library.Item{
 			{
-				ID: itemBoundaries, Title: "Statistik Kecamatan BPS 2024", Shape: library.Shape{Kind: "areas", AdminLevel: "kecamatan"},
+				ID: itemBoundaries, Title: "Statistik Kecamatan BPS 2024", RowCount: 900, Shape: library.Shape{Kind: "areas", AdminLevel: "kecamatan"},
 				Columns: []string{"kode", "nama"}, AreaLevels: []string{"kabkota"},
 				Table: libraryquery.Table{
 					Schema: "lib", Name: "kecamatan_bps_2024", Columns: []string{"kode", "nama"},
@@ -59,7 +59,7 @@ func newTestCatalogue() *testCatalogue {
 				},
 			},
 			{
-				ID: itemPlaces, Title: "Tempat & Usaha", HasTaxonomy: true, MaxRows: 5000,
+				ID: itemPlaces, Title: "Tempat & Usaha", HasTaxonomy: true, MaxRows: 5000, RowCount: 70,
 				Table: libraryquery.Table{
 					Schema: "lib", Name: "tempat_usaha", Columns: []string{"nama", "lat", "lon"},
 					AreaColumns:    []libraryquery.AreaColumn{{Length: 4, Column: "kode_kabkota"}},
@@ -89,8 +89,18 @@ func (c *testCatalogue) GetItem(ctx context.Context, id string) (library.Item, e
 func (c *testCatalogue) Taxonomy(ctx context.Context, itemID string) (library.Taxonomy, error) {
 	return c.taxonomy, nil
 }
-func (c *testCatalogue) ListAreas(ctx context.Context, parentCode string, itemID string) ([]library.Area, error) {
-	return []library.Area{c.areas["3273"]}, nil
+
+// testAreaRowsByCategory is how many Places rows Kota Bandung holds per category.
+var testAreaRowsByCategory = map[string]int64{"kafe": 10, "bar": 20, "apotek": 40}
+
+func (c *testCatalogue) ListAreas(ctx context.Context, parentCode string, itemID string, allowed []string) ([]library.Area, error) {
+	area := c.areas["3273"]
+	if itemID == itemPlaces {
+		for _, id := range allowed {
+			area.RowCount += testAreaRowsByCategory[id]
+		}
+	}
+	return []library.Area{area}, nil
 }
 func (c *testCatalogue) GetArea(ctx context.Context, code string) (library.Area, error) {
 	area, ok := c.areas[code]
@@ -537,6 +547,38 @@ func TestOrdinaryCommandsRefuseTheLibraryConnection(t *testing.T) {
 	var queryText string
 	require.NoError(t, f.server.db.QueryRow(`select query_text from queries where id=$1`, added.QueryId).Scan(&queryText))
 	require.Empty(t, queryText)
+
+	// Running must not take user text for a library dataset either, from a map or from a single dataset.
+	_, err = f.server.RunQuery(f.editor(), &proto.RunQueryRequest{QueryId: added.QueryId, QueryText: "select * from lib.tempat_usaha"})
+	requireCode(t, err, codes.PermissionDenied)
+	_, err = f.server.RunAllQueries(f.editor(), &proto.RunAllQueriesRequest{ReportId: libReportA})
+	requireCode(t, err, codes.PermissionDenied)
+	require.NoError(t, f.server.db.QueryRow(`select query_text from queries where id=$1`, added.QueryId).Scan(&queryText))
+	require.Empty(t, queryText)
+}
+
+// Row counts must not reveal categories the workspace was not granted.
+func TestLibraryRowCountsCoverOnlyGrantedCategories(t *testing.T) {
+	f := newLibraryFixture(t)
+	f.grant(t, libWorkspaceA, itemPlaces, libFarFuture, `["kafe"]`)
+	f.grant(t, libWorkspaceA, itemBoundaries, libFarFuture, `[]`)
+
+	areas, err := f.server.ListLibraryAreas(f.editor(), &proto.ListLibraryAreasRequest{ParentCode: "32", ItemId: itemPlaces})
+	require.NoError(t, err)
+	require.Len(t, areas.Areas, 1)
+	require.EqualValues(t, 10, areas.Areas[0].RowCount)
+
+	items, err := f.server.ListLibraryItems(f.editor(), &proto.ListLibraryItemsRequest{})
+	require.NoError(t, err)
+	counts := map[string]int64{}
+	for _, item := range items.Items {
+		counts[item.Id] = item.RowCount
+	}
+	require.EqualValues(t, map[string]int64{itemPlaces: 0, itemBoundaries: 900}, counts)
+
+	got, err := f.server.GetLibraryItem(f.editor(), &proto.GetLibraryItemRequest{ItemId: itemPlaces})
+	require.NoError(t, err)
+	require.EqualValues(t, 0, got.Item.RowCount)
 }
 
 // Without a configured library connection the guard must not match an empty connection id of an unbound dataset.

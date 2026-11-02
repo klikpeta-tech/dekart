@@ -167,7 +167,6 @@ func itemToProto(item library.Item, grant *library.Grant) *proto.LibraryItem {
 			AdminLevel:   item.Shape.AdminLevel,
 			H3Resolution: int32(item.Shape.H3Resolution),
 		},
-		RowCount:        item.RowCount,
 		SourceUpdatedAt: unixOrZero(item.SourceUpdatedAt),
 		Cadence:         item.Cadence,
 		Columns:         nonNil(item.Columns),
@@ -175,6 +174,10 @@ func itemToProto(item library.Item, grant *library.Grant) *proto.LibraryItem {
 		MaxRows:         item.MaxRows,
 		LayerStyleJson:  item.LayerStyleJSON,
 		AreaLevels:      nonNil(item.AreaLevels),
+	}
+	// The item total would count categories the workspace is not granted, so taxonomy items leave it out.
+	if !item.HasTaxonomy {
+		result.RowCount = item.RowCount
 	}
 	if grant != nil {
 		result.AccessEndsAt = unixOrZero(grant.AccessEndsAt())

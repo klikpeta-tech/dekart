@@ -101,12 +101,15 @@ func (s Server) ListLibraryAreas(ctx context.Context, req *proto.ListLibraryArea
 	if !libraryquery.ValidArea(req.GetParentCode()) {
 		return nil, libraryStatus(libraryquery.ErrInvalidArea)
 	}
+	var allowed []string
 	if req.GetItemId() != "" {
-		if _, _, err := s.libraryItemAccess(ctx, catalogue, workspaceID, req.GetItemId()); err != nil {
+		_, grant, err := s.libraryItemAccess(ctx, catalogue, workspaceID, req.GetItemId())
+		if err != nil {
 			return nil, libraryReadStatus(err)
 		}
+		allowed = grant.CategoryIDs
 	}
-	areas, err := catalogue.ListAreas(ctx, req.GetParentCode(), req.GetItemId())
+	areas, err := catalogue.ListAreas(ctx, req.GetParentCode(), req.GetItemId(), allowed)
 	if err != nil {
 		return nil, libraryStatus(err)
 	}

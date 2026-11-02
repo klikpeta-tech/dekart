@@ -124,8 +124,9 @@ type Catalogue interface {
 	GetItem(ctx context.Context, itemID string) (Item, error)
 	// Taxonomy returns the whole category tree of an item with nationwide counts.
 	Taxonomy(ctx context.Context, itemID string) (Taxonomy, error)
-	// ListAreas returns the children of parentCode, or the provinces for "". With itemID set it fills RowCount.
-	ListAreas(ctx context.Context, parentCode string, itemID string) ([]Area, error)
+	// ListAreas returns the children of parentCode, or the provinces for "". With itemID set it fills RowCount,
+	// counting only rows of the allowed categories when the item has a taxonomy.
+	ListAreas(ctx context.Context, parentCode string, itemID string, allowed []string) ([]Area, error)
 	// GetArea returns one area by code.
 	GetArea(ctx context.Context, code string) (Area, error)
 	// EstimateSelection returns the expected row count of a selection, restricted to allowed categories.
