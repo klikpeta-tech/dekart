@@ -24,7 +24,7 @@ loaders/build_area_csv.py       builds the area CSV from the pinned bps2020 boun
 loaders/load_area.sql           loads that CSV into lib_catalog.area
 ```
 
-Every file is re-runnable. Changing an object that exists in a shared database needs a new numbered file, not an edit to an applied one. Applied files are listed in `lib_catalog.schema_migration`.
+Every file is re-runnable. Changing an object that exists in a shared database needs a new numbered file, not an edit to an applied one.
 
 ## Schemas
 
@@ -43,7 +43,7 @@ Every file is re-runnable. Changing an object that exists in a shared database n
 
 Roles are created by this script, never in the Neon console: a console-created role gets `CREATEDB`, `CREATEROLE`, `BYPASSRLS` and `neon_superuser`.
 
-Default privileges make later views and tables in `lib` and `lib_catalog` readable without a re-grant, but only for objects created by the role that ran `001`. The pipeline must create them as that same owner (`library_owner`).
+Default privileges make later views and tables in `lib` and `lib_catalog` readable without a re-grant, but only for objects created by the role that ran `001`. The pipeline must create them as that same owner role (on Neon, the role that runs `001`).
 
 ### Reader password
 
@@ -53,7 +53,7 @@ The scripts never set a password, so the role cannot log in until someone sets o
 psql "$LIBRARY_ADMIN_URL" -c '\password dekart_library_reader'
 ```
 
-`\password` hashes the password on the client, so it does not appear in the server log. Store the result in the secret store, not in this repository. Then run `smoke_reader.sql` as the reader: the first three queries must succeed and every later statement must fail.
+`\password` hashes the password on the client, so it does not appear in the server log. Store the result in the secret store, not in this repository. Then run `smoke_reader.sql` as the reader (`psql "$LIBRARY_READER_URL" -X -f library-db/smoke_reader.sql`): the first three queries must succeed and every later statement that is not a `SET` must fail. The reader can override its own `default_transaction_read_only` and `statement_timeout`; what keeps it read-only is that it holds no privilege to create or write anything.
 
 ## Apply
 
@@ -81,5 +81,5 @@ The builder checks the archive hash, drops placeholder areas (forest, lake and i
 
 ### Status of the first data
 
-- The area CSV builds from the pinned local copy and passes the count check (7,579 rows, no orphan parents), but it is **not yet loaded** into the new project: the only available write path in the task that created this folder was the Neon MCP, which cannot stream a 320 KB file, and the connection string must not be pasted into a session. Run the two commands above with the owner connection string.
+- `lib_catalog.area` is loaded into Neon project `flat-leaf-69431132` from the pinned bps2020 boundaries: 34 provinsi, 514 kabkota and 7,031 kecamatan. The load was done and verified outside this change through the Neon MCP, because the connection string must not be pasted into a session.
 - The two first items (boundaries and kecamatan BPS 2024) are **not loaded**. The boundary geometry is large and no local copy of a kecamatan BPS 2024 table was found. Their `data`, `lib` and `item` rows belong to the release pipeline.

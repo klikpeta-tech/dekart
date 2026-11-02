@@ -8,7 +8,8 @@ CREATE TEMP TABLE area_load (
   kode text, level text, nama text, parent_kode text, boundary_vintage text
 ) ON COMMIT DROP;
 
-\copy area_load FROM :'csv' WITH (FORMAT csv, HEADER true)
+\set copycmd '\\copy area_load FROM ' :'csv' ' WITH (FORMAT csv, HEADER true)'
+:copycmd
 
 INSERT INTO lib_catalog.area (kode, level, nama, parent_kode, boundary_vintage)
 SELECT kode, level, nama, NULLIF(parent_kode, ''), boundary_vintage

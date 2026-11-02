@@ -3,12 +3,6 @@
 -- Re-runnable (CREATE ... IF NOT EXISTS). Changing an existing table needs a new,
 -- numbered file, never an edit here once applied to a shared database.
 
--- Which numbered files have been applied (written by apply.sh).
-CREATE TABLE IF NOT EXISTS lib_catalog.schema_migration (
-  version     text PRIMARY KEY,
-  applied_at  timestamptz NOT NULL DEFAULT now()
-);
-
 -- One row per dataset offered in the library.
 CREATE TABLE IF NOT EXISTS lib_catalog.item (
   id                text PRIMARY KEY,
