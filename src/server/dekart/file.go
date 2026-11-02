@@ -381,6 +381,9 @@ func (s Server) ReplaceFile(ctx context.Context, req *proto.ReplaceFileRequest) 
 	if err := s.requireReportWorkspaceWrite(ctx, *reportID); err != nil {
 		return nil, err
 	}
+	if err := s.requireConnectionInReportWorkspace(ctx, *reportID, req.ConnectionId); err != nil {
+		return nil, err
+	}
 	newFileID := newUUID()
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
