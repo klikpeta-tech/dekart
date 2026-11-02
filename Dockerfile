@@ -45,9 +45,13 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     CGO_ENABLED=1 go build ./src/server
 
 FROM godeps AS gotest
+COPY scripts/check-dark-go.sh scripts/
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go test -v -count=1 ./src/server/**/
+    sh scripts/check-dark-go.sh
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go test -v -count=1 ./src/server/...
 
 FROM cypress/included:13.14.2 as e2etest
 WORKDIR /dekart

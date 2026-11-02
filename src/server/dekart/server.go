@@ -7,6 +7,7 @@ import (
 	"dekart/src/server/conn"
 	"dekart/src/server/job"
 	"dekart/src/server/jwtkeys"
+	"dekart/src/server/library"
 	"dekart/src/server/notifications"
 	"dekart/src/server/report"
 	"dekart/src/server/secrets"
@@ -36,6 +37,8 @@ type Server struct {
 	proto.UnimplementedDekartServer
 	jobs         job.Store
 	licenseState RuntimeLicenseState
+	// libraryCatalogue reads the Data Library catalogue; nil until the library database is wired in.
+	libraryCatalogue library.Catalogue
 }
 
 // Unauthenticated error returned when no user claims in context
@@ -145,6 +148,9 @@ func (s Server) requireReportWorkspaceWrite(ctx context.Context, reportID string
 func (s Server) requireConnectionInReportWorkspace(ctx context.Context, reportID string, connectionID string) error {
 	if conn.IsSystemConnectionID(connectionID) {
 		return nil
+	}
+	if err := refuseLibraryConnection(connectionID); err != nil {
+		return err
 	}
 	var reportWorkspaceID, connectionWorkspaceID sql.NullString
 	// Placeholders appear in argument order: SQLite numbers $N by first appearance.

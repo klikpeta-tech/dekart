@@ -31,3 +31,16 @@ func TestSelfHostedWorkspaceCreationPolicy(t *testing.T) {
 		require.True(t, ShouldUseDefaultWorkspace(UnknownEmail))
 	})
 }
+
+// The Klikpeta staff check of the Data Library admin commands: only the configured instance admin, never an unset one.
+func TestIsDefaultWorkspaceAdmin(t *testing.T) {
+	t.Setenv("DEKART_DEFAULT_WORKSPACE_ADMIN", "admin@example.com")
+	require.True(t, IsDefaultWorkspaceAdmin("admin@example.com"))
+	require.False(t, IsDefaultWorkspaceAdmin("other@example.com"))
+	require.False(t, IsDefaultWorkspaceAdmin(""))
+	require.False(t, IsDefaultWorkspaceAdmin(UnknownEmail))
+
+	t.Setenv("DEKART_DEFAULT_WORKSPACE_ADMIN", "")
+	require.False(t, IsDefaultWorkspaceAdmin(""), "an unset setting must match nobody, not an empty email")
+	require.False(t, IsDefaultWorkspaceAdmin("admin@example.com"))
+}

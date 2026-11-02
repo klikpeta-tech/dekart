@@ -72,6 +72,18 @@ const (
 	Dekart_UpdateWorkspace_FullMethodName               = "/Dekart/UpdateWorkspace"
 	Dekart_GetWorkspace_FullMethodName                  = "/Dekart/GetWorkspace"
 	Dekart_UpdateWorkspaceUser_FullMethodName           = "/Dekart/UpdateWorkspaceUser"
+	Dekart_ListLibraryItems_FullMethodName              = "/Dekart/ListLibraryItems"
+	Dekart_GetLibraryItem_FullMethodName                = "/Dekart/GetLibraryItem"
+	Dekart_ListLibraryAreas_FullMethodName              = "/Dekart/ListLibraryAreas"
+	Dekart_CountLibrarySelection_FullMethodName         = "/Dekart/CountLibrarySelection"
+	Dekart_GetLibrarySample_FullMethodName              = "/Dekart/GetLibrarySample"
+	Dekart_AddLibraryDataset_FullMethodName             = "/Dekart/AddLibraryDataset"
+	Dekart_UpdateLibraryDatasetSelection_FullMethodName = "/Dekart/UpdateLibraryDatasetSelection"
+	Dekart_ListLibraryGrants_FullMethodName             = "/Dekart/ListLibraryGrants"
+	Dekart_GetLibraryTaxonomy_FullMethodName            = "/Dekart/GetLibraryTaxonomy"
+	Dekart_SetLibraryGrant_FullMethodName               = "/Dekart/SetLibraryGrant"
+	Dekart_RevokeLibraryGrant_FullMethodName            = "/Dekart/RevokeLibraryGrant"
+	Dekart_SetLibraryGrantCategories_FullMethodName     = "/Dekart/SetLibraryGrantCategories"
 )
 
 // DekartClient is the client API for Dekart service.
@@ -142,6 +154,20 @@ type DekartClient interface {
 	UpdateWorkspace(ctx context.Context, in *UpdateWorkspaceRequest, opts ...grpc.CallOption) (*UpdateWorkspaceResponse, error)
 	GetWorkspace(ctx context.Context, in *GetWorkspaceRequest, opts ...grpc.CallOption) (*GetWorkspaceResponse, error)
 	UpdateWorkspaceUser(ctx context.Context, in *UpdateWorkspaceUserRequest, opts ...grpc.CallOption) (*UpdateWorkspaceUserResponse, error)
+	// Data Library (Klikpeta fork): client commands
+	ListLibraryItems(ctx context.Context, in *ListLibraryItemsRequest, opts ...grpc.CallOption) (*ListLibraryItemsResponse, error)
+	GetLibraryItem(ctx context.Context, in *GetLibraryItemRequest, opts ...grpc.CallOption) (*GetLibraryItemResponse, error)
+	ListLibraryAreas(ctx context.Context, in *ListLibraryAreasRequest, opts ...grpc.CallOption) (*ListLibraryAreasResponse, error)
+	CountLibrarySelection(ctx context.Context, in *CountLibrarySelectionRequest, opts ...grpc.CallOption) (*CountLibrarySelectionResponse, error)
+	GetLibrarySample(ctx context.Context, in *GetLibrarySampleRequest, opts ...grpc.CallOption) (*GetLibrarySampleResponse, error)
+	AddLibraryDataset(ctx context.Context, in *AddLibraryDatasetRequest, opts ...grpc.CallOption) (*AddLibraryDatasetResponse, error)
+	UpdateLibraryDatasetSelection(ctx context.Context, in *UpdateLibraryDatasetSelectionRequest, opts ...grpc.CallOption) (*UpdateLibraryDatasetSelectionResponse, error)
+	// Data Library (Klikpeta fork): admin commands, workspace Admin who is also Klikpeta staff
+	ListLibraryGrants(ctx context.Context, in *ListLibraryGrantsRequest, opts ...grpc.CallOption) (*ListLibraryGrantsResponse, error)
+	GetLibraryTaxonomy(ctx context.Context, in *GetLibraryTaxonomyRequest, opts ...grpc.CallOption) (*GetLibraryTaxonomyResponse, error)
+	SetLibraryGrant(ctx context.Context, in *SetLibraryGrantRequest, opts ...grpc.CallOption) (*SetLibraryGrantResponse, error)
+	RevokeLibraryGrant(ctx context.Context, in *RevokeLibraryGrantRequest, opts ...grpc.CallOption) (*RevokeLibraryGrantResponse, error)
+	SetLibraryGrantCategories(ctx context.Context, in *SetLibraryGrantCategoriesRequest, opts ...grpc.CallOption) (*SetLibraryGrantCategoriesResponse, error)
 }
 
 type dekartClient struct {
@@ -709,6 +735,126 @@ func (c *dekartClient) UpdateWorkspaceUser(ctx context.Context, in *UpdateWorksp
 	return out, nil
 }
 
+func (c *dekartClient) ListLibraryItems(ctx context.Context, in *ListLibraryItemsRequest, opts ...grpc.CallOption) (*ListLibraryItemsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListLibraryItemsResponse)
+	err := c.cc.Invoke(ctx, Dekart_ListLibraryItems_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) GetLibraryItem(ctx context.Context, in *GetLibraryItemRequest, opts ...grpc.CallOption) (*GetLibraryItemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLibraryItemResponse)
+	err := c.cc.Invoke(ctx, Dekart_GetLibraryItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) ListLibraryAreas(ctx context.Context, in *ListLibraryAreasRequest, opts ...grpc.CallOption) (*ListLibraryAreasResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListLibraryAreasResponse)
+	err := c.cc.Invoke(ctx, Dekart_ListLibraryAreas_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) CountLibrarySelection(ctx context.Context, in *CountLibrarySelectionRequest, opts ...grpc.CallOption) (*CountLibrarySelectionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CountLibrarySelectionResponse)
+	err := c.cc.Invoke(ctx, Dekart_CountLibrarySelection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) GetLibrarySample(ctx context.Context, in *GetLibrarySampleRequest, opts ...grpc.CallOption) (*GetLibrarySampleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLibrarySampleResponse)
+	err := c.cc.Invoke(ctx, Dekart_GetLibrarySample_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) AddLibraryDataset(ctx context.Context, in *AddLibraryDatasetRequest, opts ...grpc.CallOption) (*AddLibraryDatasetResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddLibraryDatasetResponse)
+	err := c.cc.Invoke(ctx, Dekart_AddLibraryDataset_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) UpdateLibraryDatasetSelection(ctx context.Context, in *UpdateLibraryDatasetSelectionRequest, opts ...grpc.CallOption) (*UpdateLibraryDatasetSelectionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateLibraryDatasetSelectionResponse)
+	err := c.cc.Invoke(ctx, Dekart_UpdateLibraryDatasetSelection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) ListLibraryGrants(ctx context.Context, in *ListLibraryGrantsRequest, opts ...grpc.CallOption) (*ListLibraryGrantsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListLibraryGrantsResponse)
+	err := c.cc.Invoke(ctx, Dekart_ListLibraryGrants_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) GetLibraryTaxonomy(ctx context.Context, in *GetLibraryTaxonomyRequest, opts ...grpc.CallOption) (*GetLibraryTaxonomyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLibraryTaxonomyResponse)
+	err := c.cc.Invoke(ctx, Dekart_GetLibraryTaxonomy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) SetLibraryGrant(ctx context.Context, in *SetLibraryGrantRequest, opts ...grpc.CallOption) (*SetLibraryGrantResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetLibraryGrantResponse)
+	err := c.cc.Invoke(ctx, Dekart_SetLibraryGrant_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) RevokeLibraryGrant(ctx context.Context, in *RevokeLibraryGrantRequest, opts ...grpc.CallOption) (*RevokeLibraryGrantResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeLibraryGrantResponse)
+	err := c.cc.Invoke(ctx, Dekart_RevokeLibraryGrant_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dekartClient) SetLibraryGrantCategories(ctx context.Context, in *SetLibraryGrantCategoriesRequest, opts ...grpc.CallOption) (*SetLibraryGrantCategoriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetLibraryGrantCategoriesResponse)
+	err := c.cc.Invoke(ctx, Dekart_SetLibraryGrantCategories_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DekartServer is the server API for Dekart service.
 // All implementations must embed UnimplementedDekartServer
 // for forward compatibility.
@@ -777,6 +923,20 @@ type DekartServer interface {
 	UpdateWorkspace(context.Context, *UpdateWorkspaceRequest) (*UpdateWorkspaceResponse, error)
 	GetWorkspace(context.Context, *GetWorkspaceRequest) (*GetWorkspaceResponse, error)
 	UpdateWorkspaceUser(context.Context, *UpdateWorkspaceUserRequest) (*UpdateWorkspaceUserResponse, error)
+	// Data Library (Klikpeta fork): client commands
+	ListLibraryItems(context.Context, *ListLibraryItemsRequest) (*ListLibraryItemsResponse, error)
+	GetLibraryItem(context.Context, *GetLibraryItemRequest) (*GetLibraryItemResponse, error)
+	ListLibraryAreas(context.Context, *ListLibraryAreasRequest) (*ListLibraryAreasResponse, error)
+	CountLibrarySelection(context.Context, *CountLibrarySelectionRequest) (*CountLibrarySelectionResponse, error)
+	GetLibrarySample(context.Context, *GetLibrarySampleRequest) (*GetLibrarySampleResponse, error)
+	AddLibraryDataset(context.Context, *AddLibraryDatasetRequest) (*AddLibraryDatasetResponse, error)
+	UpdateLibraryDatasetSelection(context.Context, *UpdateLibraryDatasetSelectionRequest) (*UpdateLibraryDatasetSelectionResponse, error)
+	// Data Library (Klikpeta fork): admin commands, workspace Admin who is also Klikpeta staff
+	ListLibraryGrants(context.Context, *ListLibraryGrantsRequest) (*ListLibraryGrantsResponse, error)
+	GetLibraryTaxonomy(context.Context, *GetLibraryTaxonomyRequest) (*GetLibraryTaxonomyResponse, error)
+	SetLibraryGrant(context.Context, *SetLibraryGrantRequest) (*SetLibraryGrantResponse, error)
+	RevokeLibraryGrant(context.Context, *RevokeLibraryGrantRequest) (*RevokeLibraryGrantResponse, error)
+	SetLibraryGrantCategories(context.Context, *SetLibraryGrantCategoriesRequest) (*SetLibraryGrantCategoriesResponse, error)
 	mustEmbedUnimplementedDekartServer()
 }
 
@@ -945,6 +1105,42 @@ func (UnimplementedDekartServer) GetWorkspace(context.Context, *GetWorkspaceRequ
 }
 func (UnimplementedDekartServer) UpdateWorkspaceUser(context.Context, *UpdateWorkspaceUserRequest) (*UpdateWorkspaceUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkspaceUser not implemented")
+}
+func (UnimplementedDekartServer) ListLibraryItems(context.Context, *ListLibraryItemsRequest) (*ListLibraryItemsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListLibraryItems not implemented")
+}
+func (UnimplementedDekartServer) GetLibraryItem(context.Context, *GetLibraryItemRequest) (*GetLibraryItemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLibraryItem not implemented")
+}
+func (UnimplementedDekartServer) ListLibraryAreas(context.Context, *ListLibraryAreasRequest) (*ListLibraryAreasResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListLibraryAreas not implemented")
+}
+func (UnimplementedDekartServer) CountLibrarySelection(context.Context, *CountLibrarySelectionRequest) (*CountLibrarySelectionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CountLibrarySelection not implemented")
+}
+func (UnimplementedDekartServer) GetLibrarySample(context.Context, *GetLibrarySampleRequest) (*GetLibrarySampleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLibrarySample not implemented")
+}
+func (UnimplementedDekartServer) AddLibraryDataset(context.Context, *AddLibraryDatasetRequest) (*AddLibraryDatasetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddLibraryDataset not implemented")
+}
+func (UnimplementedDekartServer) UpdateLibraryDatasetSelection(context.Context, *UpdateLibraryDatasetSelectionRequest) (*UpdateLibraryDatasetSelectionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateLibraryDatasetSelection not implemented")
+}
+func (UnimplementedDekartServer) ListLibraryGrants(context.Context, *ListLibraryGrantsRequest) (*ListLibraryGrantsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListLibraryGrants not implemented")
+}
+func (UnimplementedDekartServer) GetLibraryTaxonomy(context.Context, *GetLibraryTaxonomyRequest) (*GetLibraryTaxonomyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLibraryTaxonomy not implemented")
+}
+func (UnimplementedDekartServer) SetLibraryGrant(context.Context, *SetLibraryGrantRequest) (*SetLibraryGrantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetLibraryGrant not implemented")
+}
+func (UnimplementedDekartServer) RevokeLibraryGrant(context.Context, *RevokeLibraryGrantRequest) (*RevokeLibraryGrantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeLibraryGrant not implemented")
+}
+func (UnimplementedDekartServer) SetLibraryGrantCategories(context.Context, *SetLibraryGrantCategoriesRequest) (*SetLibraryGrantCategoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetLibraryGrantCategories not implemented")
 }
 func (UnimplementedDekartServer) mustEmbedUnimplementedDekartServer() {}
 func (UnimplementedDekartServer) testEmbeddedByValue()                {}
@@ -1900,6 +2096,222 @@ func _Dekart_UpdateWorkspaceUser_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Dekart_ListLibraryItems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLibraryItemsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).ListLibraryItems(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_ListLibraryItems_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).ListLibraryItems(ctx, req.(*ListLibraryItemsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_GetLibraryItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLibraryItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).GetLibraryItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_GetLibraryItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).GetLibraryItem(ctx, req.(*GetLibraryItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_ListLibraryAreas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLibraryAreasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).ListLibraryAreas(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_ListLibraryAreas_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).ListLibraryAreas(ctx, req.(*ListLibraryAreasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_CountLibrarySelection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountLibrarySelectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).CountLibrarySelection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_CountLibrarySelection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).CountLibrarySelection(ctx, req.(*CountLibrarySelectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_GetLibrarySample_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLibrarySampleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).GetLibrarySample(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_GetLibrarySample_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).GetLibrarySample(ctx, req.(*GetLibrarySampleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_AddLibraryDataset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddLibraryDatasetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).AddLibraryDataset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_AddLibraryDataset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).AddLibraryDataset(ctx, req.(*AddLibraryDatasetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_UpdateLibraryDatasetSelection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateLibraryDatasetSelectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).UpdateLibraryDatasetSelection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_UpdateLibraryDatasetSelection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).UpdateLibraryDatasetSelection(ctx, req.(*UpdateLibraryDatasetSelectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_ListLibraryGrants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLibraryGrantsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).ListLibraryGrants(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_ListLibraryGrants_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).ListLibraryGrants(ctx, req.(*ListLibraryGrantsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_GetLibraryTaxonomy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLibraryTaxonomyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).GetLibraryTaxonomy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_GetLibraryTaxonomy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).GetLibraryTaxonomy(ctx, req.(*GetLibraryTaxonomyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_SetLibraryGrant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetLibraryGrantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).SetLibraryGrant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_SetLibraryGrant_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).SetLibraryGrant(ctx, req.(*SetLibraryGrantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_RevokeLibraryGrant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeLibraryGrantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).RevokeLibraryGrant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_RevokeLibraryGrant_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).RevokeLibraryGrant(ctx, req.(*RevokeLibraryGrantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dekart_SetLibraryGrantCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetLibraryGrantCategoriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DekartServer).SetLibraryGrantCategories(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dekart_SetLibraryGrantCategories_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DekartServer).SetLibraryGrantCategories(ctx, req.(*SetLibraryGrantCategoriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Dekart_ServiceDesc is the grpc.ServiceDesc for Dekart service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2106,6 +2518,54 @@ var Dekart_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateWorkspaceUser",
 			Handler:    _Dekart_UpdateWorkspaceUser_Handler,
+		},
+		{
+			MethodName: "ListLibraryItems",
+			Handler:    _Dekart_ListLibraryItems_Handler,
+		},
+		{
+			MethodName: "GetLibraryItem",
+			Handler:    _Dekart_GetLibraryItem_Handler,
+		},
+		{
+			MethodName: "ListLibraryAreas",
+			Handler:    _Dekart_ListLibraryAreas_Handler,
+		},
+		{
+			MethodName: "CountLibrarySelection",
+			Handler:    _Dekart_CountLibrarySelection_Handler,
+		},
+		{
+			MethodName: "GetLibrarySample",
+			Handler:    _Dekart_GetLibrarySample_Handler,
+		},
+		{
+			MethodName: "AddLibraryDataset",
+			Handler:    _Dekart_AddLibraryDataset_Handler,
+		},
+		{
+			MethodName: "UpdateLibraryDatasetSelection",
+			Handler:    _Dekart_UpdateLibraryDatasetSelection_Handler,
+		},
+		{
+			MethodName: "ListLibraryGrants",
+			Handler:    _Dekart_ListLibraryGrants_Handler,
+		},
+		{
+			MethodName: "GetLibraryTaxonomy",
+			Handler:    _Dekart_GetLibraryTaxonomy_Handler,
+		},
+		{
+			MethodName: "SetLibraryGrant",
+			Handler:    _Dekart_SetLibraryGrant_Handler,
+		},
+		{
+			MethodName: "RevokeLibraryGrant",
+			Handler:    _Dekart_RevokeLibraryGrant_Handler,
+		},
+		{
+			MethodName: "SetLibraryGrantCategories",
+			Handler:    _Dekart_SetLibraryGrantCategories_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
