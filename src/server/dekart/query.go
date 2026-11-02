@@ -537,10 +537,15 @@ func (s Server) runQuery(ctx context.Context, o runQueryOptions) (*proto.QueryJo
 	if err != nil {
 		return nil, err
 	}
+	responseQueryText := queryTextParsed
+	// The server-built SQL of a library dataset never leaves the server.
+	if isLibraryConnection(o.connection.Id) {
+		responseQueryText = ""
+	}
 	return &proto.QueryJob{
 		Id:              job.GetID(),
 		QueryId:         job.GetQueryID(),
-		QueryText:       queryTextParsed,
+		QueryText:       responseQueryText,
 		JobStatus:       proto.QueryJob_JOB_STATUS_PENDING,
 		DwJobId:         stringOrEmpty(job.GetDWJobID()),
 		JobResultId:     stringOrEmpty(job.GetResultID()),

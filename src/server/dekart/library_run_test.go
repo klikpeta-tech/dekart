@@ -2,6 +2,7 @@ package dekart
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 	"testing"
 
@@ -86,9 +87,18 @@ func TestLibraryRunsUseServerBuiltSQLOnly(t *testing.T) {
 	require.Equal(t, []string{placesKafeBandungSQL}, f.jobs.statements())
 
 	// A refresh with supplied text builds the same SQL: supplied and stored text are ignored.
-	_, err := f.server.RunQuery(f.editor(), &proto.RunQueryRequest{QueryId: queryID, QueryText: "select * from pg_shadow"})
+	runResponse, err := f.server.RunQuery(f.editor(), &proto.RunQueryRequest{QueryId: queryID, QueryText: "select * from pg_shadow"})
 	require.NoError(t, err)
 	require.Equal(t, []string{placesKafeBandungSQL, placesKafeBandungSQL}, f.jobs.statements())
+	require.NotEmpty(t, runResponse.QueryJob.Id)
+	require.Empty(t, runResponse.QueryJob.QueryText, "the built SQL must not come back in the run response")
+
+	// Polling the job over MCP does not reveal the SQL either.
+	checkArgs, err := json.Marshal(map[string]string{"job_id": runResponse.QueryJob.Id})
+	require.NoError(t, err)
+	checked, err := f.server.callCheckJobStatusTool(f.editor(), checkArgs)
+	require.NoError(t, err)
+	require.NotContains(t, string(checked), "tempat_usaha")
 	var queryText string
 	require.NoError(t, f.server.db.QueryRow(`select query_text from queries where id=$1`, queryID).Scan(&queryText))
 	require.Empty(t, queryText)
