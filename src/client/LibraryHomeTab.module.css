@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* the centered parent shrinks the tab to its content, which wraps the filters when no rows are loaded */
+  width: 100%;
+  max-width: 860px;
 }
 
 .toolbar {
