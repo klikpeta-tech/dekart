@@ -300,6 +300,9 @@ func (s Server) CreateFile(ctx context.Context, req *proto.CreateFileRequest) (*
 	if err := s.requireReportWorkspaceWrite(ctx, *reportID); err != nil {
 		return nil, err
 	}
+	if err := s.requireConnectionInReportWorkspace(ctx, *reportID, req.ConnectionId); err != nil {
+		return nil, err
+	}
 	id := newUUID()
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
