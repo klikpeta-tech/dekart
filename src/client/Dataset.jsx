@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import Button from 'antd/es/button'
 import styles from './Dataset.module.css'
 import { useDispatch, useSelector } from 'react-redux'
@@ -5,7 +6,7 @@ import Query from './Query'
 import File from './File'
 import { createQuery } from './actions/query'
 import { createFile } from './actions/file'
-import { ApiTwoTone, InboxOutlined, ReadOutlined } from '@ant-design/icons'
+import { ApiTwoTone, BookOutlined, InboxOutlined, ReadOutlined } from '@ant-design/icons'
 import { DatasourceIcon } from './Datasource'
 import { useHistory } from 'react-router-dom/cjs/react-router-dom'
 import { addReadme } from './actions/readme'
@@ -15,6 +16,10 @@ import { track } from './lib/tracking'
 import { isSystemConnectionID } from './actions/connection'
 import { ConnectionType, QueryExecutionEngine } from 'dekart-proto/dekart_pb'
 import { DUCKDB_DATASOURCE } from './lib/duckdb/constants'
+import LibraryPane from './LibraryPane'
+import { formatCount } from './dark/data-library/index'
+import { loadLibraryItems } from './actions/library'
+import { canBrowseLibrary } from './lib/libraryItems'
 
 function DatasetSelectorButton ({ icon, title, subtitle, onClick, id, disable, disabledNote }) {
   return (
@@ -60,6 +65,16 @@ function DatasetSelector ({ dataset }) {
   const readOnly = useSelector(state => state.workspace.readOnly)
   const isAdmin = useSelector(state => state.user.isAdmin)
   const fileUploadConnection = connectionList.find(c => c.isDefault && c.canStoreFiles)
+  const library = useSelector(state => state.library)
+  const showLibrary = useSelector(state => canBrowseLibrary(state.user))
+  const [browsingLibrary, setBrowsingLibrary] = useState(false)
+
+  // Refresh the grants whenever an empty tab opens, so a new or ended grant shows at once.
+  useEffect(() => {
+    if (showLibrary) {
+      dispatch(loadLibraryItems())
+    }
+  }, [dispatch, showLibrary])
 
   if (!env.loaded) {
     // do not render until environment is loaded
@@ -69,11 +84,20 @@ function DatasetSelector ({ dataset }) {
     // do not render in playground mode, but render in default workspace
     return null
   }
-  if (!ALLOW_FILE_UPLOAD && !userDefinedConnection) {
+  if (!ALLOW_FILE_UPLOAD && !userDefinedConnection && !(showLibrary && library.loaded)) {
     return null
   }
 
+  if (browsingLibrary) {
+    return <LibraryPane onBack={() => setBrowsingLibrary(false)} />
+  }
+
   const allowFileUpload = ALLOW_FILE_UPLOAD && fileUploadConnection
+  const availableCount = library.items.length
+  const catalogueSize = Math.max(library.catalogueSize, availableCount)
+  const librarySubtitle = availableCount === 0
+    ? 'Klikpeta is preparing your library'
+    : `${formatCount(catalogueSize)} ${catalogueSize === 1 ? 'dataset' : 'datasets'} · ${formatCount(availableCount)} available to this workspace`
   let disabledNote = ''
   if (!allowFileUpload) {
     disabledNote = !ALLOW_FILE_UPLOAD ? 'File upload is disabled in configuration' : 'Add default connection with file upload support'
@@ -82,6 +106,20 @@ function DatasetSelector ({ dataset }) {
   return (
     <div className={styles.datasetSelector}>
       <div className={styles.datasetSelectorInner}>
+        {showLibrary && library.loaded && (
+          <DatasetSelectorButton
+            id='dekart-library'
+            icon={<BookOutlined />}
+            disable={availableCount === 0 || !report.canWrite || readOnly}
+            disabledNote={readOnly ? 'Workspace is read-only' : undefined}
+            title='Browse Data Library'
+            subtitle={librarySubtitle}
+            onClick={() => {
+              track('ClickLibraryOption', { datasetId: dataset.id })
+              setBrowsingLibrary(true)
+            }}
+          />
+        )}
         <DatasetSelectorButton
           icon={<InboxOutlined />}
           disable={!(allowFileUpload && report.canWrite) || readOnly}

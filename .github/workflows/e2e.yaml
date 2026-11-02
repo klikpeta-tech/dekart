@@ -434,6 +434,12 @@ jobs:
               -e DEKART_GOOGLE_OAUTH_CLIENT_ID=cypress-device-auth \
               -e DEKART_GOOGLE_OAUTH_SECRET=cypress-device-auth \
 
+          - id: local-library-browser
+            spec: cypress/e2e/local/libraryBrowser.cy.js
+            skip_postgres: true
+            extra_env: |
+              -e DEKART_DEV_CLAIMS=1 \
+
           - id: local-additional-workspace
             spec: cypress/e2e/local/additionalWorkspaceCreation.cy.js
             skip_postgres: true

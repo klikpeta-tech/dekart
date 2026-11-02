@@ -22,6 +22,7 @@ import snapshots from './snapshotsReducer'
 import fileUploadStatus from './fileUploadReducer'
 import deviceTokens from './deviceTokensReducer'
 import libraryGrants from './libraryGrantsReducer'
+import library from './libraryReducer'
 import { hasOpenedKeplerPanel, mapPreview, report, reportDirectAccessEmails, reportsList, reportStatus } from './reportReducer'
 
 function files (state = [], action) {
@@ -105,6 +106,7 @@ export default combineReducers({
   workspace,
   deviceTokens,
   libraryGrants,
+  library,
   dataset,
   storage,
   queries,
