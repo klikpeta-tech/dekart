@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom/cjs/react-router-dom'
 import { createReport } from './actions/report'
 import { track } from './lib/tracking'
 import { canViewConnections } from './lib/connectionsAccess'
+import { canManageLibraryAccess } from './lib/libraryAccess'
 
 const popupOffset = [-10, 0]
 
@@ -51,6 +52,13 @@ export default function DekartMenu () {
             ? (
               <Menu.Item key='connections' onClick={() => track('NavigateToConnections')}>
                 <Link to='/connections'>Connections</Link>
+              </Menu.Item>
+              )
+            : null}
+          {canManageLibraryAccess(user)
+            ? (
+              <Menu.Item key='library' onClick={() => track('NavigateToDataLibrary')}>
+                <Link to='/library'>Data Library</Link>
               </Menu.Item>
               )
             : null}

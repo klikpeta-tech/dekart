@@ -31,6 +31,7 @@ import DeviceAuthorizePage from './DeviceAuthorizePage'
 import { setSnapshotToken } from './actions/token'
 import { getWorkspace } from './actions/workspace'
 import { canViewConnections } from './lib/connectionsAccess'
+import { canManageLibraryAccess } from './lib/libraryAccess'
 
 // RedirectState reads states passed in the URL from the server
 function RedirectState () {
@@ -334,6 +335,12 @@ export default function App () {
               {!userDefinedConnection || (user.stream && !canViewConnections(user))
                 ? <Redirect to='/' />
                 : <HomePage reportFilter='connections' />}
+            </Route>
+            <Route exact path='/library'>
+              <AppRedirect />
+              {user.stream && !canManageLibraryAccess(user)
+                ? <Redirect to='/' />
+                : <HomePage reportFilter='library' />}
             </Route>
             <Route path='/reports/:id/edit'>
               <RedirectToSource />
