@@ -84,7 +84,7 @@ function DatasetSelector ({ dataset }) {
     // do not render in playground mode, but render in default workspace
     return null
   }
-  if (!ALLOW_FILE_UPLOAD && !userDefinedConnection) {
+  if (!ALLOW_FILE_UPLOAD && !userDefinedConnection && !(showLibrary && library.loaded)) {
     return null
   }
 
@@ -177,7 +177,7 @@ function DatasetSelector ({ dataset }) {
             }}
           />
         ))}
-        {filteredConnectionList.length === 0 && isAdmin && (
+        {filteredConnectionList.length === 0 && (
           <DatasetSelectorButton
             icon={<ApiTwoTone />}
             disable={!report.canWrite || readOnly}
