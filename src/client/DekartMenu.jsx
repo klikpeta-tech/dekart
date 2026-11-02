@@ -5,6 +5,7 @@ import { MenuOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom/cjs/react-router-dom'
 import { createReport } from './actions/report'
 import { track } from './lib/tracking'
+import { canViewConnections } from './lib/connectionsAccess'
 
 const popupOffset = [-10, 0]
 
@@ -14,7 +15,8 @@ export default function DekartMenu () {
   const dispatch = useDispatch()
   const { authEnabled } = env
   const isPlayground = useSelector(state => state.user.isPlayground)
-  const isViewer = useSelector(state => state.user.isViewer)
+  const user = useSelector(state => state.user)
+  const { isViewer } = user
   const readOnly = useSelector(state => state.workspace.readOnly)
   return (
     <div className={styles.dekartMenu}>
@@ -45,7 +47,7 @@ export default function DekartMenu () {
                 </Menu.Item>
               </>
               )}
-          {userDefinedConnection
+          {userDefinedConnection && canViewConnections(user)
             ? (
               <Menu.Item key='connections' onClick={() => track('NavigateToConnections')}>
                 <Link to='/connections'>Connections</Link>

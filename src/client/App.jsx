@@ -30,6 +30,7 @@ import { WorkspaceSelectorLight } from './WorkspaceSelector'
 import DeviceAuthorizePage from './DeviceAuthorizePage'
 import { setSnapshotToken } from './actions/token'
 import { getWorkspace } from './actions/workspace'
+import { canViewConnections } from './lib/connectionsAccess'
 
 // RedirectState reads states passed in the URL from the server
 function RedirectState () {
@@ -250,6 +251,7 @@ export default function App () {
   const env = useSelector(state => state.env)
   const envLoaded = env.loaded
   const userDefinedConnection = useSelector(state => state.connection.userDefined)
+  const user = useSelector(state => state.user)
   const dispatch = useDispatch()
   const visitedPages = React.useRef(['/'])
   const storageLoaded = useSelector(state => state.storage.loaded)
@@ -329,7 +331,9 @@ export default function App () {
             </Route>
             <Route exact path='/connections'>
               <AppRedirect />
-              {userDefinedConnection ? <HomePage reportFilter='connections' /> : <Redirect to='/' />}
+              {!userDefinedConnection || (user.stream && !canViewConnections(user))
+                ? <Redirect to='/' />
+                : <HomePage reportFilter='connections' />}
             </Route>
             <Route path='/reports/:id/edit'>
               <RedirectToSource />

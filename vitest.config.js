@@ -1,6 +1,8 @@
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  // Vitest does not load the React plugin, so JSX components need the automatic runtime.
+  esbuild: { jsx: 'automatic' },
   test: {
     globals: true,
     environment: 'jsdom',
@@ -12,7 +14,7 @@ export default defineConfig({
           enabled: true,
           // Bundle Kepler's CommonJS/ESM graph while preserving Node-only loaders.
           include: [
-            '@kepler.gl/layers', '@kepler.gl/reducers',
+            '@kepler.gl/layers', '@kepler.gl/reducers', 'antd/es/menu',
             'dekart-proto/dekart_pb', 'dekart-proto/dekart_pb_service'
           ],
           exclude: ['apache-arrow', 'thrift', 'parquet-wasm', 'h3-js']

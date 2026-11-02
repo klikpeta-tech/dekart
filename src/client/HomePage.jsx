@@ -22,6 +22,7 @@ import { useMapPreview } from './lib/useMapPreview'
 import { getRelativeTime } from './lib/relativeTime'
 import { getMapCenterCoordinates } from './lib/mapPreviewState'
 import CreateConnection from './CreateConnection'
+import { canViewConnections } from './lib/connectionsAccess'
 import { Loading } from './Loading'
 import classnames from 'classnames'
 import { UNKNOWN_EMAIL } from './lib/constants'
@@ -204,7 +205,9 @@ function ReportsHeader (
   const userDefinedConnection = useSelector(state => state.connection.userDefined)
   const dispatch = useDispatch()
   const history = useHistory()
-  const { isAdmin, isViewer } = useSelector(state => state.user)
+  const user = useSelector(state => state.user)
+  const { isAdmin, isViewer } = user
+  const showConnectionsTab = canViewConnections(user)
   const readOnly = useSelector(state => state.workspace.readOnly)
 
   const userStream = useSelector(state => state.user.stream)
@@ -237,7 +240,7 @@ function ReportsHeader (
               <Radio.Button value='my'>My Maps</Radio.Button>
               <Radio.Button value='discoverable'>Shared Maps</Radio.Button>
               {
-                connectionList && userDefinedConnection ? <Radio.Button value='connections'>Connections</Radio.Button> : null
+                showConnectionsTab && connectionList && userDefinedConnection ? <Radio.Button value='connections'>Connections</Radio.Button> : null
               }
             </Radio.Group>
 
