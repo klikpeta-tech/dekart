@@ -12,6 +12,7 @@ import Select from 'antd/es/select'
 import { track } from './lib/tracking'
 import Typography from 'antd/es/typography'
 import { UNKNOWN_EMAIL } from './lib/constants'
+import { buildInviteLink } from './lib/inviteLink'
 
 const { Text } = Typography
 
@@ -142,7 +143,7 @@ export default function MembersTab () {
                       type='text'
                       onClick={() => {
                         track('CopyInviteLink', { inviteId: u.inviteId })
-                        dispatch(copyUrlToClipboard(window.location.toString() + '/invite/' + u.inviteId, 'Invite link copied to clipboard'))
+                        dispatch(copyUrlToClipboard(buildInviteLink(window.location.origin, u.inviteId), 'Invite link copied to clipboard'))
                       }}
                     >
                       Copy invite link
