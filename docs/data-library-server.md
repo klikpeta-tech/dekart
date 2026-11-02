@@ -20,7 +20,7 @@ Server side of the Klikpeta Data Library (ENG-2164). The design and decisions ar
 - `AddLibraryDataset` and `UpdateLibraryDatasetSelection` need write access to the map; an ended grant answers `FailedPrecondition`, an ungranted category `PermissionDenied`, a selection over the item's `max_rows` `FailedPrecondition`, a stale `expected_version` `Canceled`.
 - Admin commands (`ListLibraryGrants`, `GetLibraryTaxonomy`, `SetLibraryGrant`, `RevokeLibraryGrant`, `SetLibraryGrantCategories`) need the workspace Admin role and the caller's email to equal `DEKART_DEFAULT_WORKSPACE_ADMIN` (Klikpeta staff). An unset setting refuses everyone.
 - Items with a taxonomy (Places) need at least one granted category; other items take none.
-- `DEKART_LIBRARY_CONNECTION_ID` names the staff-owned library connection. `CreateQuery`, `CreateFile` and `UpdateQuery` refuse it, so user SQL never runs on it.
+- `DEKART_LIBRARY_CONNECTION_ID` names the staff-owned library connection. `CreateQuery`, `CreateFile`, `UpdateQuery`, `RunQuery` (including the MCP run path) and `RunAllQueries` refuse it, so user SQL never runs on it.
 - Every library command answers `Unavailable` until the catalogue reader is wired in with `Server.SetLibraryCatalogue`.
 
 ## Not in this slice
