@@ -8,3 +8,5 @@ src/client/dark/**/*.tsx      linguist-generated=true
 src/client/dark/**/*.css      linguist-generated=true
 src/client/dark/**/*.test.ts  -linguist-generated
 src/client/dark/**/*.test.tsx -linguist-generated
+src/server/dark/**/*.go       linguist-generated=true
+src/server/dark/**/*_test.go  -linguist-generated

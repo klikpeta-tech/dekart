@@ -87,6 +87,13 @@ func getDefaultWorkspaceAdmin() string {
 	return os.Getenv("DEKART_DEFAULT_WORKSPACE_ADMIN")
 }
 
+// IsDefaultWorkspaceAdmin reports whether email is the instance admin configured in DEKART_DEFAULT_WORKSPACE_ADMIN,
+// which the fork treats as the Klikpeta staff identity. An unset setting matches nobody.
+func IsDefaultWorkspaceAdmin(email string) bool {
+	admin := getDefaultWorkspaceAdmin()
+	return admin != "" && email == admin
+}
+
 // GetWorkspaceDefaultRole returns default user role for workspace
 func GetWorkspaceDefaultRole() proto.UserRole {
 	switch os.Getenv("DEKART_DEFAULT_WORKSPACE_ROLE") {

@@ -78,6 +78,22 @@ service Dekart {
     rpc UpdateWorkspace(UpdateWorkspaceRequest) returns (UpdateWorkspaceResponse) {}
     rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse) {}
     rpc UpdateWorkspaceUser(UpdateWorkspaceUserRequest) returns (UpdateWorkspaceUserResponse) {}
+
+    // Data Library (Klikpeta fork): client commands
+    rpc ListLibraryItems(ListLibraryItemsRequest) returns (ListLibraryItemsResponse) {}
+    rpc GetLibraryItem(GetLibraryItemRequest) returns (GetLibraryItemResponse) {}
+    rpc ListLibraryAreas(ListLibraryAreasRequest) returns (ListLibraryAreasResponse) {}
+    rpc CountLibrarySelection(CountLibrarySelectionRequest) returns (CountLibrarySelectionResponse) {}
+    rpc GetLibrarySample(GetLibrarySampleRequest) returns (GetLibrarySampleResponse) {}
+    rpc AddLibraryDataset(AddLibraryDatasetRequest) returns (AddLibraryDatasetResponse) {}
+    rpc UpdateLibraryDatasetSelection(UpdateLibraryDatasetSelectionRequest) returns (UpdateLibraryDatasetSelectionResponse) {}
+
+    // Data Library (Klikpeta fork): admin commands, workspace Admin who is also Klikpeta staff
+    rpc ListLibraryGrants(ListLibraryGrantsRequest) returns (ListLibraryGrantsResponse) {}
+    rpc GetLibraryTaxonomy(GetLibraryTaxonomyRequest) returns (GetLibraryTaxonomyResponse) {}
+    rpc SetLibraryGrant(SetLibraryGrantRequest) returns (SetLibraryGrantResponse) {}
+    rpc RevokeLibraryGrant(RevokeLibraryGrantRequest) returns (RevokeLibraryGrantResponse) {}
+    rpc SetLibraryGrantCategories(SetLibraryGrantCategoriesRequest) returns (SetLibraryGrantCategoriesResponse) {}
 }
 
 message SaveMapPreviewRequest {
@@ -741,6 +757,7 @@ message Dataset {
     string name = 7;
     string connection_id = 8;
     ConnectionType connection_type = 9;
+    LibraryDatasetBinding library = 10; // set only for Data Library datasets
 }
 
 message QueryJob {
@@ -1112,4 +1129,233 @@ message QueryParam {
 message DuckDBExecutionExtension {
     string name = 1;
     string repository = 2; // core | community
+}
+
+// ---- Data Library (Klikpeta fork) ----
+
+// LibraryShape describes what one row of a library item is.
+message LibraryShape {
+    enum Kind {
+        KIND_UNSPECIFIED = 0;
+        KIND_POINTS = 1;
+        KIND_LINES = 2;
+        KIND_AREAS = 3;
+        KIND_H3 = 4;
+    }
+    Kind kind = 1;
+    string admin_level = 2; // for KIND_AREAS: provinsi, kabkota or kecamatan
+    int32 h3_resolution = 3; // for KIND_H3
+}
+
+// LibraryItem is one catalogue entry. The year is part of the item (title), there is no year picker.
+message LibraryItem {
+    string id = 1;
+    string title = 2;
+    string description_md = 3;
+    string category = 4;
+    string provider = 5;
+    string attribution = 6;
+    string coverage_summary = 7;
+    LibraryShape shape = 8;
+    int64 row_count = 9;
+    int64 source_updated_at = 10; // unix seconds
+    string cadence = 11;
+    repeated string columns = 12;
+    bool has_taxonomy = 13; // true when access and selection are per category (Places)
+    int64 max_rows = 14; // largest selection the server adds to a map, 0 when unlimited
+    string layer_style_json = 15;
+    int64 access_ends_at = 16; // unix seconds when this workspace's access ends, 0 when not granted
+    int32 granted_category_count = 17;
+    repeated string area_levels = 18; // provinsi, kabkota, kecamatan
+}
+
+// LibrarySelection is what a client picks from an item. area_code is a BPS code (kode_wilayah), empty for the whole coverage.
+message LibrarySelection {
+    string area_code = 1;
+    repeated string category_ids = 2;
+    repeated string brand_ids = 3;
+}
+
+// LibraryDatasetBinding is sent in place of SQL and connection for a library dataset.
+message LibraryDatasetBinding {
+    string item_id = 1;
+    LibrarySelection selection = 2;
+    int64 version = 3; // compare-and-set token for UpdateLibraryDatasetSelection
+    int64 access_ends_at = 4; // unix seconds
+    bool access_ended = 5; // the grant ended or was revoked: the stored result stays, refresh is refused
+}
+
+message LibraryCategoryGroup {
+    string id = 1;
+    string title = 2;
+    int32 sort_order = 3;
+}
+
+message LibraryCategory {
+    string id = 1;
+    string group_id = 2;
+    string title = 3;
+    int32 sort_order = 4;
+    int64 row_count = 5; // nationwide count
+}
+
+message LibraryBrand {
+    string id = 1;
+    string category_id = 2;
+    string title = 3;
+}
+
+message LibraryTaxonomy {
+    repeated LibraryCategoryGroup groups = 1;
+    repeated LibraryCategory categories = 2;
+    repeated LibraryBrand brands = 3;
+}
+
+message LibraryArea {
+    string code = 1;
+    string level = 2; // provinsi, kabkota or kecamatan
+    string name = 3;
+    string parent_code = 4;
+    int64 row_count = 5; // rows of the requested item in this area, 0 when no item was requested
+}
+
+message LibraryCount {
+    string id = 1;
+    int64 row_count = 2;
+}
+
+message ListLibraryItemsRequest {}
+
+message ListLibraryItemsResponse {
+    repeated LibraryItem items = 1; // only items granted to the current workspace
+    int32 catalogue_size = 2; // published items in the catalogue
+}
+
+message GetLibraryItemRequest {
+    string item_id = 1;
+}
+
+message GetLibraryItemResponse {
+    LibraryItem item = 1;
+    LibraryTaxonomy taxonomy = 2; // only the categories granted to the current workspace
+}
+
+message ListLibraryAreasRequest {
+    string parent_code = 1; // empty lists provinces
+    string item_id = 2; // optional, fills row_count
+}
+
+message ListLibraryAreasResponse {
+    repeated LibraryArea areas = 1;
+}
+
+message CountLibrarySelectionRequest {
+    string item_id = 1;
+    LibrarySelection selection = 2;
+}
+
+message CountLibrarySelectionResponse {
+    int64 row_count = 1;
+    repeated LibraryCount by_category = 2;
+    repeated LibraryCount by_brand = 3;
+    bool exceeds_max_rows = 4;
+}
+
+message GetLibrarySampleRequest {
+    string item_id = 1;
+    LibrarySelection selection = 2;
+}
+
+message LibrarySampleRow {
+    repeated string values = 1;
+}
+
+message GetLibrarySampleResponse {
+    repeated string columns = 1;
+    repeated LibrarySampleRow rows = 2; // at most 20
+}
+
+message AddLibraryDatasetRequest {
+    string dataset_id = 1; // an empty dataset of the map
+    string item_id = 2;
+    LibrarySelection selection = 3;
+}
+
+message AddLibraryDatasetResponse {
+    string dataset_id = 1;
+    string query_id = 2;
+}
+
+message UpdateLibraryDatasetSelectionRequest {
+    string dataset_id = 1;
+    int64 expected_version = 2; // binding version observed by the client
+    LibrarySelection selection = 3; // the full new selection
+}
+
+message UpdateLibraryDatasetSelectionResponse {
+    string dataset_id = 1;
+    int64 version = 2;
+}
+
+// LibraryGrant is the state of one item for one workspace.
+message LibraryGrant {
+    enum State {
+        STATE_UNSPECIFIED = 0;
+        STATE_NOT_GRANTED = 1;
+        STATE_ACTIVE = 2;
+        STATE_ENDED = 3; // the end date passed
+        STATE_REVOKED = 4;
+    }
+    string item_id = 1;
+    State state = 2;
+    string ends_on = 3; // YYYY-MM-DD, access lasts until 23:59:59 Asia/Jakarta of that day
+    int64 access_ends_at = 4; // unix seconds, 0 when never granted
+    repeated string category_ids = 5;
+    string authored_by = 6;
+}
+
+message LibraryGrantRow {
+    LibraryItem item = 1;
+    LibraryGrant grant = 2;
+}
+
+message ListLibraryGrantsRequest {}
+
+message ListLibraryGrantsResponse {
+    repeated LibraryGrantRow rows = 1; // the whole catalogue with the current workspace's grants
+}
+
+message GetLibraryTaxonomyRequest {
+    string item_id = 1;
+}
+
+message GetLibraryTaxonomyResponse {
+    LibraryTaxonomy taxonomy = 1; // the whole taxonomy
+}
+
+message SetLibraryGrantRequest {
+    string item_id = 1;
+    string ends_on = 2; // required, YYYY-MM-DD
+    repeated string category_ids = 3; // required for items with a taxonomy, empty otherwise
+}
+
+message SetLibraryGrantResponse {
+    LibraryGrant grant = 1;
+}
+
+message RevokeLibraryGrantRequest {
+    string item_id = 1;
+}
+
+message RevokeLibraryGrantResponse {
+    LibraryGrant grant = 1;
+}
+
+message SetLibraryGrantCategoriesRequest {
+    string item_id = 1;
+    repeated string category_ids = 2; // the full new set, at least one
+}
+
+message SetLibraryGrantCategoriesResponse {
+    LibraryGrant grant = 1;
 }

@@ -53,7 +53,10 @@ func (s Server) CreateQuery(ctx context.Context, req *proto.CreateQueryRequest) 
 	return s.createQuery(ctx, req, nil)
 }
 
-func (s Server) createDatasetQueryRecord(ctx context.Context, reportID string, datasetID string, connectionID string, executionEngine proto.QueryExecutionEngine, changedBy string) (string, bool, error) {
+// createDatasetQueryRecord creates the empty query of a dataset and binds its connection. afterCreate, when set, runs
+// in the same transaction once the query exists and before the report snapshot is taken, so callers can store
+// state that must appear in that snapshot or not at all.
+func (s Server) createDatasetQueryRecord(ctx context.Context, reportID string, datasetID string, connectionID string, executionEngine proto.QueryExecutionEngine, changedBy string, afterCreate func(tx *sql.Tx) error) (string, bool, error) {
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return "", false, err
@@ -120,6 +123,11 @@ func (s Server) createDatasetQueryRecord(ctx context.Context, reportID string, d
 		}
 		return "", false, fmt.Errorf("dataset query was not created id:%s", datasetID)
 	}
+	if afterCreate != nil {
+		if err := afterCreate(tx); err != nil {
+			return "", false, err
+		}
+	}
 	versionID := newUUID()
 	if _, err := tx.ExecContext(ctx, `update reports set version_id=$1 where id=$2`, versionID, reportID); err != nil {
 		return "", false, err
@@ -182,7 +190,7 @@ func (s Server) createQuery(ctx context.Context, req *proto.CreateQueryRequest, 
 		return nil, status.Error(codes.InvalidArgument, "execution_engine is required")
 	}
 
-	queryID, created, err := s.createDatasetQueryRecord(ctx, *reportID, req.DatasetId, req.ConnectionId, req.ExecutionEngine, claims.Email)
+	queryID, created, err := s.createDatasetQueryRecord(ctx, *reportID, req.DatasetId, req.ConnectionId, req.ExecutionEngine, claims.Email, nil)
 	if err != nil {
 		errtype.LogError(err, "Error creating dataset query")
 		if status.Code(err) != codes.Unknown {
@@ -278,6 +286,10 @@ func (s Server) RunAllQueries(ctx context.Context, req *proto.RunAllQueriesReque
 		}
 		if executionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 			return nil, status.Errorf(codes.FailedPrecondition, "query %s has no execution engine", queryID)
+		}
+		// Library datasets are built by the server only; user text never runs on the library connection.
+		if err := refuseLibraryConnection(connectionID.String); err != nil {
+			return nil, err
 		}
 		connection, err := s.getConnection(ctx, connectionID.String)
 		if err != nil {
@@ -728,6 +740,10 @@ func (s Server) updateQuery(ctx context.Context, req *proto.UpdateQueryRequest, 
 	if err != nil {
 		return nil, err
 	}
+	// Library datasets get their SQL from the server only; nobody edits it.
+	if err := refuseLibraryConnection(q.ConnectionID); err != nil {
+		return nil, err
+	}
 	var dryRun *proto.QueryDryRunResult
 	if validate != nil {
 		dryRun, err = validate(ctx, req, q)
@@ -842,6 +858,10 @@ func (s Server) runQueryRequest(ctx context.Context, req *proto.RunQueryRequest,
 	}
 	if q.ExecutionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 		return nil, status.Error(codes.FailedPrecondition, "query has no execution engine")
+	}
+	// Library datasets are built by the server only; user text never runs on the library connection.
+	if err := refuseLibraryConnection(q.ConnectionID); err != nil {
+		return nil, err
 	}
 	connection, err := s.getConnection(ctx, q.ConnectionID)
 

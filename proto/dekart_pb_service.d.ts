@@ -481,6 +481,114 @@ type DekartUpdateWorkspaceUser = {
   readonly responseType: typeof dekart_pb.UpdateWorkspaceUserResponse;
 };
 
+type DekartListLibraryItems = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.ListLibraryItemsRequest;
+  readonly responseType: typeof dekart_pb.ListLibraryItemsResponse;
+};
+
+type DekartGetLibraryItem = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.GetLibraryItemRequest;
+  readonly responseType: typeof dekart_pb.GetLibraryItemResponse;
+};
+
+type DekartListLibraryAreas = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.ListLibraryAreasRequest;
+  readonly responseType: typeof dekart_pb.ListLibraryAreasResponse;
+};
+
+type DekartCountLibrarySelection = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.CountLibrarySelectionRequest;
+  readonly responseType: typeof dekart_pb.CountLibrarySelectionResponse;
+};
+
+type DekartGetLibrarySample = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.GetLibrarySampleRequest;
+  readonly responseType: typeof dekart_pb.GetLibrarySampleResponse;
+};
+
+type DekartAddLibraryDataset = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.AddLibraryDatasetRequest;
+  readonly responseType: typeof dekart_pb.AddLibraryDatasetResponse;
+};
+
+type DekartUpdateLibraryDatasetSelection = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.UpdateLibraryDatasetSelectionRequest;
+  readonly responseType: typeof dekart_pb.UpdateLibraryDatasetSelectionResponse;
+};
+
+type DekartListLibraryGrants = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.ListLibraryGrantsRequest;
+  readonly responseType: typeof dekart_pb.ListLibraryGrantsResponse;
+};
+
+type DekartGetLibraryTaxonomy = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.GetLibraryTaxonomyRequest;
+  readonly responseType: typeof dekart_pb.GetLibraryTaxonomyResponse;
+};
+
+type DekartSetLibraryGrant = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.SetLibraryGrantRequest;
+  readonly responseType: typeof dekart_pb.SetLibraryGrantResponse;
+};
+
+type DekartRevokeLibraryGrant = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.RevokeLibraryGrantRequest;
+  readonly responseType: typeof dekart_pb.RevokeLibraryGrantResponse;
+};
+
+type DekartSetLibraryGrantCategories = {
+  readonly methodName: string;
+  readonly service: typeof Dekart;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof dekart_pb.SetLibraryGrantCategoriesRequest;
+  readonly responseType: typeof dekart_pb.SetLibraryGrantCategoriesResponse;
+};
+
 export class Dekart {
   static readonly serviceName: string;
   static readonly CreateReport: DekartCreateReport;
@@ -536,6 +644,18 @@ export class Dekart {
   static readonly UpdateWorkspace: DekartUpdateWorkspace;
   static readonly GetWorkspace: DekartGetWorkspace;
   static readonly UpdateWorkspaceUser: DekartUpdateWorkspaceUser;
+  static readonly ListLibraryItems: DekartListLibraryItems;
+  static readonly GetLibraryItem: DekartGetLibraryItem;
+  static readonly ListLibraryAreas: DekartListLibraryAreas;
+  static readonly CountLibrarySelection: DekartCountLibrarySelection;
+  static readonly GetLibrarySample: DekartGetLibrarySample;
+  static readonly AddLibraryDataset: DekartAddLibraryDataset;
+  static readonly UpdateLibraryDatasetSelection: DekartUpdateLibraryDatasetSelection;
+  static readonly ListLibraryGrants: DekartListLibraryGrants;
+  static readonly GetLibraryTaxonomy: DekartGetLibraryTaxonomy;
+  static readonly SetLibraryGrant: DekartSetLibraryGrant;
+  static readonly RevokeLibraryGrant: DekartRevokeLibraryGrant;
+  static readonly SetLibraryGrantCategories: DekartSetLibraryGrantCategories;
 }
 
 export type ServiceError = { message: string, code: number; metadata: grpc.Metadata }
@@ -1022,6 +1142,114 @@ export class DekartClient {
   updateWorkspaceUser(
     requestMessage: dekart_pb.UpdateWorkspaceUserRequest,
     callback: (error: ServiceError|null, responseMessage: dekart_pb.UpdateWorkspaceUserResponse|null) => void
+  ): UnaryResponse;
+  listLibraryItems(
+    requestMessage: dekart_pb.ListLibraryItemsRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.ListLibraryItemsResponse|null) => void
+  ): UnaryResponse;
+  listLibraryItems(
+    requestMessage: dekart_pb.ListLibraryItemsRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.ListLibraryItemsResponse|null) => void
+  ): UnaryResponse;
+  getLibraryItem(
+    requestMessage: dekart_pb.GetLibraryItemRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.GetLibraryItemResponse|null) => void
+  ): UnaryResponse;
+  getLibraryItem(
+    requestMessage: dekart_pb.GetLibraryItemRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.GetLibraryItemResponse|null) => void
+  ): UnaryResponse;
+  listLibraryAreas(
+    requestMessage: dekart_pb.ListLibraryAreasRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.ListLibraryAreasResponse|null) => void
+  ): UnaryResponse;
+  listLibraryAreas(
+    requestMessage: dekart_pb.ListLibraryAreasRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.ListLibraryAreasResponse|null) => void
+  ): UnaryResponse;
+  countLibrarySelection(
+    requestMessage: dekart_pb.CountLibrarySelectionRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.CountLibrarySelectionResponse|null) => void
+  ): UnaryResponse;
+  countLibrarySelection(
+    requestMessage: dekart_pb.CountLibrarySelectionRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.CountLibrarySelectionResponse|null) => void
+  ): UnaryResponse;
+  getLibrarySample(
+    requestMessage: dekart_pb.GetLibrarySampleRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.GetLibrarySampleResponse|null) => void
+  ): UnaryResponse;
+  getLibrarySample(
+    requestMessage: dekart_pb.GetLibrarySampleRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.GetLibrarySampleResponse|null) => void
+  ): UnaryResponse;
+  addLibraryDataset(
+    requestMessage: dekart_pb.AddLibraryDatasetRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.AddLibraryDatasetResponse|null) => void
+  ): UnaryResponse;
+  addLibraryDataset(
+    requestMessage: dekart_pb.AddLibraryDatasetRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.AddLibraryDatasetResponse|null) => void
+  ): UnaryResponse;
+  updateLibraryDatasetSelection(
+    requestMessage: dekart_pb.UpdateLibraryDatasetSelectionRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.UpdateLibraryDatasetSelectionResponse|null) => void
+  ): UnaryResponse;
+  updateLibraryDatasetSelection(
+    requestMessage: dekart_pb.UpdateLibraryDatasetSelectionRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.UpdateLibraryDatasetSelectionResponse|null) => void
+  ): UnaryResponse;
+  listLibraryGrants(
+    requestMessage: dekart_pb.ListLibraryGrantsRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.ListLibraryGrantsResponse|null) => void
+  ): UnaryResponse;
+  listLibraryGrants(
+    requestMessage: dekart_pb.ListLibraryGrantsRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.ListLibraryGrantsResponse|null) => void
+  ): UnaryResponse;
+  getLibraryTaxonomy(
+    requestMessage: dekart_pb.GetLibraryTaxonomyRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.GetLibraryTaxonomyResponse|null) => void
+  ): UnaryResponse;
+  getLibraryTaxonomy(
+    requestMessage: dekart_pb.GetLibraryTaxonomyRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.GetLibraryTaxonomyResponse|null) => void
+  ): UnaryResponse;
+  setLibraryGrant(
+    requestMessage: dekart_pb.SetLibraryGrantRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.SetLibraryGrantResponse|null) => void
+  ): UnaryResponse;
+  setLibraryGrant(
+    requestMessage: dekart_pb.SetLibraryGrantRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.SetLibraryGrantResponse|null) => void
+  ): UnaryResponse;
+  revokeLibraryGrant(
+    requestMessage: dekart_pb.RevokeLibraryGrantRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.RevokeLibraryGrantResponse|null) => void
+  ): UnaryResponse;
+  revokeLibraryGrant(
+    requestMessage: dekart_pb.RevokeLibraryGrantRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.RevokeLibraryGrantResponse|null) => void
+  ): UnaryResponse;
+  setLibraryGrantCategories(
+    requestMessage: dekart_pb.SetLibraryGrantCategoriesRequest,
+    metadata: grpc.Metadata,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.SetLibraryGrantCategoriesResponse|null) => void
+  ): UnaryResponse;
+  setLibraryGrantCategories(
+    requestMessage: dekart_pb.SetLibraryGrantCategoriesRequest,
+    callback: (error: ServiceError|null, responseMessage: dekart_pb.SetLibraryGrantCategoriesResponse|null) => void
   ): UnaryResponse;
 }
 

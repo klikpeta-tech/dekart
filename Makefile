@@ -421,3 +421,4 @@ github-runner: runner-start
 .PHONY: dark-check
 dark-check:
 	npm run dark:check
+	sh scripts/check-dark-go.sh

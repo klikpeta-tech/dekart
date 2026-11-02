@@ -2724,6 +2724,11 @@ export class Dataset extends jspb.Message {
   getConnectionType(): ConnectionTypeMap[keyof ConnectionTypeMap];
   setConnectionType(value: ConnectionTypeMap[keyof ConnectionTypeMap]): void;
 
+  hasLibrary(): boolean;
+  clearLibrary(): void;
+  getLibrary(): LibraryDatasetBinding | undefined;
+  setLibrary(value?: LibraryDatasetBinding): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Dataset.AsObject;
   static toObject(includeInstance: boolean, msg: Dataset): Dataset.AsObject;
@@ -2745,6 +2750,7 @@ export namespace Dataset {
     name: string,
     connectionId: string,
     connectionType: ConnectionTypeMap[keyof ConnectionTypeMap],
+    library?: LibraryDatasetBinding.AsObject,
   }
 }
 
@@ -4379,6 +4385,1078 @@ export namespace DuckDBExecutionExtension {
   export type AsObject = {
     name: string,
     repository: string,
+  }
+}
+
+export class LibraryShape extends jspb.Message {
+  getKind(): LibraryShape.KindMap[keyof LibraryShape.KindMap];
+  setKind(value: LibraryShape.KindMap[keyof LibraryShape.KindMap]): void;
+
+  getAdminLevel(): string;
+  setAdminLevel(value: string): void;
+
+  getH3Resolution(): number;
+  setH3Resolution(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryShape.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryShape): LibraryShape.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryShape, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryShape;
+  static deserializeBinaryFromReader(message: LibraryShape, reader: jspb.BinaryReader): LibraryShape;
+}
+
+export namespace LibraryShape {
+  export type AsObject = {
+    kind: LibraryShape.KindMap[keyof LibraryShape.KindMap],
+    adminLevel: string,
+    h3Resolution: number,
+  }
+
+  export interface KindMap {
+    KIND_UNSPECIFIED: 0;
+    KIND_POINTS: 1;
+    KIND_LINES: 2;
+    KIND_AREAS: 3;
+    KIND_H3: 4;
+  }
+
+  export const Kind: KindMap;
+}
+
+export class LibraryItem extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  getTitle(): string;
+  setTitle(value: string): void;
+
+  getDescriptionMd(): string;
+  setDescriptionMd(value: string): void;
+
+  getCategory(): string;
+  setCategory(value: string): void;
+
+  getProvider(): string;
+  setProvider(value: string): void;
+
+  getAttribution(): string;
+  setAttribution(value: string): void;
+
+  getCoverageSummary(): string;
+  setCoverageSummary(value: string): void;
+
+  hasShape(): boolean;
+  clearShape(): void;
+  getShape(): LibraryShape | undefined;
+  setShape(value?: LibraryShape): void;
+
+  getRowCount(): number;
+  setRowCount(value: number): void;
+
+  getSourceUpdatedAt(): number;
+  setSourceUpdatedAt(value: number): void;
+
+  getCadence(): string;
+  setCadence(value: string): void;
+
+  clearColumnsList(): void;
+  getColumnsList(): Array<string>;
+  setColumnsList(value: Array<string>): void;
+  addColumns(value: string, index?: number): string;
+
+  getHasTaxonomy(): boolean;
+  setHasTaxonomy(value: boolean): void;
+
+  getMaxRows(): number;
+  setMaxRows(value: number): void;
+
+  getLayerStyleJson(): string;
+  setLayerStyleJson(value: string): void;
+
+  getAccessEndsAt(): number;
+  setAccessEndsAt(value: number): void;
+
+  getGrantedCategoryCount(): number;
+  setGrantedCategoryCount(value: number): void;
+
+  clearAreaLevelsList(): void;
+  getAreaLevelsList(): Array<string>;
+  setAreaLevelsList(value: Array<string>): void;
+  addAreaLevels(value: string, index?: number): string;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryItem.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryItem): LibraryItem.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryItem, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryItem;
+  static deserializeBinaryFromReader(message: LibraryItem, reader: jspb.BinaryReader): LibraryItem;
+}
+
+export namespace LibraryItem {
+  export type AsObject = {
+    id: string,
+    title: string,
+    descriptionMd: string,
+    category: string,
+    provider: string,
+    attribution: string,
+    coverageSummary: string,
+    shape?: LibraryShape.AsObject,
+    rowCount: number,
+    sourceUpdatedAt: number,
+    cadence: string,
+    columnsList: Array<string>,
+    hasTaxonomy: boolean,
+    maxRows: number,
+    layerStyleJson: string,
+    accessEndsAt: number,
+    grantedCategoryCount: number,
+    areaLevelsList: Array<string>,
+  }
+}
+
+export class LibrarySelection extends jspb.Message {
+  getAreaCode(): string;
+  setAreaCode(value: string): void;
+
+  clearCategoryIdsList(): void;
+  getCategoryIdsList(): Array<string>;
+  setCategoryIdsList(value: Array<string>): void;
+  addCategoryIds(value: string, index?: number): string;
+
+  clearBrandIdsList(): void;
+  getBrandIdsList(): Array<string>;
+  setBrandIdsList(value: Array<string>): void;
+  addBrandIds(value: string, index?: number): string;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibrarySelection.AsObject;
+  static toObject(includeInstance: boolean, msg: LibrarySelection): LibrarySelection.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibrarySelection, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibrarySelection;
+  static deserializeBinaryFromReader(message: LibrarySelection, reader: jspb.BinaryReader): LibrarySelection;
+}
+
+export namespace LibrarySelection {
+  export type AsObject = {
+    areaCode: string,
+    categoryIdsList: Array<string>,
+    brandIdsList: Array<string>,
+  }
+}
+
+export class LibraryDatasetBinding extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  hasSelection(): boolean;
+  clearSelection(): void;
+  getSelection(): LibrarySelection | undefined;
+  setSelection(value?: LibrarySelection): void;
+
+  getVersion(): number;
+  setVersion(value: number): void;
+
+  getAccessEndsAt(): number;
+  setAccessEndsAt(value: number): void;
+
+  getAccessEnded(): boolean;
+  setAccessEnded(value: boolean): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryDatasetBinding.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryDatasetBinding): LibraryDatasetBinding.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryDatasetBinding, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryDatasetBinding;
+  static deserializeBinaryFromReader(message: LibraryDatasetBinding, reader: jspb.BinaryReader): LibraryDatasetBinding;
+}
+
+export namespace LibraryDatasetBinding {
+  export type AsObject = {
+    itemId: string,
+    selection?: LibrarySelection.AsObject,
+    version: number,
+    accessEndsAt: number,
+    accessEnded: boolean,
+  }
+}
+
+export class LibraryCategoryGroup extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  getTitle(): string;
+  setTitle(value: string): void;
+
+  getSortOrder(): number;
+  setSortOrder(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryCategoryGroup.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryCategoryGroup): LibraryCategoryGroup.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryCategoryGroup, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryCategoryGroup;
+  static deserializeBinaryFromReader(message: LibraryCategoryGroup, reader: jspb.BinaryReader): LibraryCategoryGroup;
+}
+
+export namespace LibraryCategoryGroup {
+  export type AsObject = {
+    id: string,
+    title: string,
+    sortOrder: number,
+  }
+}
+
+export class LibraryCategory extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  getGroupId(): string;
+  setGroupId(value: string): void;
+
+  getTitle(): string;
+  setTitle(value: string): void;
+
+  getSortOrder(): number;
+  setSortOrder(value: number): void;
+
+  getRowCount(): number;
+  setRowCount(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryCategory.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryCategory): LibraryCategory.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryCategory, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryCategory;
+  static deserializeBinaryFromReader(message: LibraryCategory, reader: jspb.BinaryReader): LibraryCategory;
+}
+
+export namespace LibraryCategory {
+  export type AsObject = {
+    id: string,
+    groupId: string,
+    title: string,
+    sortOrder: number,
+    rowCount: number,
+  }
+}
+
+export class LibraryBrand extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  getCategoryId(): string;
+  setCategoryId(value: string): void;
+
+  getTitle(): string;
+  setTitle(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryBrand.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryBrand): LibraryBrand.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryBrand, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryBrand;
+  static deserializeBinaryFromReader(message: LibraryBrand, reader: jspb.BinaryReader): LibraryBrand;
+}
+
+export namespace LibraryBrand {
+  export type AsObject = {
+    id: string,
+    categoryId: string,
+    title: string,
+  }
+}
+
+export class LibraryTaxonomy extends jspb.Message {
+  clearGroupsList(): void;
+  getGroupsList(): Array<LibraryCategoryGroup>;
+  setGroupsList(value: Array<LibraryCategoryGroup>): void;
+  addGroups(value?: LibraryCategoryGroup, index?: number): LibraryCategoryGroup;
+
+  clearCategoriesList(): void;
+  getCategoriesList(): Array<LibraryCategory>;
+  setCategoriesList(value: Array<LibraryCategory>): void;
+  addCategories(value?: LibraryCategory, index?: number): LibraryCategory;
+
+  clearBrandsList(): void;
+  getBrandsList(): Array<LibraryBrand>;
+  setBrandsList(value: Array<LibraryBrand>): void;
+  addBrands(value?: LibraryBrand, index?: number): LibraryBrand;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryTaxonomy.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryTaxonomy): LibraryTaxonomy.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryTaxonomy, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryTaxonomy;
+  static deserializeBinaryFromReader(message: LibraryTaxonomy, reader: jspb.BinaryReader): LibraryTaxonomy;
+}
+
+export namespace LibraryTaxonomy {
+  export type AsObject = {
+    groupsList: Array<LibraryCategoryGroup.AsObject>,
+    categoriesList: Array<LibraryCategory.AsObject>,
+    brandsList: Array<LibraryBrand.AsObject>,
+  }
+}
+
+export class LibraryArea extends jspb.Message {
+  getCode(): string;
+  setCode(value: string): void;
+
+  getLevel(): string;
+  setLevel(value: string): void;
+
+  getName(): string;
+  setName(value: string): void;
+
+  getParentCode(): string;
+  setParentCode(value: string): void;
+
+  getRowCount(): number;
+  setRowCount(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryArea.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryArea): LibraryArea.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryArea, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryArea;
+  static deserializeBinaryFromReader(message: LibraryArea, reader: jspb.BinaryReader): LibraryArea;
+}
+
+export namespace LibraryArea {
+  export type AsObject = {
+    code: string,
+    level: string,
+    name: string,
+    parentCode: string,
+    rowCount: number,
+  }
+}
+
+export class LibraryCount extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  getRowCount(): number;
+  setRowCount(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryCount.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryCount): LibraryCount.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryCount, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryCount;
+  static deserializeBinaryFromReader(message: LibraryCount, reader: jspb.BinaryReader): LibraryCount;
+}
+
+export namespace LibraryCount {
+  export type AsObject = {
+    id: string,
+    rowCount: number,
+  }
+}
+
+export class ListLibraryItemsRequest extends jspb.Message {
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLibraryItemsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLibraryItemsRequest): ListLibraryItemsRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListLibraryItemsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLibraryItemsRequest;
+  static deserializeBinaryFromReader(message: ListLibraryItemsRequest, reader: jspb.BinaryReader): ListLibraryItemsRequest;
+}
+
+export namespace ListLibraryItemsRequest {
+  export type AsObject = {
+  }
+}
+
+export class ListLibraryItemsResponse extends jspb.Message {
+  clearItemsList(): void;
+  getItemsList(): Array<LibraryItem>;
+  setItemsList(value: Array<LibraryItem>): void;
+  addItems(value?: LibraryItem, index?: number): LibraryItem;
+
+  getCatalogueSize(): number;
+  setCatalogueSize(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLibraryItemsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLibraryItemsResponse): ListLibraryItemsResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListLibraryItemsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLibraryItemsResponse;
+  static deserializeBinaryFromReader(message: ListLibraryItemsResponse, reader: jspb.BinaryReader): ListLibraryItemsResponse;
+}
+
+export namespace ListLibraryItemsResponse {
+  export type AsObject = {
+    itemsList: Array<LibraryItem.AsObject>,
+    catalogueSize: number,
+  }
+}
+
+export class GetLibraryItemRequest extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetLibraryItemRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetLibraryItemRequest): GetLibraryItemRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: GetLibraryItemRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetLibraryItemRequest;
+  static deserializeBinaryFromReader(message: GetLibraryItemRequest, reader: jspb.BinaryReader): GetLibraryItemRequest;
+}
+
+export namespace GetLibraryItemRequest {
+  export type AsObject = {
+    itemId: string,
+  }
+}
+
+export class GetLibraryItemResponse extends jspb.Message {
+  hasItem(): boolean;
+  clearItem(): void;
+  getItem(): LibraryItem | undefined;
+  setItem(value?: LibraryItem): void;
+
+  hasTaxonomy(): boolean;
+  clearTaxonomy(): void;
+  getTaxonomy(): LibraryTaxonomy | undefined;
+  setTaxonomy(value?: LibraryTaxonomy): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetLibraryItemResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetLibraryItemResponse): GetLibraryItemResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: GetLibraryItemResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetLibraryItemResponse;
+  static deserializeBinaryFromReader(message: GetLibraryItemResponse, reader: jspb.BinaryReader): GetLibraryItemResponse;
+}
+
+export namespace GetLibraryItemResponse {
+  export type AsObject = {
+    item?: LibraryItem.AsObject,
+    taxonomy?: LibraryTaxonomy.AsObject,
+  }
+}
+
+export class ListLibraryAreasRequest extends jspb.Message {
+  getParentCode(): string;
+  setParentCode(value: string): void;
+
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLibraryAreasRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLibraryAreasRequest): ListLibraryAreasRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListLibraryAreasRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLibraryAreasRequest;
+  static deserializeBinaryFromReader(message: ListLibraryAreasRequest, reader: jspb.BinaryReader): ListLibraryAreasRequest;
+}
+
+export namespace ListLibraryAreasRequest {
+  export type AsObject = {
+    parentCode: string,
+    itemId: string,
+  }
+}
+
+export class ListLibraryAreasResponse extends jspb.Message {
+  clearAreasList(): void;
+  getAreasList(): Array<LibraryArea>;
+  setAreasList(value: Array<LibraryArea>): void;
+  addAreas(value?: LibraryArea, index?: number): LibraryArea;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLibraryAreasResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLibraryAreasResponse): ListLibraryAreasResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListLibraryAreasResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLibraryAreasResponse;
+  static deserializeBinaryFromReader(message: ListLibraryAreasResponse, reader: jspb.BinaryReader): ListLibraryAreasResponse;
+}
+
+export namespace ListLibraryAreasResponse {
+  export type AsObject = {
+    areasList: Array<LibraryArea.AsObject>,
+  }
+}
+
+export class CountLibrarySelectionRequest extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  hasSelection(): boolean;
+  clearSelection(): void;
+  getSelection(): LibrarySelection | undefined;
+  setSelection(value?: LibrarySelection): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): CountLibrarySelectionRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: CountLibrarySelectionRequest): CountLibrarySelectionRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: CountLibrarySelectionRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): CountLibrarySelectionRequest;
+  static deserializeBinaryFromReader(message: CountLibrarySelectionRequest, reader: jspb.BinaryReader): CountLibrarySelectionRequest;
+}
+
+export namespace CountLibrarySelectionRequest {
+  export type AsObject = {
+    itemId: string,
+    selection?: LibrarySelection.AsObject,
+  }
+}
+
+export class CountLibrarySelectionResponse extends jspb.Message {
+  getRowCount(): number;
+  setRowCount(value: number): void;
+
+  clearByCategoryList(): void;
+  getByCategoryList(): Array<LibraryCount>;
+  setByCategoryList(value: Array<LibraryCount>): void;
+  addByCategory(value?: LibraryCount, index?: number): LibraryCount;
+
+  clearByBrandList(): void;
+  getByBrandList(): Array<LibraryCount>;
+  setByBrandList(value: Array<LibraryCount>): void;
+  addByBrand(value?: LibraryCount, index?: number): LibraryCount;
+
+  getExceedsMaxRows(): boolean;
+  setExceedsMaxRows(value: boolean): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): CountLibrarySelectionResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: CountLibrarySelectionResponse): CountLibrarySelectionResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: CountLibrarySelectionResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): CountLibrarySelectionResponse;
+  static deserializeBinaryFromReader(message: CountLibrarySelectionResponse, reader: jspb.BinaryReader): CountLibrarySelectionResponse;
+}
+
+export namespace CountLibrarySelectionResponse {
+  export type AsObject = {
+    rowCount: number,
+    byCategoryList: Array<LibraryCount.AsObject>,
+    byBrandList: Array<LibraryCount.AsObject>,
+    exceedsMaxRows: boolean,
+  }
+}
+
+export class GetLibrarySampleRequest extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  hasSelection(): boolean;
+  clearSelection(): void;
+  getSelection(): LibrarySelection | undefined;
+  setSelection(value?: LibrarySelection): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetLibrarySampleRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetLibrarySampleRequest): GetLibrarySampleRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: GetLibrarySampleRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetLibrarySampleRequest;
+  static deserializeBinaryFromReader(message: GetLibrarySampleRequest, reader: jspb.BinaryReader): GetLibrarySampleRequest;
+}
+
+export namespace GetLibrarySampleRequest {
+  export type AsObject = {
+    itemId: string,
+    selection?: LibrarySelection.AsObject,
+  }
+}
+
+export class LibrarySampleRow extends jspb.Message {
+  clearValuesList(): void;
+  getValuesList(): Array<string>;
+  setValuesList(value: Array<string>): void;
+  addValues(value: string, index?: number): string;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibrarySampleRow.AsObject;
+  static toObject(includeInstance: boolean, msg: LibrarySampleRow): LibrarySampleRow.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibrarySampleRow, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibrarySampleRow;
+  static deserializeBinaryFromReader(message: LibrarySampleRow, reader: jspb.BinaryReader): LibrarySampleRow;
+}
+
+export namespace LibrarySampleRow {
+  export type AsObject = {
+    valuesList: Array<string>,
+  }
+}
+
+export class GetLibrarySampleResponse extends jspb.Message {
+  clearColumnsList(): void;
+  getColumnsList(): Array<string>;
+  setColumnsList(value: Array<string>): void;
+  addColumns(value: string, index?: number): string;
+
+  clearRowsList(): void;
+  getRowsList(): Array<LibrarySampleRow>;
+  setRowsList(value: Array<LibrarySampleRow>): void;
+  addRows(value?: LibrarySampleRow, index?: number): LibrarySampleRow;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetLibrarySampleResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetLibrarySampleResponse): GetLibrarySampleResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: GetLibrarySampleResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetLibrarySampleResponse;
+  static deserializeBinaryFromReader(message: GetLibrarySampleResponse, reader: jspb.BinaryReader): GetLibrarySampleResponse;
+}
+
+export namespace GetLibrarySampleResponse {
+  export type AsObject = {
+    columnsList: Array<string>,
+    rowsList: Array<LibrarySampleRow.AsObject>,
+  }
+}
+
+export class AddLibraryDatasetRequest extends jspb.Message {
+  getDatasetId(): string;
+  setDatasetId(value: string): void;
+
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  hasSelection(): boolean;
+  clearSelection(): void;
+  getSelection(): LibrarySelection | undefined;
+  setSelection(value?: LibrarySelection): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): AddLibraryDatasetRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: AddLibraryDatasetRequest): AddLibraryDatasetRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: AddLibraryDatasetRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AddLibraryDatasetRequest;
+  static deserializeBinaryFromReader(message: AddLibraryDatasetRequest, reader: jspb.BinaryReader): AddLibraryDatasetRequest;
+}
+
+export namespace AddLibraryDatasetRequest {
+  export type AsObject = {
+    datasetId: string,
+    itemId: string,
+    selection?: LibrarySelection.AsObject,
+  }
+}
+
+export class AddLibraryDatasetResponse extends jspb.Message {
+  getDatasetId(): string;
+  setDatasetId(value: string): void;
+
+  getQueryId(): string;
+  setQueryId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): AddLibraryDatasetResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: AddLibraryDatasetResponse): AddLibraryDatasetResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: AddLibraryDatasetResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AddLibraryDatasetResponse;
+  static deserializeBinaryFromReader(message: AddLibraryDatasetResponse, reader: jspb.BinaryReader): AddLibraryDatasetResponse;
+}
+
+export namespace AddLibraryDatasetResponse {
+  export type AsObject = {
+    datasetId: string,
+    queryId: string,
+  }
+}
+
+export class UpdateLibraryDatasetSelectionRequest extends jspb.Message {
+  getDatasetId(): string;
+  setDatasetId(value: string): void;
+
+  getExpectedVersion(): number;
+  setExpectedVersion(value: number): void;
+
+  hasSelection(): boolean;
+  clearSelection(): void;
+  getSelection(): LibrarySelection | undefined;
+  setSelection(value?: LibrarySelection): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): UpdateLibraryDatasetSelectionRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: UpdateLibraryDatasetSelectionRequest): UpdateLibraryDatasetSelectionRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: UpdateLibraryDatasetSelectionRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): UpdateLibraryDatasetSelectionRequest;
+  static deserializeBinaryFromReader(message: UpdateLibraryDatasetSelectionRequest, reader: jspb.BinaryReader): UpdateLibraryDatasetSelectionRequest;
+}
+
+export namespace UpdateLibraryDatasetSelectionRequest {
+  export type AsObject = {
+    datasetId: string,
+    expectedVersion: number,
+    selection?: LibrarySelection.AsObject,
+  }
+}
+
+export class UpdateLibraryDatasetSelectionResponse extends jspb.Message {
+  getDatasetId(): string;
+  setDatasetId(value: string): void;
+
+  getVersion(): number;
+  setVersion(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): UpdateLibraryDatasetSelectionResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: UpdateLibraryDatasetSelectionResponse): UpdateLibraryDatasetSelectionResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: UpdateLibraryDatasetSelectionResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): UpdateLibraryDatasetSelectionResponse;
+  static deserializeBinaryFromReader(message: UpdateLibraryDatasetSelectionResponse, reader: jspb.BinaryReader): UpdateLibraryDatasetSelectionResponse;
+}
+
+export namespace UpdateLibraryDatasetSelectionResponse {
+  export type AsObject = {
+    datasetId: string,
+    version: number,
+  }
+}
+
+export class LibraryGrant extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  getState(): LibraryGrant.StateMap[keyof LibraryGrant.StateMap];
+  setState(value: LibraryGrant.StateMap[keyof LibraryGrant.StateMap]): void;
+
+  getEndsOn(): string;
+  setEndsOn(value: string): void;
+
+  getAccessEndsAt(): number;
+  setAccessEndsAt(value: number): void;
+
+  clearCategoryIdsList(): void;
+  getCategoryIdsList(): Array<string>;
+  setCategoryIdsList(value: Array<string>): void;
+  addCategoryIds(value: string, index?: number): string;
+
+  getAuthoredBy(): string;
+  setAuthoredBy(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryGrant.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryGrant): LibraryGrant.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryGrant, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryGrant;
+  static deserializeBinaryFromReader(message: LibraryGrant, reader: jspb.BinaryReader): LibraryGrant;
+}
+
+export namespace LibraryGrant {
+  export type AsObject = {
+    itemId: string,
+    state: LibraryGrant.StateMap[keyof LibraryGrant.StateMap],
+    endsOn: string,
+    accessEndsAt: number,
+    categoryIdsList: Array<string>,
+    authoredBy: string,
+  }
+
+  export interface StateMap {
+    STATE_UNSPECIFIED: 0;
+    STATE_NOT_GRANTED: 1;
+    STATE_ACTIVE: 2;
+    STATE_ENDED: 3;
+    STATE_REVOKED: 4;
+  }
+
+  export const State: StateMap;
+}
+
+export class LibraryGrantRow extends jspb.Message {
+  hasItem(): boolean;
+  clearItem(): void;
+  getItem(): LibraryItem | undefined;
+  setItem(value?: LibraryItem): void;
+
+  hasGrant(): boolean;
+  clearGrant(): void;
+  getGrant(): LibraryGrant | undefined;
+  setGrant(value?: LibraryGrant): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LibraryGrantRow.AsObject;
+  static toObject(includeInstance: boolean, msg: LibraryGrantRow): LibraryGrantRow.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LibraryGrantRow, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LibraryGrantRow;
+  static deserializeBinaryFromReader(message: LibraryGrantRow, reader: jspb.BinaryReader): LibraryGrantRow;
+}
+
+export namespace LibraryGrantRow {
+  export type AsObject = {
+    item?: LibraryItem.AsObject,
+    grant?: LibraryGrant.AsObject,
+  }
+}
+
+export class ListLibraryGrantsRequest extends jspb.Message {
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLibraryGrantsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLibraryGrantsRequest): ListLibraryGrantsRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListLibraryGrantsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLibraryGrantsRequest;
+  static deserializeBinaryFromReader(message: ListLibraryGrantsRequest, reader: jspb.BinaryReader): ListLibraryGrantsRequest;
+}
+
+export namespace ListLibraryGrantsRequest {
+  export type AsObject = {
+  }
+}
+
+export class ListLibraryGrantsResponse extends jspb.Message {
+  clearRowsList(): void;
+  getRowsList(): Array<LibraryGrantRow>;
+  setRowsList(value: Array<LibraryGrantRow>): void;
+  addRows(value?: LibraryGrantRow, index?: number): LibraryGrantRow;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLibraryGrantsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLibraryGrantsResponse): ListLibraryGrantsResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ListLibraryGrantsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLibraryGrantsResponse;
+  static deserializeBinaryFromReader(message: ListLibraryGrantsResponse, reader: jspb.BinaryReader): ListLibraryGrantsResponse;
+}
+
+export namespace ListLibraryGrantsResponse {
+  export type AsObject = {
+    rowsList: Array<LibraryGrantRow.AsObject>,
+  }
+}
+
+export class GetLibraryTaxonomyRequest extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetLibraryTaxonomyRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetLibraryTaxonomyRequest): GetLibraryTaxonomyRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: GetLibraryTaxonomyRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetLibraryTaxonomyRequest;
+  static deserializeBinaryFromReader(message: GetLibraryTaxonomyRequest, reader: jspb.BinaryReader): GetLibraryTaxonomyRequest;
+}
+
+export namespace GetLibraryTaxonomyRequest {
+  export type AsObject = {
+    itemId: string,
+  }
+}
+
+export class GetLibraryTaxonomyResponse extends jspb.Message {
+  hasTaxonomy(): boolean;
+  clearTaxonomy(): void;
+  getTaxonomy(): LibraryTaxonomy | undefined;
+  setTaxonomy(value?: LibraryTaxonomy): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetLibraryTaxonomyResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetLibraryTaxonomyResponse): GetLibraryTaxonomyResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: GetLibraryTaxonomyResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetLibraryTaxonomyResponse;
+  static deserializeBinaryFromReader(message: GetLibraryTaxonomyResponse, reader: jspb.BinaryReader): GetLibraryTaxonomyResponse;
+}
+
+export namespace GetLibraryTaxonomyResponse {
+  export type AsObject = {
+    taxonomy?: LibraryTaxonomy.AsObject,
+  }
+}
+
+export class SetLibraryGrantRequest extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  getEndsOn(): string;
+  setEndsOn(value: string): void;
+
+  clearCategoryIdsList(): void;
+  getCategoryIdsList(): Array<string>;
+  setCategoryIdsList(value: Array<string>): void;
+  addCategoryIds(value: string, index?: number): string;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SetLibraryGrantRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: SetLibraryGrantRequest): SetLibraryGrantRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: SetLibraryGrantRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SetLibraryGrantRequest;
+  static deserializeBinaryFromReader(message: SetLibraryGrantRequest, reader: jspb.BinaryReader): SetLibraryGrantRequest;
+}
+
+export namespace SetLibraryGrantRequest {
+  export type AsObject = {
+    itemId: string,
+    endsOn: string,
+    categoryIdsList: Array<string>,
+  }
+}
+
+export class SetLibraryGrantResponse extends jspb.Message {
+  hasGrant(): boolean;
+  clearGrant(): void;
+  getGrant(): LibraryGrant | undefined;
+  setGrant(value?: LibraryGrant): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SetLibraryGrantResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: SetLibraryGrantResponse): SetLibraryGrantResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: SetLibraryGrantResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SetLibraryGrantResponse;
+  static deserializeBinaryFromReader(message: SetLibraryGrantResponse, reader: jspb.BinaryReader): SetLibraryGrantResponse;
+}
+
+export namespace SetLibraryGrantResponse {
+  export type AsObject = {
+    grant?: LibraryGrant.AsObject,
+  }
+}
+
+export class RevokeLibraryGrantRequest extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): RevokeLibraryGrantRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: RevokeLibraryGrantRequest): RevokeLibraryGrantRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: RevokeLibraryGrantRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RevokeLibraryGrantRequest;
+  static deserializeBinaryFromReader(message: RevokeLibraryGrantRequest, reader: jspb.BinaryReader): RevokeLibraryGrantRequest;
+}
+
+export namespace RevokeLibraryGrantRequest {
+  export type AsObject = {
+    itemId: string,
+  }
+}
+
+export class RevokeLibraryGrantResponse extends jspb.Message {
+  hasGrant(): boolean;
+  clearGrant(): void;
+  getGrant(): LibraryGrant | undefined;
+  setGrant(value?: LibraryGrant): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): RevokeLibraryGrantResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: RevokeLibraryGrantResponse): RevokeLibraryGrantResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: RevokeLibraryGrantResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RevokeLibraryGrantResponse;
+  static deserializeBinaryFromReader(message: RevokeLibraryGrantResponse, reader: jspb.BinaryReader): RevokeLibraryGrantResponse;
+}
+
+export namespace RevokeLibraryGrantResponse {
+  export type AsObject = {
+    grant?: LibraryGrant.AsObject,
+  }
+}
+
+export class SetLibraryGrantCategoriesRequest extends jspb.Message {
+  getItemId(): string;
+  setItemId(value: string): void;
+
+  clearCategoryIdsList(): void;
+  getCategoryIdsList(): Array<string>;
+  setCategoryIdsList(value: Array<string>): void;
+  addCategoryIds(value: string, index?: number): string;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SetLibraryGrantCategoriesRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: SetLibraryGrantCategoriesRequest): SetLibraryGrantCategoriesRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: SetLibraryGrantCategoriesRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SetLibraryGrantCategoriesRequest;
+  static deserializeBinaryFromReader(message: SetLibraryGrantCategoriesRequest, reader: jspb.BinaryReader): SetLibraryGrantCategoriesRequest;
+}
+
+export namespace SetLibraryGrantCategoriesRequest {
+  export type AsObject = {
+    itemId: string,
+    categoryIdsList: Array<string>,
+  }
+}
+
+export class SetLibraryGrantCategoriesResponse extends jspb.Message {
+  hasGrant(): boolean;
+  clearGrant(): void;
+  getGrant(): LibraryGrant | undefined;
+  setGrant(value?: LibraryGrant): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SetLibraryGrantCategoriesResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: SetLibraryGrantCategoriesResponse): SetLibraryGrantCategoriesResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: SetLibraryGrantCategoriesResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SetLibraryGrantCategoriesResponse;
+  static deserializeBinaryFromReader(message: SetLibraryGrantCategoriesResponse, reader: jspb.BinaryReader): SetLibraryGrantCategoriesResponse;
+}
+
+export namespace SetLibraryGrantCategoriesResponse {
+  export type AsObject = {
+    grant?: LibraryGrant.AsObject,
   }
 }
 
