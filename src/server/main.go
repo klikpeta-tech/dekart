@@ -181,6 +181,37 @@ func applyMigrations(db *sql.DB) {
 	}
 }
 
+// forkMigrationsTable keeps the fork's migration version apart from Dekart's own schema_migrations table,
+// so the stock image still sees its last migration as the latest and a rollback stays a plain image swap.
+const forkMigrationsTable = "klikpeta_schema_migrations"
+
+// applyForkSqliteMigrations runs the fork-only migration track found at sourceURL on a SQLite database.
+func applyForkSqliteMigrations(db *sql.DB, sourceURL string) error {
+	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{MigrationsTable: forkMigrationsTable})
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance(sourceURL, "sqlite3", driver)
+	if err != nil {
+		return err
+	}
+	err = m.Up()
+	if err == migrate.ErrNoChange {
+		return nil
+	}
+	return err
+}
+
+// applyForkMigrations runs the fork migration track after Dekart's own migrations (SQLite metadata only for now).
+func applyForkMigrations(db *sql.DB) {
+	if dekart.SelectedMetadataBackend() != dekart.MetadataBackendSQLite {
+		return
+	}
+	if err := applyForkSqliteMigrations(db, "file://sqlite/klikpeta-migrations"); err != nil {
+		log.Fatal().Err(err).Msg("Fork migrations Up")
+	}
+}
+
 func configureBucket(db *sql.DB) storage.Storage {
 	var bucket storage.Storage
 	switch os.Getenv("DEKART_STORAGE") {
@@ -264,6 +295,7 @@ func main() {
 	defer db.Close()
 
 	applyMigrations(db)
+	applyForkMigrations(db)
 	jwtkeys.MustInitBootstrapKey(db)
 	secrets.Init()
 

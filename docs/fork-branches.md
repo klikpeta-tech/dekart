@@ -10,9 +10,11 @@ The fork keeps two lines:
 ## Rules for the release line
 
 - Fixes enter as pull requests into `release/v0.26-klikpeta` (not into `main`), validated through no-mistakes and merged by the captain.
-- The database schema stays exactly at v0.26.0 (`sqlite/migrations` up to `000052`, `migrations` up to `000053`). No new migration lands on this branch.
-  That keeps a rollback to the stock `dekartxyz/dekart:0.26` image a plain image swap, because Dekart exits at startup when its database
-  is ahead of the image's migrations. `main` already carries newer upstream migrations (for example `http_sources`, workspace `deleted_at`), so
+- The fork makes no changes in Dekart's own migration track: `sqlite/migrations` stays at `000052` and `migrations` at `000053`, exactly as in v0.26.0.
+  Fork-owned tables live only in a separate track, `sqlite/klikpeta-migrations`, tracked in its own `klikpeta_schema_migrations` table and run after Dekart's migrations at startup.
+  Dekart's `schema_migrations` table therefore stays at the v0.26.0 version, so a rollback to the stock `dekartxyz/dekart:0.26` image stays a plain image swap:
+  the stock image sees no new migration and ignores the extra tables. (Dekart exits at startup when its own database is ahead of the image's migrations.)
+  `main` already carries newer upstream migrations (for example `http_sources`, workspace `deleted_at`), so
   a database that ran `main` cannot go back to the stock image.
 - Deploy files live in `deploy/fly/`, see its README.
 - A fix that should reach both lines is made on both: once as a PR to `main`, once as a port to the release line (hand-resolved where the code differs).
