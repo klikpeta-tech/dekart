@@ -2,7 +2,6 @@
 import {
   AddLibraryDatasetRequest,
   AddLibraryDatasetResponse,
-  CountLibrarySelectionRequest,
   CountLibrarySelectionResponse,
   GetLibraryItemResponse,
   GetLibrarySampleResponse,
@@ -68,6 +67,8 @@ function taxonomy () {
 }
 
 // stubLibrary answers every library read; count answers with the rows the test sets in `state.rows`.
+// Like the server, it counts every granted category of the area, leaving out those in `state.omit` that have no rows there.
+// A sample answers after `state.sampleDelay` milliseconds.
 function stubLibrary (state) {
   cy.intercept('POST', '**/Dekart/ListLibraryItems', (req) => {
     const response = new ListLibraryItemsResponse()
@@ -94,10 +95,9 @@ function stubLibrary (state) {
     req.reply(grpcWebReply(response))
   })
   cy.intercept('POST', '**/Dekart/CountLibrarySelection', (req) => {
-    const { selection } = grpcWebRequest(req, CountLibrarySelectionRequest)
     const response = new CountLibrarySelectionResponse()
     response.setRowCount(state.rows)
-    response.setByCategoryList(selection.categoryIdsList.map(id => {
+    response.setByCategoryList(['kafe', 'kopi'].filter(id => !(state.omit || []).includes(id)).map(id => {
       const count = new LibraryCount()
       count.setId(id)
       count.setRowCount(state.rows)
@@ -111,8 +111,8 @@ function stubLibrary (state) {
     const response = new GetLibrarySampleResponse()
     response.setColumnsList(['nama', 'alamat'])
     response.setRowsList([row])
-    req.reply(grpcWebReply(response))
-  })
+    req.reply({ ...grpcWebReply(response), delay: state.sampleDelay || 0 })
+  }).as('sample')
 }
 
 // currentReportId reads the id of the open map from the address.
@@ -215,6 +215,28 @@ describe('data library item detail', () => {
     cy.contains('button', 'Add 2.100 places to map').should('not.be.disabled')
   })
 
+  it('counts categories for the narrowed area and drops a preview of an older selection', () => {
+    const state = { rows: 120, omit: ['kopi'], sampleDelay: 1500 }
+    openMapAsEditor('picker', state)
+    openDetail()
+
+    // Nationwide counts show only while no area is picked; a category without rows in the area shows 0.
+    cy.contains('label', 'Kafe (1.200)').scrollIntoView().should('be.visible')
+    cy.get('select[aria-label="Provinsi"]').should('contain', 'Jawa Barat').select('Jawa Barat (21.000)')
+    cy.contains('label', 'Kafe').should('not.contain', '(')
+    cy.contains('label', 'Kafe').find('input').check()
+    cy.contains('label', 'Kafe (120)').should('exist')
+    cy.contains('label', 'Kedai kopi (0)').should('exist')
+
+    // A preview that answers after the selection changed is not shown for the new selection.
+    cy.contains('button', 'Preview sample').click()
+    cy.contains('label', 'Kedai kopi').find('input').check()
+    cy.wait('@sample')
+    // Waits out the time the browser needs to handle the answer; the table must still be absent.
+    cy.wait(500)
+    cy.get('table[aria-label="Sample rows"]').should('not.exist')
+  })
+
   it('shows the status of an added dataset and changes its area', () => {
     const email = openMapAsEditor('change', { rows: 120 })
     cy.intercept('POST', '**/Dekart/AddLibraryDataset', (req) => {
@@ -263,6 +285,16 @@ describe('data library item detail', () => {
     seedLibraryDataset(email, { version: 2, areaCode: '3273', name: 'Tempat Usaha 2025 · Kafe · Kota Bandung' })
     cy.reload()
     cy.contains('h2', 'Tempat Usaha 2025 · Kafe · Kota Bandung', { timeout: 30000 }).scrollIntoView().should('be.visible')
+  })
+
+  it('changes the category of a bound dataset without naming an area', () => {
+    const email = openMapAsEditor('category', { rows: 120 })
+    cy.get('#dekart-library', { timeout: 30000 }).should('be.visible')
+    seedLibraryDataset(email, { areaCode: '3273', name: 'Tempat Usaha 2025 · Kafe · Kota Bandung' })
+    cy.reload()
+    cy.contains('button', 'Change category', { timeout: 30000 }).click()
+    cy.contains('label', 'Kafe').should('exist')
+    cy.contains('Tab name:').should('not.exist')
   })
 
   it('retries a failed dataset, and shows access ended with refresh refused', () => {
