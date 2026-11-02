@@ -171,6 +171,9 @@ func (s Server) createQuery(ctx context.Context, req *proto.CreateQueryRequest, 
 
 	switch req.ExecutionEngine {
 	case proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION:
+		if err := s.requireConnectionInReportWorkspace(ctx, *reportID, req.ConnectionId); err != nil {
+			return nil, err
+		}
 	case proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_DUCKDB:
 		if req.ConnectionId != "" {
 			return nil, status.Error(codes.InvalidArgument, "DuckDB query cannot reference a connection")
