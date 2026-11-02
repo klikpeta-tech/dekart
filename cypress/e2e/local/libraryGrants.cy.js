@@ -96,7 +96,9 @@ function replyOk (req, message) {
   const body = new Uint8Array(data.length + trailer.length)
   body.set(data)
   body.set(trailer, data.length)
-  req.reply({ statusCode: 200, headers: { ...GRPC_HEADERS, 'grpc-status': '0' }, body: Cypress.Buffer.from(body) })
+  // the status travels in the trailer frame: a grpc-status header would make the client read a trailers-only reply without a message
+  // an ArrayBuffer body reaches the client byte for byte; a Cypress.Buffer would be sent as JSON
+  req.reply({ statusCode: 200, headers: GRPC_HEADERS, body: body.buffer })
 }
 
 // replyRefused answers with a trailers-only gRPC PERMISSION_DENIED.
