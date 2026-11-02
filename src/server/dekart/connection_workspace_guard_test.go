@@ -148,6 +148,18 @@ func TestMCPCreateQuery_RefusesConnectionOfAnotherWorkspace(t *testing.T) {
 	require.False(t, datasetConnectionID(t, server.db, guardDatasetA).Valid)
 }
 
+func TestMCPCreateQuery_AnswersMissingConnectionLikeAnotherWorkspace(t *testing.T) {
+	server, ctx := newConnectionGuardFixture(t)
+
+	_, err := server.createQuery(ctx, &proto.CreateQueryRequest{
+		DatasetId:       guardDatasetA,
+		ConnectionId:    guardMissingConID,
+		ExecutionEngine: proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION,
+	}, server.requireMCPCreateQueryConnection)
+
+	requireCrossWorkspaceRefusal(t, err)
+}
+
 func TestMCPCreateQuery_AllowsConnectionOfSameWorkspace(t *testing.T) {
 	server, ctx := newConnectionGuardFixture(t)
 
