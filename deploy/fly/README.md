@@ -4,7 +4,8 @@
 It keeps the app's volume `dekart_data`, SQLite data, Tigris bucket and every environment setting of the stock-image setup;
 only `[build]` changes, from `dekartxyz/dekart:0.26` to this repository's `Dockerfile`.
 
-The release line keeps the database schema exactly at upstream v0.26.0 (last migration `000052_report_history_retention`).
+The release line keeps Dekart's own migration track exactly at upstream v0.26.0 (last migration `000052_report_history_retention`);
+fork-owned tables live in a separate track, see [docs/fork-branches.md](../../docs/fork-branches.md).
 Check that before every deploy; the command must print nothing:
 
 ```sh
