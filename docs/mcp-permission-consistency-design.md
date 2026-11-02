@@ -60,6 +60,8 @@ Workspace-level operations that have no report capability use their existing end
 
 `create_query`, `create_file`, and `replace_file` (and their gRPC counterparts) additionally require that the supplied `connection_id` is the system connection or belongs to the report's workspace, because jobs run with the stored credentials of the bound connection. A missing connection and a connection of another workspace both return `PermissionDenied`. See `requireConnectionInReportWorkspace`.
 
+Copying a map (`ForkReport`) applies the same rule: a dataset connection that is neither the system connection nor owned by the copying workspace is blanked in the copy, so the person copying picks one of their own workspace's connections. Query text and layout are kept. See `blankConnectionsOutsideWorkspace`.
+
 ## Current Inconsistencies
 
 ### MCP-only report updates
