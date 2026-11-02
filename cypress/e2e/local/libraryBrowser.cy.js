@@ -175,7 +175,11 @@ describe('data library browser', () => {
       cy.visit(path)
     })
 
-    cy.contains('.ant-select', 'Viewing', { timeout: 30000 }).should('be.visible')
+    // A viewer has no Editing/Viewing switch and only gets the read-only Copy Link share button.
+    cy.contains('button', 'Copy Link', { timeout: 30000 }).should('be.visible')
+    cy.contains('.ant-select', /Viewing|Editing/).should('not.exist')
+    // The dataset selector has rendered, so the missing library row is not a loading artifact.
+    cy.contains('Upload File').should('be.visible')
     cy.get('#dekart-library').should('not.exist')
     // The library is never requested for a viewer.
     cy.get('@listLibraryItems.all').should('have.length', 1)
