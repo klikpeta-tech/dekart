@@ -60,3 +60,95 @@ export interface CategoryCount {
   /** How many items of that category match the other filters. */
   count: number
 }
+
+/** A catalogue item with everything the detail view shows. */
+export interface ItemDetail extends CatalogueItem {
+  /** Description as plain text. Blank lines separate paragraphs; it is rendered as text, never as markup. */
+  description: string
+  /** Credit line for the data source. Empty when there is none. */
+  attribution: string
+  /** When the source data was last updated, in Unix seconds. `0` when unknown. */
+  sourceUpdatedAt: number
+  /** How often the data is refreshed, as display text. Empty when unknown. */
+  cadence: string
+  /** Names of the columns a row has. */
+  columns: string[]
+  /** Largest selection that can be added, in rows. `0` means no limit. */
+  maxRows: number
+  /** True when rows carry categories (and optional brands) that must be picked. */
+  hasTaxonomy: boolean
+}
+
+/** What is picked from an item: where, and which categories and brands. */
+export interface Selection {
+  /** Region code of 2, 4 or 7 digits, or empty for the whole coverage. */
+  areaCode: string
+  /** Ids of the picked categories. Required (at least one) for items with a taxonomy. */
+  categoryIds: string[]
+  /** Ids of the picked brands. Optional; each belongs to one of the picked categories. */
+  brandIds: string[]
+}
+
+/** One region offered by the {@link AreaPicker}. */
+export interface AreaNode {
+  /** Region code of 2, 4 or 7 digits. */
+  code: string
+  /** Display name. */
+  name: string
+  /** Rows of the item inside this region. Shown next to the name when present. */
+  rowCount?: number
+}
+
+/** A group of categories. */
+export interface TaxonomyGroup {
+  /** Opaque, unique id. */
+  id: string
+  /** Display title. */
+  title: string
+}
+
+/** One pickable category. */
+export interface TaxonomyCategory {
+  /** Opaque, unique id. */
+  id: string
+  /** Id of the {@link TaxonomyGroup} it belongs to. */
+  groupId: string
+  /** Display title. */
+  title: string
+}
+
+/** One pickable brand inside a category. */
+export interface TaxonomyBrand {
+  /** Opaque, unique id. */
+  id: string
+  /** Id of the {@link TaxonomyCategory} it belongs to. */
+  categoryId: string
+  /** Display title. */
+  title: string
+}
+
+/** The categories a caller may pick from, in display order. */
+export interface Taxonomy {
+  /** Groups, in display order. */
+  groups: TaxonomyGroup[]
+  /** Categories, in display order within their group. */
+  categories: TaxonomyCategory[]
+  /** Brands, in display order. */
+  brands: TaxonomyBrand[]
+}
+
+/** Why a selection cannot be added. */
+export interface SelectionIssue {
+  /** Machine-readable reason: `area-invalid`, `area-level`, `category-required`, `empty` or `too-many`. */
+  code: 'area-invalid' | 'area-level' | 'category-required' | 'empty' | 'too-many'
+  /** Display text that tells the user what to change. */
+  message: string
+}
+
+/** A few rows of an item, for a preview. All cells are text. */
+export interface SampleTable {
+  /** Column names. */
+  columns: string[]
+  /** Rows of cell text, in column order. */
+  rows: string[][]
+}

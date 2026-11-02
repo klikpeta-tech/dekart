@@ -3,45 +3,17 @@ import {
   GetLibraryItemResponse,
   LibraryArea,
   LibraryCategory,
-  LibraryItem,
   LibraryShape,
   LibraryTaxonomy,
   ListLibraryAreasResponse,
   ListLibraryItemsResponse
 } from 'dekart-proto/dekart_pb'
 import { createReport } from './duckdbHelpers'
-
-const workspaceId = '00000000-0000-0000-0000-000000000000'
-const ROLE_EDITOR = 2
-const ROLE_VIEWER = 3
-
-// setRole replaces the user's default-workspace role, as the MCP role spec does.
-function setRole (email, role) {
-  return cy.exec(`sqlite3 data/dekart.db "DELETE FROM workspace_log WHERE email='${email}'; INSERT INTO workspace_log (workspace_id, email, status, authored_by, id, role) VALUES ('${workspaceId}', '${email}', 1, '${email}', lower(hex(randomblob(16))), ${role})"`)
-}
+import { ROLE_EDITOR, ROLE_VIEWER, grpcWebReply, libraryItem, setRole } from './libraryStubs'
 
 // libraryRows selects the dataset rows of the browser, each marked by its access badge.
 function libraryRows () {
   return cy.get('li').filter(':contains("Available")')
-}
-
-// libraryItem builds a granted catalogue entry.
-function libraryItem ({ id, title, category, kind, adminLevel = '', h3Resolution = 0, areaLevels, rowCount, hasTaxonomy = false }) {
-  const shape = new LibraryShape()
-  shape.setKind(kind)
-  shape.setAdminLevel(adminLevel)
-  shape.setH3Resolution(h3Resolution)
-  const item = new LibraryItem()
-  item.setId(id)
-  item.setTitle(title)
-  item.setCategory(category)
-  item.setProvider('Klikpeta')
-  item.setCoverageSummary('Seluruh Indonesia')
-  item.setShape(shape)
-  item.setRowCount(rowCount)
-  item.setAreaLevelsList(areaLevels)
-  item.setHasTaxonomy(hasTaxonomy)
-  return item
 }
 
 const grantedItems = [
@@ -50,27 +22,6 @@ const grantedItems = [
   libraryItem({ id: 'boundaries', title: 'Batas Kabupaten Kota 2024', category: 'Boundaries', kind: LibraryShape.Kind.KIND_AREAS, adminLevel: 'kabkota', areaLevels: ['provinsi', 'kabkota'], rowCount: 514 }),
   libraryItem({ id: 'density', title: 'Grid Kepadatan H3 2024', category: 'Demographics', kind: LibraryShape.Kind.KIND_H3, h3Resolution: 8, areaLevels: ['provinsi'], rowCount: 90000 })
 ]
-
-// grpcWebReply frames a response message the way the Dekart server does, so the client decodes it unchanged.
-function grpcWebReply (message) {
-  const payload = Cypress.Buffer.from(message.serializeBinary())
-  const trailer = Cypress.Buffer.from('grpc-status:0\r\n')
-  const body = Cypress.Buffer.alloc(5 + payload.length + 5 + trailer.length)
-  body.writeUInt32BE(payload.length, 1)
-  payload.copy(body, 5)
-  body[5 + payload.length] = 0x80
-  body.writeUInt32BE(trailer.length, 5 + payload.length + 1)
-  trailer.copy(body, 10 + payload.length)
-  return {
-    statusCode: 200,
-    headers: {
-      'content-type': 'application/grpc-web+proto',
-      'access-control-allow-origin': '*',
-      'access-control-expose-headers': '*'
-    },
-    body: body.buffer.slice(body.byteOffset, body.byteOffset + body.length)
-  }
-}
 
 // stubLibrary answers the library RPCs, since no library database is available to the local lane.
 function stubLibrary (items, catalogueSize) {
