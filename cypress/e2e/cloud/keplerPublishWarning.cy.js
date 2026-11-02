@@ -58,9 +58,9 @@ describe('Kepler dataset publication warning', () => {
       .find('a').should($link => {
         expect($link.attr('target')).to.equal('_blank')
         const url = new URL($link.attr('href'))
-        expect(url.pathname).to.equal('/dekart-xyz/dekart/issues/new')
+        expect(url.pathname).to.equal('/klikpeta-tech/dekart/issues/new')
         expect(url.searchParams.get('body')).to.include('Area: dataset publication')
-        expect(url.searchParams.get('body')).to.include('Dekart version:')
+        expect(url.searchParams.get('body')).to.include('Klikpeta version:')
         expect(url.searchParams.get('body')).not.to.include('Kepler failed to publish the dataset.')
         expect(url.searchParams.get('body')).not.to.include(email)
       })

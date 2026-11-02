@@ -178,7 +178,7 @@ func (s *resendService) SendWorkspaceInvite(invite WorkspaceInvite) {
 
 func (s *resendService) dispatchWorkspaceInvite(invite WorkspaceInvite) error {
 	inviteURL := fmt.Sprintf("%s/workspace/invite/%s", s.appURL, invite.InviteID)
-	subject := fmt.Sprintf("%s invited you to %s on Dekart", invite.InviterEmail, invite.WorkspaceName)
+	subject := fmt.Sprintf("%s invited you to %s on Klikpeta", invite.InviterEmail, invite.WorkspaceName)
 	templateData := workspaceInviteTemplateData{
 		WorkspaceInvite: invite,
 		InviteURL:       inviteURL,

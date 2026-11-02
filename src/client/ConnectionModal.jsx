@@ -223,7 +223,7 @@ function SnowflakeConnectionModal ({ form }) {
           <Form.Item required label='Snowflake Username' name='snowflakeUsername' extra='The database username for the account that you want to use to connect to your database.'>
             <Input placeholder='USERNAME' />
           </Form.Item>
-          <Form.Item required label='Snowflake Private Key' name='snowflakeKey' extra={<>The <a target='_blank' href='https://dekart.xyz/docs/usage/snowflake-private-key/' rel='noreferrer'>private key</a> required for authenticating with Snowflake.</>}>
+          <Form.Item required label='Snowflake Private Key' name='snowflakeKey' extra='The private key required for authenticating with Snowflake.'>
             <Input.Password
               placeholder='MIIEv..' visibilityToggle={keyChanged} onFocus={() => {
                 if (!keyChanged) {
@@ -340,13 +340,13 @@ function PostgresConnectionModal ({ form }) {
           <Form.Item required label='Database' name='postgresDatabase' extra='Database your connection will use.'>
             <Input placeholder='postgres' />
           </Form.Item>
-          <Form.Item required={isCloud} label='SSL mode' name='postgresSslMode' extra={isCloud ? <><LockOutlined /> Required on Dekart Cloud. Outbound connections must be encrypted.</> : "Optional for self-hosted Dekart. Match your server's SSL configuration."}>
+          <Form.Item required={isCloud} label='SSL mode' name='postgresSslMode' extra={isCloud ? <><LockOutlined /> Required for hosted workspaces. Outbound connections must be encrypted.</> : "Optional. Match your server's SSL configuration."}>
             <Select options={sslModeOptions} disabled={isCloud} />
           </Form.Item>
           {isCloud
             ? (
               <div className={styles.postgresSetupHint}>
-                <InfoCircleOutlined /> Allowlist Dekart Cloud egress IPs and use a read-only database user. <a href='https://dekart.xyz/docs/usage/postgres-connection/' target='_blank' rel='noreferrer'>Setup instructions</a>
+                <InfoCircleOutlined /> Allowlist the Klikpeta egress IPs and use a read-only database user.
               </div>
               )
             : null}
@@ -420,7 +420,7 @@ function BigQueryServiceAccountConnectionModal ({ form }) {
                   )
                 : (
                   <>
-                    Paste the JSON key for the service account you want to use to connect to BigQuery. <a href='https://dekart.xyz/docs/usage/choose-bigquery-connection-method/#how-to-get-a-service-account-key' target='_blank' rel='noreferrer'>Read Documentation</a>
+                    Paste the JSON key for the service account you want to use to connect to BigQuery.
                   </>
                   )
             }
@@ -505,7 +505,7 @@ function BigQueryConnectionModal ({ form }) {
           <Form.Item
             label='Project ID' extra={(() => {
               if (projects) {
-                return projects.length ? 'Click to select you BigQuery project ID' : <>→ <a target='_blank' href='https://dekart.xyz/docs/configuration/environment-variables/?ref=no-gcp-project#user-authorization-via-google-oauth-20-flow' rel='noreferrer'>Ensure your account has access to the Google Cloud Project</a></>
+                return projects.length ? 'Click to select you BigQuery project ID' : 'Ensure your account has access to the Google Cloud Project'
               }
               return <LoadingOutlined />
             })()} required name='bigqueryProjectId'

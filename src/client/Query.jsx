@@ -19,7 +19,6 @@ import { showReadmeTab } from './actions/readme'
 import { getDatasourceMeta } from './lib/datasource'
 import { copyErrorToClipboard } from './actions/clipboard'
 import { track } from './lib/tracking'
-import GeoSQLBanner from './GeoSQLBanner'
 import { DUCKDB_DATASOURCE, DuckDBJobStatus, isDuckDBQuery } from './lib/duckdb/constants'
 import { getDuckDBSources, registerDuckDBCompleter } from './lib/duckdb/datasets'
 import SampleQuery from './SampleQuery'
@@ -214,7 +213,6 @@ function QueryEditor ({ queryId, queryText, onChange, canWrite, canExecute, onEx
 
   return (
     <div className={styles.editor}>
-      <GeoSQLBanner canShow={canWrite} />
       <div className={styles.aceEditor}>
         <AutoSizer>
           {({ height, width }) => (

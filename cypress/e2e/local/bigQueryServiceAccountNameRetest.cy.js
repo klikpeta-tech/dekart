@@ -88,7 +88,7 @@ describe('bigquery connection name retest', () => {
       .should('be.disabled')
       .parent()
       .trigger('mouseover')
-    cy.contains('.ant-tooltip-inner', 'Google OAuth is not configured for this Dekart instance', { timeout: 20000 }).should('be.visible')
+    cy.contains('.ant-tooltip-inner', 'Google OAuth is not configured for this instance', { timeout: 20000 }).should('be.visible')
     cy.contains('button', 'Configure Service Account').should('be.enabled')
   })
 })

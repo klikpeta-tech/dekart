@@ -79,7 +79,7 @@ type addReportReadmeMCPArgs struct {
 }
 
 const mcpBigQueryServiceAccountRequiredMessage = "BigQuery via MCP requires a service-account-backed connection"
-const mcpCreateConnectionDisabledMessage = "create_connection via MCP is disabled; create the connection in Dekart UI first"
+const mcpCreateConnectionDisabledMessage = "create_connection via MCP is disabled; create the connection in the UI first"
 
 // HandleCreateReport wraps CreateReport RPC with protojson HTTP endpoint.
 func (s *Server) HandleCreateReport(w http.ResponseWriter, r *http.Request) {
@@ -975,21 +975,21 @@ func newMCPGoogleCredentialError(err error) *mcpCredentialError {
 		credentialErr.response = mcpCredentialErrorResponse{
 			Error:   "bigquery_passthrough_auth_required",
 			Message: "BigQuery passthrough requires local gcloud authorization",
-			Hint:    "Upgrade Dekart CLI to a version that supports BigQuery passthrough, then run `dekart init` and follow the gcloud setup prompts.",
+			Hint:    "Upgrade the CLI to a version that supports BigQuery passthrough, then run `dekart init` and follow the gcloud setup prompts.",
 		}
 	case errors.Is(err, user.ErrMCPGoogleAccessTokenInvalid):
 		credentialErr.statusCode = http.StatusUnauthorized
 		credentialErr.response = mcpCredentialErrorResponse{
 			Error:   "google_access_token_invalid",
 			Message: "Google access token is invalid or expired",
-			Hint:    "Retry once, then run `gcloud auth login --account <your Dekart email>` if the token is still rejected.",
+			Hint:    "Retry once, then run `gcloud auth login --account <your account email>` if the token is still rejected.",
 		}
 	case errors.Is(err, user.ErrMCPGoogleAccountMismatch):
 		credentialErr.statusCode = http.StatusForbidden
 		credentialErr.response = mcpCredentialErrorResponse{
 			Error:   "google_account_mismatch",
-			Message: "Google account does not match the Dekart account",
-			Hint:    "Select the same Google account as Dekart, then run `dekart init` again.",
+			Message: "Google account does not match your account",
+			Hint:    "Select the same Google account you signed in with, then run `dekart init` again.",
 		}
 	case errors.Is(err, user.ErrMCPGooglePrincipalUnsupported):
 		credentialErr.statusCode = http.StatusForbidden
@@ -1003,7 +1003,7 @@ func newMCPGoogleCredentialError(err error) *mcpCredentialError {
 		credentialErr.response = mcpCredentialErrorResponse{
 			Error:   "google_scope_insufficient",
 			Message: "Google access token does not include the cloud-platform scope",
-			Hint:    "Run `gcloud auth login` for the Dekart account, then try again.",
+			Hint:    "Run `gcloud auth login` for your account, then try again.",
 		}
 	}
 	return credentialErr
@@ -1250,7 +1250,7 @@ func mcpToolDefinitions() []mcpTool {
 		},
 		{
 			Name:         "get_widgets_config_schema",
-			Description:  "Return the Dekart widgets_config v1 JSON schema used by MCP validation.",
+			Description:  "Return the widgets_config v1 JSON schema used by MCP validation.",
 			InputSchema:  mcpschema.Object(nil, map[string]any{}),
 			WhenToUse:    "Use before building or editing widgets_config to discover the envelope, allowed chart types, required settings, enums and numeric bounds. Category, Search and Histogram can set crossFilter true to filter other loaded datasets whose column has the exact same name and compatible type; integer and real are compatible. Number cannot use crossFilter.",
 			WhenNotToUse: "Do not use for map layers, filters or selections. Those belong to map_config and get_map_config_schema.",

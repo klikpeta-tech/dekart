@@ -3,7 +3,6 @@ import styles from './Header.module.css'
 import { useDispatch, useSelector } from 'react-redux'
 import DekartMenu from './DekartMenu'
 import WorkspaceSelector from './WorkspaceSelector'
-import { getUrlRef } from './lib/ref'
 import Avatar from 'antd/es/avatar'
 import Dropdown from 'antd/es/dropdown'
 import { AuthState } from 'dekart-proto/dekart_pb'
@@ -221,10 +220,9 @@ export function PlaygroundMode () {
 
 export function Header ({ buttons, title, queryParams }) {
   const env = useSelector(state => state.env)
-  const usage = useSelector(state => state.usage)
   let homePage
-  if (env.loaded && usage.loaded) {
-    homePage = env.variables.UX_HOMEPAGE + '?ref=' + getUrlRef(env, usage)
+  if (env.loaded) {
+    homePage = env.variables.UX_HOMEPAGE
   }
   return (
     <div className={styles.header}>

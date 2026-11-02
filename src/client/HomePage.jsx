@@ -18,7 +18,6 @@ import { ConnectionType, PlanType } from 'dekart-proto/dekart_pb'
 import Onboarding from './Onboarding'
 import { DatasourceIcon } from './Datasource'
 import { track } from './lib/tracking'
-import { If } from './lib/helperElements'
 import { useMapPreview } from './lib/useMapPreview'
 import { getRelativeTime } from './lib/relativeTime'
 import { getMapCenterCoordinates } from './lib/mapPreviewState'
@@ -112,11 +111,9 @@ function ConnectionCard ({ connection }) {
 }
 
 function FirstReportOnboarding () {
-  const isPlayground = useSelector(state => state.user.isPlayground)
   const dispatch = useDispatch()
   const isViewer = useSelector(state => state.user.isViewer)
   const isAdmin = useSelector(state => state.user.isAdmin)
-  const isSelfHosted = useSelector(state => state.user.isSelfHosted)
   const readOnly = useSelector(state => state.workspace.readOnly)
   const history = useHistory()
   const sqlConnectionList = useSelector(state => state.connection.list.filter(c => c.connectionType !== ConnectionType.CONNECTION_TYPE_LOCAL))
@@ -150,10 +147,6 @@ function FirstReportOnboarding () {
                 Connect database
               </Button>
             )}
-            <div className={styles.stepBySetLink}>
-              <a href='https://github.com/dekart-xyz/geosql#install-claudecodex' target='_blank' rel='noreferrer'>Install Claude skill</a>
-            </div>
-            <If condition={isPlayground && !isSelfHosted}><div className={styles.stepBySetLink}><a target='_blank' href='https://dekart.xyz/docs/about/playground/#quick-start' rel='noreferrer'>Check step-by-step guide</a></div></If>
           </>
         )}
       />
@@ -668,7 +661,7 @@ export default function HomePage ({ reportFilter }) {
   return (
     <div className={styles.homePage}>
       <Helmet>
-        <title>{getPageTitle(reportFilter)} — Dekart</title>
+        <title>{getPageTitle(reportFilter)} — Klikpeta</title>
       </Helmet>
       <Header />
       <div className={styles.body}>

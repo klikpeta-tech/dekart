@@ -88,7 +88,7 @@ export function ForkOnboarding ({ requireOnboarding: { requireWorkspace, missing
   }, [])
   return (
     <>
-      <Tooltip title='Copy and edit this map in your Dekart Workspace.'>
+      <Tooltip title='Copy and edit this map in your Klikpeta Workspace.'>
         <Button
           type='primary' icon={<ForkOutlined />} onClick={() => {
             setVisible(true)

@@ -7,7 +7,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import { authorizeDevice } from './actions/deviceAuth'
 import { updateSessionStorage } from './actions/sessionStorage'
 import { pendingDeviceAuthorizationKey } from './lib/deviceAuth'
-import { ConnectionType, PlanType } from 'dekart-proto/dekart_pb'
+import { ConnectionType } from 'dekart-proto/dekart_pb'
 import { track } from './lib/tracking'
 import { Header } from './Header'
 import { Loading } from './Loading'
@@ -27,7 +27,7 @@ const pageState = {
   approve: {
     status: 'info',
     title: 'Authorize this device',
-    subtitle: 'Confirm this request to let your terminal access Dekart.',
+    subtitle: 'Confirm this request to let your terminal access Klikpeta.',
     actionLabel: 'Authorize'
   }
 }
@@ -104,7 +104,6 @@ export default function DeviceAuthorizePage () {
   const deviceID = queryDeviceID || pendingDeviceID
   const envLoaded = useSelector(state => state.env.loaded)
   const googleOAuthEnabled = useSelector(state => state.env.googleOAuthEnabled)
-  const isCloud = useSelector(state => state.env.isCloud)
   const userStream = useSelector(state => state.user.stream)
   const isAnonymous = useSelector(state => state.user.isAnonymous)
   const isAdmin = useSelector(state => state.user.isAdmin)
@@ -142,11 +141,6 @@ export default function DeviceAuthorizePage () {
     try {
       await dispatch(authorizeDevice(deviceID))
       dispatch(updateSessionStorage(pendingDeviceAuthorizationKey, ''))
-      // Cloud Personal workspaces continue to the trial gate after device authorization.
-      if (isCloud && userStream.planType === PlanType.TYPE_PERSONAL) {
-        history.push('/workspace/trial')
-        return
-      }
       setAuthorized(true)
     } catch (err) {
       setErrorMessage(getErrorMessage(err))
@@ -157,7 +151,7 @@ export default function DeviceAuthorizePage () {
 
   if (authorized) {
     return (
-      <DeviceAuthorizeLayout title='Device authorized — Dekart'>
+      <DeviceAuthorizeLayout title='Device authorized — Klikpeta'>
         <Result
           status={pageState.authorized.status}
           title={pageState.authorized.title}
@@ -185,9 +179,6 @@ export default function DeviceAuthorizePage () {
               >
                 Manage tokens
               </Button>
-              <div className={styles.installSkillLink}>
-                <a href='https://github.com/dekart-xyz/geosql#install-claudecodex' target='_blank' rel='noreferrer'>Install Claude skill</a>
-              </div>
             </>
           )}
         />
@@ -197,7 +188,7 @@ export default function DeviceAuthorizePage () {
 
   if (!deviceID) {
     return (
-      <DeviceAuthorizeLayout title='Invalid device request — Dekart'>
+      <DeviceAuthorizeLayout title='Invalid device request — Klikpeta'>
         <Result status={pageState.invalid.status} title={pageState.invalid.title} subTitle={pageState.invalid.subtitle} />
       </DeviceAuthorizeLayout>
     )
@@ -205,7 +196,7 @@ export default function DeviceAuthorizePage () {
 
   if (!envLoaded || !userStream) {
     return (
-      <DeviceAuthorizeLayout title='Authorize device — Dekart'>
+      <DeviceAuthorizeLayout title='Authorize device — Klikpeta'>
         <Loading />
       </DeviceAuthorizeLayout>
     )
@@ -213,7 +204,7 @@ export default function DeviceAuthorizePage () {
 
   if (isAnonymous && googleOAuthEnabled) {
     return (
-      <DeviceAuthorizeLayout title='Authorize device — Dekart'>
+      <DeviceAuthorizeLayout title='Authorize device — Klikpeta'>
         <Loading />
       </DeviceAuthorizeLayout>
     )
@@ -221,7 +212,7 @@ export default function DeviceAuthorizePage () {
 
   if (!hasWorkspaceContext) {
     return (
-      <DeviceAuthorizeLayout title='Workspace required — Dekart'>
+      <DeviceAuthorizeLayout title='Workspace required — Klikpeta'>
         <WorkspaceRequiredPanel
           onCreate={() => openWorkspaceStep('create')}
           onJoin={() => openWorkspaceStep('join')}
@@ -231,7 +222,7 @@ export default function DeviceAuthorizePage () {
   }
 
   return (
-    <DeviceAuthorizeLayout title='Authorize device — Dekart'>
+    <DeviceAuthorizeLayout title='Authorize device — Klikpeta'>
       <Result
         status={pageState.approve.status}
         title={pageState.approve.title}

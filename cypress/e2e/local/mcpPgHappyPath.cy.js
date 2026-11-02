@@ -441,7 +441,7 @@ describe('local MCP postgres happy path with device auth', () => {
                           expect(response.body).to.deep.eq({
                             error: 'bigquery_passthrough_auth_required',
                             message: 'BigQuery passthrough requires local gcloud authorization',
-                            hint: 'Upgrade Dekart CLI to a version that supports BigQuery passthrough, then run `dekart init` and follow the gcloud setup prompts.'
+                            hint: 'Upgrade the CLI to a version that supports BigQuery passthrough, then run `dekart init` and follow the gcloud setup prompts.'
                           })
                           // The accepted Source leaf remains available in the browser despite the later rejection.
                           cy.assertDatasetRows('Source', 7)

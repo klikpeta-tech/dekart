@@ -76,7 +76,7 @@ jobs:
             config: cloud-stripe
             target: premium
             cloud: true
-            spec: cypress/e2e/cloud/cloudBasicFlowEnd.cy.js,cypress/e2e/cloud/readOnlyMemberRoles.cy.js,cypress/e2e/cloud/trialAcknowledgement.cy.js,cypress/e2e/cloud/reportSaveRegression.cy.js,cypress/e2e/cloud/keplerPublishWarning.cy.js,cypress/e2e/cloud/geolocationDeniedWarning.cy.js
+            spec: cypress/e2e/cloud/cloudBasicFlowEnd.cy.js,cypress/e2e/cloud/readOnlyMemberRoles.cy.js,cypress/e2e/cloud/reportSaveRegression.cy.js,cypress/e2e/cloud/keplerPublishWarning.cy.js,cypress/e2e/cloud/geolocationDeniedWarning.cy.js
             extra_env: |
               -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
               -e DEKART_POSTGRES_USER=$DEKART_POSTGRES_USER \
@@ -113,7 +113,7 @@ jobs:
             config: cloud
             target: premium
             cloud: true
-            spec: cypress/e2e/cloud/postgresTlsConnectionHappyPath.cy.js,cypress/e2e/cloud/moreWarehousesSelector.cy.js,cypress/e2e/cloud/workspaceSource.cy.js,cypress/e2e/cloud/keplerReportLoad.cy.js,cypress/e2e/cloud/queryParameterBigQueryRendering.cy.js,cypress/e2e/cloud/viewToEditQueryParameters.cy.js
+            spec: cypress/e2e/cloud/postgresTlsConnectionHappyPath.cy.js,cypress/e2e/cloud/workspaceSource.cy.js,cypress/e2e/cloud/keplerReportLoad.cy.js,cypress/e2e/cloud/queryParameterBigQueryRendering.cy.js,cypress/e2e/cloud/viewToEditQueryParameters.cy.js
             extra_env: |
               -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
               -e DEKART_POSTGRES_USER=$DEKART_POSTGRES_USER \
@@ -336,7 +336,7 @@ jobs:
               -e DEKART_ALLOW_FILE_UPLOAD=1 \
 
           - id: pg-dataset-streaming
-            spec: cypress/e2e/pg/keplerFilterRestore.cy.js,cypress/e2e/pg/happyPath.cy.js,cypress/e2e/pg/geosqlBanner.cy.js,cypress/e2e/pg/datasetSourceWriteTimeout.cy.js
+            spec: cypress/e2e/pg/keplerFilterRestore.cy.js,cypress/e2e/pg/happyPath.cy.js,cypress/e2e/pg/datasetSourceWriteTimeout.cy.js
             extra_env: |
               -e DEKART_LICENSE_KEY=$DEKART_LICENSE_KEY_SEC \
               -e DEKART_STORAGE=PG \
@@ -480,26 +480,6 @@ jobs:
               -e AWS_REGION=$AWS_REGION \
               -e AWS_ACCESS_KEY_ID=$AWS_KEY_SEC \
               -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_SEC \
-              -e DEKART_ALLOW_FILE_UPLOAD=0 \
-
-          - id: version-banner
-            spec: cypress/e2e/version/spec.cy.js
-            # The E2E image defaults to SQLite, while this lane stores metadata in Postgres.
-            extra_env: |
-              -e DEKART_LICENSE_KEY=$DEKART_LICENSE_KEY_SEC \
-              -e DEKART_SQLITE_DB_PATH= \
-              -e DEKART_POSTGRES_HOST=localhost \
-              -e DEKART_POSTGRES_PORT=$DEKART_POSTGRES_PORT \
-              -e DEKART_POSTGRES_USER=$DEKART_POSTGRES_USER \
-              -e DEKART_POSTGRES_PASSWORD=$DEKART_POSTGRES_PASSWORD \
-              -e DEKART_POSTGRES_DB=$DEKART_POSTGRES_DB \
-              -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
-              -e DEKART_BIGQUERY_PROJECT_ID=dekart-dev \
-              -e DEKART_CLOUD_STORAGE_BUCKET=dekart-dev \
-              -e DEKART_STORAGE=GCS \
-              -e DEKART_DATASOURCE=BQ \
-              -e DEKART_VERSION_CHECK_URL=http://localhost:3000/api/v1/version \
-              -e DEKART_VERSION_CHECK_FORCE_CURRENT_VERSION=0.0.0 \
               -e DEKART_ALLOW_FILE_UPLOAD=0 \
 
           - id: pg-s3-postgres-expired-license-startup

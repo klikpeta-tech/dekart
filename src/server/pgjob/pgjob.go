@@ -163,7 +163,7 @@ func postgresConnectionError(err error) string {
 	case strings.Contains(lower, "does not exist"):
 		return "Postgres database was not found. Check the database name: " + msg
 	case strings.Contains(lower, "connection refused") || strings.Contains(lower, "timeout") || strings.Contains(lower, "no route to host") || strings.Contains(lower, "i/o timeout"):
-		return "Postgres network connection failed. Check host, port, firewall, and Dekart Cloud IP allowlisting: " + msg
+		return "Postgres network connection failed. Check host, port, firewall, and IP allowlisting: " + msg
 	default:
 		return msg
 	}

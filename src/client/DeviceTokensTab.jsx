@@ -8,17 +8,6 @@ import styles from './DeviceTokensTab.module.css'
 import { revokeDeviceToken } from './actions/workspace'
 
 const { Text } = Typography
-const gisSkillRepoURL = 'https://github.com/dekart-xyz/geosql'
-
-function AgentLink () {
-  return (
-    <div className={styles.agentLink}>
-      <a href={gisSkillRepoURL} target='_blank' rel='noreferrer'>
-        Install Claude skill to run agentic GIS queries.
-      </a>
-    </div>
-  )
-}
 
 // DeviceTokensTab renders workspace device tokens and revoke interactions.
 export default function DeviceTokensTab () {
@@ -35,7 +24,6 @@ export default function DeviceTokensTab () {
         <Card className={styles.wrapper}>
           <Empty description='No active device tokens' />
         </Card>
-        <AgentLink />
       </div>
     )
   }
@@ -88,7 +76,6 @@ export default function DeviceTokensTab () {
           ))}
         </div>
       </Card>
-      <AgentLink />
     </div>
   )
 }

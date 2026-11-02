@@ -169,8 +169,8 @@ func (h StaticFilesHandler) injectPublicReportMetaTags(ctx context.Context, r *h
 	return []byte(htmlContent), nil
 }
 
-// injectDefaultTitle injects the default "Dekart" title for non-public reports
+// injectDefaultTitle injects the default "Klikpeta" title for non-public reports
 func (h StaticFilesHandler) injectDefaultTitle(htmlContent string) string {
-	defaultTitle := `<title>Dekart</title>`
+	defaultTitle := `<title>Klikpeta</title>`
 	return reportMetaRe.ReplaceAllString(htmlContent, defaultTitle)
 }
