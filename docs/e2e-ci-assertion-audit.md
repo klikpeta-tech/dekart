@@ -11,7 +11,7 @@ This table is ready to copy into the PR description. The runtime config is part 
 | `athena/spec.cy.js` cancel case | Delete | `bq/cancelQuery.cy.js` covers the shared cancel behavior; Athena's query smoke remains. |
 | `google-oauth/basicFlow.cy.js` empty result case | Delete | `snowflake-s3/emptyResult.cy.js` retains the client empty-result assertion; Google OAuth still has its auth smoke. |
 | `local/userDefinedConnectionHappyPath.cy.js` | Merge into `local/mcpPgHappyPath.cy.js` | The latter already creates a Postgres connection in the UI. It now also verifies a PostGIS geometry query produces a geojson layer and polygon data cell. |
-| `cloud/freeWorkspaceMapLimit.cy.js` | Delete | The 0.25 release replaced the three-map Personal limit with a trial gate (`docs/release-notes-0-25-0.md`). The spec asserted removed copy and allowed a fourth map in a local run. `cloud/trialAcknowledgement.cy.js` covers the current gate. |
+| `cloud/freeWorkspaceMapLimit.cy.js` | Delete | The 0.25 release replaced the three-map Personal limit with a trial gate (`docs/release-notes-0-25-0.md`). The spec asserted removed copy and allowed a fourth map in a local run. The trial UI and its `cloud/trialAcknowledgement.cy.js` spec were later removed in the Klikpeta rebrand. |
 | `cloud/widgetsFirstSlice.cy.js` filter persistence | Keep | Number/Category widget selection and histogram behavior. |
 | `cloud/widgetsMultiDataset.cy.js` filter persistence | Keep | Multiple-dataset widget binding. |
 | `cloud/keplerFilterReload.cy.js` filter persistence | Keep | Native Kepler filter, rather than a widget-owned filter. |
