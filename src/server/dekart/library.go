@@ -271,6 +271,16 @@ func (s Server) AddLibraryDataset(ctx context.Context, req *proto.AddLibraryData
 	if err != nil {
 		return nil, err
 	}
+	report, err := s.getReport(ctx, reportID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if report == nil {
+		return nil, status.Error(codes.NotFound, "report not found")
+	}
+	if report.IsPublic {
+		return nil, status.Error(codes.FailedPrecondition, "a published map cannot hold Data Library datasets")
+	}
 	catalogue, err := s.libraryCatalogueOrUnavailable()
 	if err != nil {
 		return nil, err
@@ -322,6 +332,7 @@ func (s Server) AddLibraryDataset(ctx context.Context, req *proto.AddLibraryData
 		return nil, libraryStatus(err)
 	}
 	s.reportStreams.Ping(reportID)
+	s.runLibraryQuery(ctx, reportID, newQueryID)
 	return &proto.AddLibraryDatasetResponse{DatasetId: req.GetDatasetId(), QueryId: newQueryID}, nil
 }
 
@@ -370,6 +381,11 @@ func (s Server) UpdateLibraryDatasetSelection(ctx context.Context, req *proto.Up
 		return nil, libraryStatus(err)
 	}
 	s.reportStreams.Ping(reportID)
+	// A bound dataset always has its query; the new selection runs at once, as a refresh would.
+	var queryID sql.NullString
+	if err := s.db.QueryRowContext(ctx, `select query_id from datasets where id=$1`, req.GetDatasetId()).Scan(&queryID); err == nil && queryID.Valid {
+		s.runLibraryQuery(ctx, reportID, queryID.String)
+	}
 	return &proto.UpdateLibraryDatasetSelectionResponse{DatasetId: req.GetDatasetId(), Version: version}, nil
 }
 

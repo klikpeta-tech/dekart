@@ -306,6 +306,8 @@ func main() {
 		Required:  licenseState.Required,
 		ExpiresAt: licenseState.ExpiresAt,
 	})
+	// Reads the Data Library catalogue through the library connection when one is configured.
+	dekartServer.EnableLibraryCatalogue()
 	httpServer := app.Configure(dekartServer, db)
 
 	go startHttpServer(httpServer)

@@ -507,6 +507,14 @@ func (s *Server) callCheckJobStatusTool(ctx context.Context, raw json.RawMessage
 	if report == nil {
 		return nil, status.Error(codes.NotFound, "Report not found")
 	}
+	datasets, err := s.getDatasets(ctx, reportID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	// A library dataset's job never carries its server-built SQL to the client.
+	if err := s.decorateLibraryDatasets(ctx, reportID, datasets, nil, []*proto.QueryJob{job}); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	return mcp.MarshalProtoJSON(&proto.CheckJobStatusResponse{QueryJob: job})
 }
 
@@ -916,6 +924,10 @@ func (s *Server) callGetReportPropertiesTool(ctx context.Context, raw json.RawMe
 	}
 	queries, err := s.getQueries(ctx, datasets)
 	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	// MCP clients see the same library bindings as the browser, never the library connection or its SQL.
+	if err := s.decorateLibraryDatasets(ctx, request.ReportId, datasets, queries, nil); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return mcp.MarshalProtoJSON(&proto.GetReportPropertiesResponse{

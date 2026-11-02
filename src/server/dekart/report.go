@@ -8,12 +8,14 @@ import (
 	"dekart/src/proto"
 	"dekart/src/server/conn"
 	"dekart/src/server/errtype"
+	"dekart/src/server/library"
 	"dekart/src/server/notifications"
 	reportpkg "dekart/src/server/report"
 	"dekart/src/server/storage"
 	"dekart/src/server/user"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"maps"
@@ -746,6 +748,12 @@ func (s Server) commitReportWithDatasets(
 			log.Warn().Err(err).Send()
 			return err
 		}
+		// Without its binding a copied library dataset could never run.
+		if isLibraryConnection(dataset.ConnectionId) {
+			if err := (library.Bindings{}).Copy(ctx, tx, dataset.Id, datasetId, report.Id); err != nil && !errors.Is(err, library.ErrBindingNotFound) {
+				return err
+			}
+		}
 	}
 	if len(duckDBHashes) == 0 {
 		if err := analyzeDuckDBGraphTx(ctx, tx, report.Id); err != nil {
@@ -774,7 +782,8 @@ func (s Server) blankConnectionsOutsideWorkspace(
 ) (map[string]bool, error) {
 	blankedQueryIDs := make(map[string]bool)
 	for _, dataset := range datasets {
-		if conn.IsSystemConnectionID(dataset.ConnectionId) {
+		// Library datasets keep the staff library connection, which no client workspace owns.
+		if conn.IsSystemConnectionID(dataset.ConnectionId) || isLibraryConnection(dataset.ConnectionId) {
 			continue
 		}
 		var connectionWorkspaceID sql.NullString
@@ -876,6 +885,10 @@ func (s Server) ForkReport(ctx context.Context, req *proto.ForkReportRequest) (*
 			if query != nil && query.ExecutionEngine == proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_DUCKDB {
 				continue
 			}
+			// Library datasets keep the library connection: the server checks the copy's own grant on every run.
+			if isLibraryConnection(dataset.ConnectionId) {
+				continue
+			}
 			var newConnectionID string
 			for _, connection := range userConnections {
 				if dataset.ConnectionId == connection.Id {
@@ -907,6 +920,22 @@ func (s Server) ForkReport(ctx context.Context, req *proto.ForkReportRequest) (*
 	}
 	for queryID := range blankedQueryIDs {
 		connectionUpdatedQueryIDs[queryID] = true
+	}
+	// A copy in another workspace must not inherit results that were read under the source workspace's grants.
+	libraryQueryIDs, err := s.libraryQueriesOfOtherWorkspace(ctx, req.ReportId, datasets, workspaceID)
+	if err != nil {
+		errtype.LogError(err, "Cannot verify library datasets")
+		return nil, err
+	}
+	for queryID := range libraryQueryIDs {
+		connectionUpdatedQueryIDs[queryID] = true
+	}
+	// Library data never goes to public storage, so a copy of a map that holds it starts unpublished.
+	for _, dataset := range datasets {
+		if isLibraryConnection(dataset.ConnectionId) {
+			report.IsPublic = false
+			break
+		}
 	}
 	jobs, err := s.getDatasetsQueryJobs(ctx, datasets)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"dekart/src/server/bqutils"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -287,9 +288,17 @@ func (s Server) RunAllQueries(ctx context.Context, req *proto.RunAllQueriesReque
 		if executionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 			return nil, status.Errorf(codes.FailedPrecondition, "query %s has no execution engine", queryID)
 		}
-		// Library datasets are built by the server only; user text never runs on the library connection.
-		if err := refuseLibraryConnection(connectionID.String); err != nil {
-			return nil, err
+		// A library dataset whose grant ended is skipped here; runQuery builds the SQL of the others.
+		if isLibraryConnection(connectionID.String) {
+			queryText, err = s.libraryQueryText(ctx, req.ReportId, queryID)
+			var refusal libraryAccessRefusal
+			if errors.As(err, &refusal) {
+				// An ended grant refuses the refresh of this dataset only; its last result stays and the others still run.
+				continue
+			}
+			if err != nil {
+				return nil, libraryRunStatus(err)
+			}
 		}
 		connection, err := s.getConnection(ctx, connectionID.String)
 		if err != nil {
@@ -427,6 +436,16 @@ func loadReportQueryParamsTx(ctx context.Context, tx *sql.Tx, reportID string) (
 }
 
 func (s Server) runQuery(ctx context.Context, o runQueryOptions) (*proto.QueryJob, error) {
+	// Library datasets are built by the server only: stored and supplied text are ignored, a map whose grant
+	// ended cannot refresh, and the staff-owned result never goes to public storage.
+	isLibrary := isLibraryConnection(o.connection.Id)
+	if isLibrary {
+		libraryText, err := s.libraryQueryText(ctx, o.reportID, o.queryID)
+		if err != nil {
+			return nil, libraryRunStatus(err)
+		}
+		o.queryText, o.updateQuery, o.isPublic = libraryText, false, false
+	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
@@ -442,7 +461,7 @@ func (s Server) runQuery(ctx context.Context, o runQueryOptions) (*proto.QueryJo
 		return nil, err
 	}
 	queryText := savedQueryText
-	if o.updateQuery || queryText == "" {
+	if o.updateQuery || queryText == "" || isLibrary {
 		queryText = o.queryText
 	}
 	queryParams := o.queryParams
@@ -528,10 +547,15 @@ func (s Server) runQuery(ctx context.Context, o runQueryOptions) (*proto.QueryJo
 	if err != nil {
 		return nil, err
 	}
+	responseQueryText := queryTextParsed
+	// The server-built SQL of a library dataset never leaves the server.
+	if isLibraryConnection(o.connection.Id) {
+		responseQueryText = ""
+	}
 	return &proto.QueryJob{
 		Id:              job.GetID(),
 		QueryId:         job.GetQueryID(),
-		QueryText:       queryTextParsed,
+		QueryText:       responseQueryText,
 		JobStatus:       proto.QueryJob_JOB_STATUS_PENDING,
 		DwJobId:         stringOrEmpty(job.GetDWJobID()),
 		JobResultId:     stringOrEmpty(job.GetResultID()),
@@ -858,10 +882,6 @@ func (s Server) runQueryRequest(ctx context.Context, req *proto.RunQueryRequest,
 	}
 	if q.ExecutionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_CONNECTION {
 		return nil, status.Error(codes.FailedPrecondition, "query has no execution engine")
-	}
-	// Library datasets are built by the server only; user text never runs on the library connection.
-	if err := refuseLibraryConnection(q.ConnectionID); err != nil {
-		return nil, err
 	}
 	connection, err := s.getConnection(ctx, q.ConnectionID)
 

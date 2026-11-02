@@ -120,6 +120,7 @@ func (c *testCatalogue) SampleRows(ctx context.Context, statement string) (libra
 type libraryFixture struct {
 	server    Server
 	catalogue *testCatalogue
+	jobs      *fakeJobStore
 }
 
 // asUser returns a context for a signed-in user with a role in workspace A.
@@ -178,9 +179,10 @@ func newLibraryFixture(t *testing.T) libraryFixture {
 		libConnection, libWorkspaceA, int(proto.ConnectionType_CONNECTION_TYPE_POSTGRES))
 
 	catalogue := newTestCatalogue()
-	server := NewServer(db, nil, nil)
+	jobs := &fakeJobStore{}
+	server := NewServer(db, fakeStorage{}, jobs)
 	server.SetLibraryCatalogue(catalogue)
-	return libraryFixture{server: *server, catalogue: catalogue}
+	return libraryFixture{server: *server, catalogue: catalogue, jobs: jobs}
 }
 
 func requireCode(t *testing.T, err error, code codes.Code) {
@@ -549,10 +551,14 @@ func TestOrdinaryCommandsRefuseTheLibraryConnection(t *testing.T) {
 	require.Empty(t, queryText)
 
 	// Running must not take user text for a library dataset either, from a map or from a single dataset.
-	_, err = f.server.RunQuery(f.editor(), &proto.RunQueryRequest{QueryId: added.QueryId, QueryText: "select * from lib.tempat_usaha"})
-	requireCode(t, err, codes.PermissionDenied)
+	_, err = f.server.RunQuery(f.editor(), &proto.RunQueryRequest{QueryId: added.QueryId, QueryText: "select * from pg_shadow"})
+	require.NoError(t, err)
 	_, err = f.server.RunAllQueries(f.editor(), &proto.RunAllQueriesRequest{ReportId: libReportA})
-	requireCode(t, err, codes.PermissionDenied)
+	require.NoError(t, err)
+	for _, statement := range f.jobs.statements() {
+		require.NotContains(t, statement, "pg_shadow")
+		require.Contains(t, statement, `FROM "lib"."tempat_usaha"`)
+	}
 	require.NoError(t, f.server.db.QueryRow(`select query_text from queries where id=$1`, added.QueryId).Scan(&queryText))
 	require.Empty(t, queryText)
 }
