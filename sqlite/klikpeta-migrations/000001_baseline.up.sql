@@ -1,0 +1,1 @@
+-- Fork migration track baseline: no fork tables yet. See docs/fork-branches.md.
