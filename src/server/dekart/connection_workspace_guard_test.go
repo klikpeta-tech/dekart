@@ -189,3 +189,36 @@ func TestCreateFile_AllowsConnectionOfSameWorkspace(t *testing.T) {
 	require.NotEmpty(t, res.GetFileId())
 	require.Equal(t, guardConnectionA, datasetConnectionID(t, server.db, guardDatasetA).String)
 }
+
+func TestReplaceFile_RefusesConnectionOfAnotherWorkspace(t *testing.T) {
+	server, ctx := newConnectionGuardFixture(t)
+	created, err := server.CreateFile(ctx, &proto.CreateFileRequest{
+		DatasetId:    guardDatasetA,
+		ConnectionId: conn.SystemConnectionID,
+	})
+	require.NoError(t, err)
+
+	_, err = server.ReplaceFile(ctx, &proto.ReplaceFileRequest{
+		DatasetId:    guardDatasetA,
+		ConnectionId: guardConnectionB,
+	})
+
+	requireCrossWorkspaceRefusal(t, err)
+	var fileID string
+	require.NoError(t, server.db.QueryRow(`select file_id from datasets where id=$1`, guardDatasetA).Scan(&fileID))
+	require.Equal(t, created.GetFileId(), fileID, "dataset must keep its file")
+	require.NotEqual(t, guardConnectionB, datasetConnectionID(t, server.db, guardDatasetA).String, "dataset must not be rebound")
+}
+
+func TestReplaceFile_AllowsConnectionOfSameWorkspace(t *testing.T) {
+	server, ctx := newConnectionGuardFixture(t)
+
+	res, err := server.ReplaceFile(ctx, &proto.ReplaceFileRequest{
+		DatasetId:    guardDatasetA,
+		ConnectionId: guardConnectionA,
+	})
+
+	require.NoError(t, err)
+	require.NotEmpty(t, res.GetFileId())
+	require.Equal(t, guardConnectionA, datasetConnectionID(t, server.db, guardDatasetA).String)
+}
