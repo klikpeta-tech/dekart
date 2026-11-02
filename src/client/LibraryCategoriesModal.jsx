@@ -52,7 +52,7 @@ export default function LibraryCategoriesModal ({ itemId, title, initial, okText
             <Checkbox.Group className={styles.groups} value={selected} onChange={setSelected}>
               <Collapse>
                 {groupCategories(taxonomy).map(group => (
-                  <Collapse.Panel key={group.id} header={group.title}>
+                  <Collapse.Panel key={group.id} header={group.title} forceRender>
                     <div className={styles.categories}>
                       {group.categories.map(category => (
                         <Checkbox key={category.id} value={category.id}>
