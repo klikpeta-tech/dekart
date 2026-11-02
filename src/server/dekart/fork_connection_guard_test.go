@@ -83,10 +83,9 @@ func TestForkReport_PublicMapOfAnotherWorkspaceDoesNotKeepForeignConnection(t *t
 
 	res, err := server.ForkReport(ctx, &proto.ForkReportRequest{ReportId: forkSourceReportB})
 
-	if err == nil {
-		require.NotEqual(t, guardConnectionB, datasetConnectionIDForReport(t, server.db, res.ReportId).String,
-			"copy must not keep the connection of the source workspace")
-	}
+	require.NoError(t, err)
+	require.NotEqual(t, guardConnectionB, datasetConnectionIDForReport(t, server.db, res.ReportId).String,
+		"copy must not keep the connection of the source workspace")
 }
 
 // The existing public-map remap to the copier's own connection of the same type must keep working.
