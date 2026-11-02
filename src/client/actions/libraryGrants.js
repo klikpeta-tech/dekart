@@ -13,6 +13,14 @@ export function libraryGrantsFailed (itemId, err) {
   return { type: libraryGrantsFailed.name, itemId, message: err.message }
 }
 
+// libraryGrantsRejected builds a grpcCall reject callback that returns null so the refusal is not escalated to a page-level error.
+function libraryGrantsRejected (dispatch, itemId) {
+  return (err) => {
+    dispatch(libraryGrantsFailed(itemId, err))
+    return null
+  }
+}
+
 export function libraryGrantsUpdated (rowsList) {
   return { type: libraryGrantsUpdated.name, rowsList }
 }
@@ -37,7 +45,7 @@ export function listLibraryGrants () {
       Dekart.ListLibraryGrants,
       new ListLibraryGrantsRequest(),
       (response) => dispatch(libraryGrantsUpdated(response.rowsList)),
-      (err) => dispatch(libraryGrantsFailed('', err))
+      libraryGrantsRejected(dispatch, '')
     ))
   }
 }
@@ -54,7 +62,7 @@ export function setLibraryGrant (itemId, endsOn, categoryIds) {
       Dekart.SetLibraryGrant,
       request,
       (response) => dispatch(libraryGrantChanged(response.grant)),
-      (err) => dispatch(libraryGrantsFailed(itemId, err))
+      libraryGrantsRejected(dispatch, itemId)
     ))
   }
 }
@@ -69,7 +77,7 @@ export function revokeLibraryGrant (itemId) {
       Dekart.RevokeLibraryGrant,
       request,
       (response) => dispatch(libraryGrantChanged(response.grant)),
-      (err) => dispatch(libraryGrantsFailed(itemId, err))
+      libraryGrantsRejected(dispatch, itemId)
     ))
   }
 }
@@ -85,7 +93,7 @@ export function setLibraryGrantCategories (itemId, categoryIds) {
       Dekart.SetLibraryGrantCategories,
       request,
       (response) => dispatch(libraryGrantChanged(response.grant)),
-      (err) => dispatch(libraryGrantsFailed(itemId, err))
+      libraryGrantsRejected(dispatch, itemId)
     ))
   }
 }
@@ -100,7 +108,7 @@ export function getLibraryTaxonomy (itemId) {
       Dekart.GetLibraryTaxonomy,
       request,
       (response) => dispatch(libraryTaxonomyLoaded(itemId, response.taxonomy)),
-      (err) => dispatch(libraryGrantsFailed(itemId, err))
+      libraryGrantsRejected(dispatch, itemId)
     ))
   }
 }
