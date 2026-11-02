@@ -650,7 +650,7 @@ export default function ReportPage ({ edit, snapshot }) {
       data-testid='report-page'
     >
       <Helmet>
-        <title>{pageTitle} — Dekart</title>
+        <title>{pageTitle} — Klikpeta</title>
       </Helmet>
       {!snapshot ? <Downloading /> : null}
       {!snapshot

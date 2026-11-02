@@ -2,7 +2,7 @@ import { Header } from './Header'
 import { Helmet } from 'react-helmet'
 import styles from './WorkspacePage.module.css'
 import Card from 'antd/es/card'
-import { TeamOutlined, CreditCardOutlined, AppstoreTwoTone, KeyOutlined } from '@ant-design/icons'
+import { TeamOutlined, AppstoreTwoTone, KeyOutlined } from '@ant-design/icons'
 import Title from 'antd/es/typography/Title'
 import Button from 'antd/es/button'
 import { useEffect, useState } from 'react'
@@ -15,7 +15,6 @@ import Onboarding from './Onboarding'
 import Badge from 'antd/es/badge'
 import Radio from 'antd/es/radio'
 import Form from 'antd/es/form'
-import SubscriptionTab from './SubscriptionTab'
 import MembersTab from './MembersTab'
 import Result from 'antd/es/result'
 import { switchPlayground } from './actions/user'
@@ -153,7 +152,7 @@ function CreateWorkspaceForm () {
           ? (
             <>
               <Form.Item
-                label='Where did you first hear about Dekart?'
+                label='Where did you first hear about Klikpeta?'
                 name='source'
                 rules={[{ required: true, message: 'Please select a source' }]}
               >
@@ -182,7 +181,7 @@ function CreateWorkspaceForm () {
                         { max: 120, message: 'Please keep it under 120 characters' }
                       ]}
                     >
-                      <Input placeholder='How did you hear about Dekart?' />
+                      <Input placeholder='How did you hear about Klikpeta?' />
                     </Form.Item>
                     )
                   : null}
@@ -289,7 +288,6 @@ function getMembersSubTitle (addedUsersCount, planType) {
 
 export function Workspace ({ nextStep, setNextStep, stepId, isCreatingAdditionalWorkspace }) {
   const userStream = useSelector(state => state.user.stream)
-  const isSelfHosted = useSelector(state => state.user.isSelfHosted)
   const addedUsersCount = useSelector(state => state.workspace.addedUsersCount)
   const workspaceId = userStream?.workspaceId
   const planType = userStream?.planType
@@ -310,9 +308,7 @@ export function Workspace ({ nextStep, setNextStep, stepId, isCreatingAdditional
                 value={step}
                 onChange={(e) => {
                   const v = e.target.value
-                  if (v === 'plan') {
-                    history.push('/workspace/plan')
-                  } else if (v === 'members') {
+                  if (v === 'members') {
                     history.push('/workspace/members')
                   } else if (v === 'tokens') {
                     history.push('/workspace/tokens')
@@ -325,13 +321,6 @@ export function Workspace ({ nextStep, setNextStep, stepId, isCreatingAdditional
                 <Radio.Button value='workspace'>
                   <AppstoreTwoTone /> Workspace
                 </Radio.Button>
-                {!isSelfHosted
-                  ? (
-                    <Radio.Button value='plan' disabled={!userStream.workspaceId}>
-                      <CreditCardOutlined /> Plan
-                    </Radio.Button>
-                    )
-                  : null}
                 <Radio.Button value='members'>
                   <Badge color='blue' count={getMembersSubTitle(addedUsersCount, planType) ? undefined : 0} style={{ display: 'none' }}>
                     {/* keep layout consistent without visible badge when not needed */}
@@ -350,11 +339,9 @@ export function Workspace ({ nextStep, setNextStep, stepId, isCreatingAdditional
       {
         step === 'workspace'
           ? <WorkspaceTab nextStep={nextStep} setNextStep={setNextStep} isCreatingAdditionalWorkspace={isCreatingAdditionalWorkspace} />
-          : step === 'plan'
-            ? (!isSelfHosted ? <SubscriptionTab /> : <MembersTab />)
-            : step === 'members'
-              ? <MembersTab />
-              : <DeviceTokensTab />
+          : step === 'members'
+            ? <MembersTab />
+            : <DeviceTokensTab />
       }
     </div>
   )
@@ -396,9 +383,7 @@ function WelcomeScreen ({ setNextStep }) {
             <div className={styles.notSureItems}>
               <div>→ Connect Instantly to BigQuery and Snowflake</div>
               <div>→ Create Your First Map in 30 Seconds</div>
-              <div>→ No credit card required.</div>
             </div>
-            <Button ghost type='primary' href='https://dekart.xyz/docs/about/screencast/' target='_blank' onClick={() => track('WatchWalkthrough')}>🎬 Watch a 40-Second Walkthrough</Button>
           </div>
         </>
       )}
@@ -407,9 +392,6 @@ function WelcomeScreen ({ setNextStep }) {
 }
 
 function getWorkspacePageTitle (step) {
-  if (step === 'plan') {
-    return 'Workspace Plan'
-  }
   if (step === 'members') {
     return 'Workspace Members'
   }
@@ -457,7 +439,7 @@ export default function WorkspacePage ({ step, onboarding }) {
   return (
     <div className={styles.workspacePage}>
       <Helmet>
-        <title>{getWorkspacePageTitle(step)} — Dekart</title>
+        <title>{getWorkspacePageTitle(step)} — Klikpeta</title>
       </Helmet>
       <Header />
       {userStream

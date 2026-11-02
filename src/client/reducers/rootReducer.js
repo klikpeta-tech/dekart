@@ -3,7 +3,6 @@ import { openReport, reportUpdate } from '../actions/report'
 import { duckDBJobStates, queries, queryExecutionsPending, queryJobs, queryParams, queryStatus, runAllQueriesPending } from './queryReducer'
 import { setUsage } from '../actions/usage'
 import { setEnv } from '../actions/env'
-import { newRelease } from '../actions/version'
 import keplerGl from './keplerReducer'
 import stream from './streamReducer'
 import widgets from './widgetsReducer'
@@ -86,15 +85,6 @@ function env (state = defaultEnv, action) {
   }
 }
 
-function release (state = null, action) {
-  switch (action.type) {
-    case newRelease.name:
-      return action.release
-    default:
-      return state
-  }
-}
-
 export default combineReducers({
   keplerGl,
   widgets,
@@ -104,7 +94,6 @@ export default combineReducers({
   reportDirectAccessEmails,
   env,
   httpError,
-  release,
   files,
   fileUploadStatus,
   usage,

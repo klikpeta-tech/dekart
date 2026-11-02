@@ -38,7 +38,7 @@ export default function AnalyticsModal () {
         const a = buttonRef.current
         a.href = url
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-        a.download = `dekart-report-viewers-${report.id}-${timestamp}.csv`
+        a.download = `klikpeta-report-viewers-${report.id}-${timestamp}.csv`
         setLoading(false)
       }).catch(err => {
         dispatch(setError(err))

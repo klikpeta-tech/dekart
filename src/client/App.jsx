@@ -25,11 +25,9 @@ import Button from 'antd/es/button'
 import { loadSessionStorage } from './actions/sessionStorage'
 import { Loading } from './Loading'
 import WorkspaceReadOnlyBanner from './WorkspaceReadOnlyBanner'
-import NewVersion from './NewVersion'
 import styles from './App.module.css'
 import { WorkspaceSelectorLight } from './WorkspaceSelector'
 import DeviceAuthorizePage from './DeviceAuthorizePage'
-import TrialPage from './TrialPage'
 import { setSnapshotToken } from './actions/token'
 import { getWorkspace } from './actions/workspace'
 
@@ -73,7 +71,6 @@ function AppRedirect ({ allowWorkspaceRedirect = true }) {
   const httpError = useSelector(state => state.httpError)
   const { status, doNotAuthenticate } = httpError
   const { googleOAuthEnabled } = useSelector(state => state.env)
-  const isCloud = useSelector(state => state.env.isCloud)
   const { newReportId } = useSelector(state => state.reportStatus)
   const userStream = useSelector(state => state.user.stream)
   const isPlayground = useSelector(state => state.user.isPlayground)
@@ -87,8 +84,6 @@ function AppRedirect ({ allowWorkspaceRedirect = true }) {
   const isAnonymous = useSelector(state => state.user.isAnonymous)
   const isReportUrl = useIsReportUrl()
   const isWorkspaceUrl = location.pathname.startsWith('/workspace')
-  const isReportView = /^\/reports\/[a-f0-9-]+\/?$/.test(location.pathname)
-  const trialNotStarted = isCloud && userStream?.planType === PlanType.TYPE_PERSONAL
 
   useEffect(() => {
     if (
@@ -114,13 +109,13 @@ function AppRedirect ({ allowWorkspaceRedirect = true }) {
   if (
     allowWorkspaceRedirect &&
     userStream &&
-    ((trialNotStarted && !isReportView && !['/workspace/trial', '/workspace/plan'].includes(location.pathname)) || (!userStream.planType && !isWorkspaceUrl && !isPlayground)) &&
+    (!userStream.planType && !isWorkspaceUrl && !isPlayground) &&
     !(reportWillOpen && !report) && // report is being loaded
     !(report?.isPlayground) && // playground report
     !(report?.isPublic) && // public report
     !(report?.hasDirectAccess) // public report
   ) {
-    return <Redirect to={trialNotStarted ? '/workspace/trial' : '/workspace'} push />
+    return <Redirect to='/workspace' push />
   }
 
   if (newReportId) {
@@ -190,7 +185,7 @@ function NotFoundPage () {
   return (
     <>
       <Helmet>
-        <title>404 - Page Not Found — Dekart</title>
+        <title>404 - Page Not Found — Klikpeta</title>
       </Helmet>
       <Result
         icon={<QuestionOutlined />} title='404' subTitle={(
@@ -233,7 +228,7 @@ function ErrorPage ({ icon, title, subTitle }) {
   return (
     <>
       <Helmet>
-        <title>{title} — Dekart</title>
+        <title>{title} — Klikpeta</title>
       </Helmet>
       <Result
         icon={icon} title={title} subTitle={(
@@ -355,14 +350,6 @@ export default function App () {
               <AppRedirect />
               <WorkspacePage userInvite />
             </Route>
-            <Route exact path='/workspace/plan'>
-              <AppRedirect />
-              <WorkspacePage step='plan' />
-            </Route>
-            <Route exact path='/workspace/trial'>
-              <AppRedirect />
-              <TrialPage />
-            </Route>
             <Route exact path='/workspace/members'>
               <AppRedirect />
               <WorkspacePage step='members' />
@@ -397,7 +384,6 @@ export default function App () {
             </Route>
           </Switch>
         </div>
-        <NewVersion />
         <WorkspaceReadOnlyBanner />
       </div>
     </Router>

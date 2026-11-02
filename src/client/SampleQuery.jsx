@@ -73,20 +73,5 @@ export default function SampleQuery ({ queryId }) {
       </div>
     )
   }
-  const examplesUrl = getDatasourceMeta(connectionType)?.examplesUrl
-  if (examplesUrl) {
-    return (
-      <div className={styles.sampleQuery}>
-        <Tooltip title={<>Don't know where to start?<br />Try running public dataset query.</>}>
-          <a
-            href={examplesUrl}
-            target='_blank'
-            rel='noreferrer'
-          >💡 Start with public dataset query
-          </a>
-        </Tooltip>
-      </div>
-    )
-  }
   return null
 }

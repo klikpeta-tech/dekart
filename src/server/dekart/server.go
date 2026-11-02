@@ -259,7 +259,7 @@ func (s Server) GetEnv(ctx context.Context, req *proto.GetEnvRequest) (*proto.Ge
 		// authenticated user
 		homePageUrl := os.Getenv("DEKART_UX_HOMEPAGE")
 		if homePageUrl == "" {
-			homePageUrl = "https://dekart.xyz/cloud/"
+			homePageUrl = "https://klikpeta.io/"
 		}
 		var authEnabled string
 		if claims.Email != user.UnknownEmail {

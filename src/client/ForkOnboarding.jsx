@@ -88,7 +88,7 @@ export function ForkOnboarding ({ requireOnboarding: { requireWorkspace, missing
   }, [])
   return (
     <>
-      <Tooltip title='Copy and edit this map in your Dekart Workspace.'>
+      <Tooltip title='Copy and edit this map in your Klikpeta Workspace.'>
         <Button
           type='primary' icon={<ForkOutlined />} onClick={() => {
             setVisible(true)
@@ -113,7 +113,7 @@ export function ForkOnboarding ({ requireOnboarding: { requireWorkspace, missing
               title: 'Create Workspace',
               description: '10 seconds'
             }
-          ].concat(alreadyConnectedTypes.concat(missingConnectionTypes).map(getDatasourceMeta).map(({ name, style, usageStatsId }) => ({
+          ].concat(alreadyConnectedTypes.concat(missingConnectionTypes).map(getDatasourceMeta).map(({ name }) => ({
             title: `Connect ${name}`,
             description: '15 seconds'
           }))).concat({

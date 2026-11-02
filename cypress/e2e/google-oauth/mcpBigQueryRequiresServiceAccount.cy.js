@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 
 const apiBase = `${Cypress.env('DEKART_E2E_API_URL')}/api/v1`
-const createConnectionDisabledError = 'create_connection via MCP is disabled; create the connection in Dekart UI first'
+const createConnectionDisabledError = 'create_connection via MCP is disabled; create the connection in the UI first'
 
 const getDeviceToken = () => cy.mcpDeviceToken('test@gmail.com', { deviceName: 'cypress-google-oauth-mcp' })
 

@@ -285,20 +285,6 @@
     gap: 40px;
 }
 
-.moreWarehousesButton {
-    white-space: nowrap;
-}
-
-.moreWarehousesPrimary {
-    font-weight: 500;
-}
-
-.moreWarehousesHint {
-    color: rgb(0 0 0 / 45%);
-    margin-left: 8px;
-    font-weight: 400;
-}
-
 .connectionSelectorBack {
     color: #4A5158;
 }
@@ -315,10 +301,6 @@
     }
     .connectionTypeCard {
         min-height: 160px;
-    }
-
-    .moreWarehousesHint {
-        display: none;
     }
 }
 

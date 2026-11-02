@@ -11,7 +11,7 @@ import { track } from './lib/tracking'
 export default function BigQueryConnectionTypeSelectorModal ({ open, onClose }) {
   const dispatch = useDispatch()
   const googleOAuthEnabled = useSelector(state => state.env.googleOAuthEnabled)
-  const googleOAuthDisabledTitle = googleOAuthEnabled ? '' : 'Google OAuth is not configured for this Dekart instance'
+  const googleOAuthDisabledTitle = googleOAuthEnabled ? '' : 'Google OAuth is not configured for this instance'
   useEffect(() => {
     if (open) {
       track('OpenBigQueryConnectionTypeSelectorModal')
@@ -35,7 +35,7 @@ export default function BigQueryConnectionTypeSelectorModal ({ open, onClose }) 
             Recommended if your account already has BigQuery access.
           </p>
           <p>
-            No credentials stored in Dekart backend.
+            No credentials stored in Klikpeta backend.
           </p>
 
           <p>
@@ -54,10 +54,6 @@ export default function BigQueryConnectionTypeSelectorModal ({ open, onClose }) 
               </span>
             </Tooltip>
           </p>
-          <p>
-            → <a href='https://dekart.xyz/docs/usage/choose-bigquery-connection-method/#which-permissions-are-required' target='_blank' rel='noreferrer'>Which permissions required?</a>
-          </p>
-
         </div>
         <div className={styles.connectionOptionsItem}>
           <h2>
@@ -66,7 +62,7 @@ export default function BigQueryConnectionTypeSelectorModal ({ open, onClose }) 
           <p>
             Connect to BigQuery with using Service Account Key in JSON format.
           </p>
-          <p>Key will be encrypted and stored in Dekart backend.</p>
+          <p>Key will be encrypted and stored in Klikpeta backend.</p>
 
           <p>
             <Button
@@ -79,11 +75,6 @@ export default function BigQueryConnectionTypeSelectorModal ({ open, onClose }) 
             >Configure Service Account
             </Button>
           </p>
-          <div>
-            <div>→ <a href='https://dekart.xyz/docs/usage/choose-bigquery-connection-method/#how-to-get-a-service-account-key' target='_blank' rel='noreferrer'>How to get the key?</a></div>
-            <div>→ <a href='https://dekart.xyz/docs/usage/choose-bigquery-connection-method/#how-is-the-key-secured' target='_blank' rel='noreferrer'>How key is secured?</a></div>
-          </div>
-
         </div>
       </div>
     </Modal>

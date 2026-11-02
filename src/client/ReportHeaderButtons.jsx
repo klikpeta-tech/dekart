@@ -1,7 +1,7 @@
 import { useHistory } from 'react-router-dom/cjs/react-router-dom'
 import styles from './ReportHeaderButtons.module.css'
 import Button from 'antd/es/button'
-import { EyeOutlined, DownloadOutlined, CloudOutlined, EditOutlined, ForkOutlined, ReloadOutlined, LoadingOutlined, CloudSyncOutlined, PlusOutlined, InfoCircleOutlined, ClockCircleOutlined, HistoryOutlined } from '@ant-design/icons'
+import { EyeOutlined, DownloadOutlined, CloudOutlined, EditOutlined, ForkOutlined, ReloadOutlined, LoadingOutlined, CloudSyncOutlined, PlusOutlined, ClockCircleOutlined, HistoryOutlined } from '@ant-design/icons'
 import { useDispatch, useSelector } from 'react-redux'
 import ShareButton from './ShareButton'
 import { forkReport, saveMap, saveMapPreview, toggleReportEdit } from './actions/report'
@@ -204,18 +204,6 @@ function WorkspaceOnboarding () {
   }, [])
   return (
     <div className={styles.reportHeaderButtons}>
-      <div className={styles.hideOnMobile}>
-        <Button
-          type='text' icon={<InfoCircleOutlined />}
-          href='https://dekart.xyz/?ref=about-maps-button'
-          target='_blank'
-          title='About this map'
-          onClick={() => {
-            track('AboutDekartMaps')
-          }}
-        >About this map
-        </Button>
-      </div>
       {!isAnonymous && (
         <Button
           icon={<PlusOutlined />}

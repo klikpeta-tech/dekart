@@ -5,7 +5,7 @@ import Result from 'antd/es/result'
 import Button from 'antd/es/button'
 import { useDispatch, useSelector } from 'react-redux'
 import { requestSensitiveScopes } from './actions/redirect'
-import { CloudTwoTone, FileProtectOutlined } from '@ant-design/icons'
+import { CloudTwoTone } from '@ant-design/icons'
 import { useEffect } from 'react'
 import { Redirect } from 'react-router-dom/cjs/react-router-dom'
 import { track } from './lib/tracking'
@@ -44,7 +44,7 @@ export default function GrantScopesPage ({ visitedPages }) {
   return (
     <div className={styles.grantScopesPage}>
       <Helmet>
-        <title>Grant Access to Google Cloud — Dekart</title>
+        <title>Grant Access to Google Cloud — Klikpeta</title>
       </Helmet>
       <Header />
       <div className={styles.body}>
@@ -53,7 +53,7 @@ export default function GrantScopesPage ({ visitedPages }) {
           title='Grant Access to Google Cloud'
           subTitle={(
             <>
-              <p>Dekart uses BigQuery passthrough authentication and requests short-lived tokens stored only in your browser, ensuring no tokens or query results are stored on its backend.</p>
+              <p>Klikpeta uses BigQuery passthrough authentication and requests short-lived tokens stored only in your browser, ensuring no tokens or query results are stored on its backend.</p>
             </>
           )}
           extra={(
@@ -66,12 +66,6 @@ export default function GrantScopesPage ({ visitedPages }) {
             </Button>
           )}
         />
-        <p style={{
-          fontSize: '1.2em'
-        }}
-        ><FileProtectOutlined /> <a href='https://dekart.xyz/docs/usage/google-cloud-grant-scopes-faq/' target='_blank' rel='noreferrer'>Verified by Google’s Trust & Safety Team</a>
-        </p>
-
       </div>
     </div>
   )

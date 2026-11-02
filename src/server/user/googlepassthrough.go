@@ -21,7 +21,7 @@ const (
 var (
 	ErrMCPGoogleAccessTokenMissing         = errors.New("MCP Google access token is missing")
 	ErrMCPGoogleAccessTokenInvalid         = errors.New("MCP Google access token is invalid")
-	ErrMCPGoogleAccountMismatch            = errors.New("MCP Google account does not match Dekart account")
+	ErrMCPGoogleAccountMismatch            = errors.New("MCP Google account does not match your account")
 	ErrMCPGooglePrincipalUnsupported       = errors.New("MCP Google principal is unsupported")
 	ErrMCPGoogleScopeInsufficient          = errors.New("MCP Google access token scope is insufficient")
 	ErrMCPGoogleTokenValidationUnavailable = errors.New("MCP Google token validation is unavailable")

@@ -118,15 +118,15 @@
 
 a.dekartLink {
     display: block;
-    width: 76px;
-    height: 18px;
+    width: 65px;
+    height: 30px;
 }
 .dekartTitle {
-    width: 76px;
-    height: 18px;
+    width: 65px;
+    height: 30px;
     display: block;
     background-size: contain;
-    background-image: url('./dekart-title.svg');
+    background-image: url('./klikpeta-geo-title.svg');
     background-repeat: no-repeat;
 }
 

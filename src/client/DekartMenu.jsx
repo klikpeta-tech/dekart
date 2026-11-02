@@ -1,31 +1,21 @@
 import Menu from 'antd/es/menu'
 import styles from './DekartMenu.module.css'
 import { useDispatch, useSelector } from 'react-redux'
-import { getUrlRef } from './lib/ref'
 import { MenuOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom/cjs/react-router-dom'
 import { createReport } from './actions/report'
-import Tooltip from 'antd/es/tooltip'
 import { track } from './lib/tracking'
-import { ConnectionType } from 'dekart-proto/dekart_pb'
 
 const popupOffset = [-10, 0]
 
 export default function DekartMenu () {
   const env = useSelector(state => state.env)
-  const usage = useSelector(state => state.usage)
-  const connections = useSelector(state => state.connection.list)
   const userDefinedConnection = useSelector(state => state.connection.userDefined)
   const dispatch = useDispatch()
   const { authEnabled } = env
   const isPlayground = useSelector(state => state.user.isPlayground)
-  const isSnowpark = useSelector(state => state.env.isSnowpark)
   const isViewer = useSelector(state => state.user.isViewer)
   const readOnly = useSelector(state => state.workspace.readOnly)
-  const isBigQueryDatasource = env.variables.DATASOURCE === 'BQ'
-  const hasBigQueryConnection = connections.some(connection => connection.connectionType === ConnectionType.CONNECTION_TYPE_BIGQUERY)
-  const showBigQueryOvertureSkill = isBigQueryDatasource || hasBigQueryConnection
-  const ref = getUrlRef(env, usage)
   return (
     <div className={styles.dekartMenu}>
       <Menu mode='horizontal' theme='dark'>
@@ -73,35 +63,10 @@ export default function DekartMenu () {
             New Map
           </Menu.Item>
           <Menu.Divider />
-          {isSnowpark && (
-            <Menu.Item key='snowflake-kepler-gl-examples' onClick={() => track('ClickedSnowflakeKeplerGlExamples')}>
-              <a target='_blank' rel='noopener noreferrer' href={'https://dekart.xyz/docs/snowflake-snowpark/about/?ref=' + ref}>Configure Access</a>
-            </Menu.Item>
-          )}
-          {!isSnowpark && showBigQueryOvertureSkill && (
-            <Menu.Item key='bigquery-overture-skill' onClick={() => track('ClickedClaudeSkill')}>
-              <a target='_blank' rel='noopener noreferrer' href='https://github.com/dekart-xyz/geosql'>Claude Skill</a>
-            </Menu.Item>
-          )}
-          <Menu.Item key='examples' onClick={() => track('ClickedMapExamples')}>
-            <a
-              target='_blank' rel='noopener noreferrer' href={
-              isSnowpark ? 'https://dekart.xyz/docs/about/snowflake-kepler-gl-examples/?ref=' + ref : 'https://dekart.xyz/docs/about/kepler-gl-map-examples?ref=' + ref
-            }
-            >Map Examples
-            </a>
-          </Menu.Item>
-          <Menu.Item key='slack' onClick={() => track('ClickedAskInSlack')}>
-            <a target='_blank' rel='noopener noreferrer' href='https://slack.dekart.xyz'>Slack Support</a>
+          <Menu.Item key='source' onClick={() => track('ClickedSource')}>
+            <a target='_blank' rel='noopener noreferrer' href='https://github.com/klikpeta-tech/dekart'>Source - Based on Dekart (AGPL-3.0)</a>
           </Menu.Item>
         </Menu.SubMenu>
-        {
-          !isSnowpark && (
-            <Menu.Item key='contribute' onClick={() => track('ClickedGitHubStar')}>
-              <Tooltip color='#328EB2' title={<>Loving Dekart?<br />Help community find it.<br />Give us ⭐️ on GitHub!</>}><a target='_blank' rel='noopener noreferrer' href='https://github.com/dekart-xyz/dekart'>🩵</a></Tooltip>
-            </Menu.Item>
-          )
-        }
       </Menu>
     </div>
   )
