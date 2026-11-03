@@ -762,6 +762,47 @@ func (s Server) commitReportWithDatasets(
 	return err
 }
 
+// blankConnectionsOutsideWorkspace clears the connection of every dataset that is neither the system connection
+// nor owned by workspaceID (empty for the playground, which owns no connections), so the person copying picks one
+// of their own workspace's connections. Query text and layout are kept. It returns the query ids whose
+// warehouse connection was cleared; their source results came from another connection and are not reusable.
+func (s Server) blankConnectionsOutsideWorkspace(
+	ctx context.Context,
+	datasets []*proto.Dataset,
+	queryByID map[string]*proto.Query,
+	workspaceID string,
+) (map[string]bool, error) {
+	blankedQueryIDs := make(map[string]bool)
+	for _, dataset := range datasets {
+		if conn.IsSystemConnectionID(dataset.ConnectionId) {
+			continue
+		}
+		var connectionWorkspaceID sql.NullString
+		err := s.db.QueryRowContext(ctx,
+			`SELECT workspace_id FROM connections WHERE id = $1`,
+			dataset.ConnectionId,
+		).Scan(&connectionWorkspaceID)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, err
+		}
+		if err == nil && workspaceID != "" && connectionWorkspaceID.Valid && connectionWorkspaceID.String == workspaceID {
+			continue
+		}
+		log.Warn().
+			Str("dataset_id", dataset.Id).
+			Str("connection_id", dataset.ConnectionId).
+			Str("workspace_id", workspaceID).
+			Msg("blanking connection outside the workspace of the copy")
+		dataset.ConnectionId = ""
+		dataset.ConnectionType = proto.ConnectionType_CONNECTION_TYPE_UNSPECIFIED
+		query := queryByID[dataset.QueryId]
+		if dataset.QueryId != "" && (query == nil || query.ExecutionEngine != proto.QueryExecutionEngine_QUERY_EXECUTION_ENGINE_DUCKDB) {
+			blankedQueryIDs[dataset.QueryId] = true
+		}
+	}
+	return blankedQueryIDs, nil
+}
+
 func (s Server) ForkReport(ctx context.Context, req *proto.ForkReportRequest) (*proto.ForkReportResponse, error) {
 	claims := user.GetClaims(ctx)
 	if claims == nil {
@@ -856,6 +897,16 @@ func (s Server) ForkReport(ctx context.Context, req *proto.ForkReportRequest) (*
 			}
 			dataset.ConnectionId = newConnectionID
 		}
+	}
+	// A map readable from another workspace (public, playground, authored or shared by direct access) must not
+	// carry that workspace's connection into the copy: a refresh would run with its stored credentials.
+	blankedQueryIDs, err := s.blankConnectionsOutsideWorkspace(ctx, datasets, queryByID, workspaceID)
+	if err != nil {
+		errtype.LogError(err, "Cannot verify dataset connections")
+		return nil, err
+	}
+	for queryID := range blankedQueryIDs {
+		connectionUpdatedQueryIDs[queryID] = true
 	}
 	jobs, err := s.getDatasetsQueryJobs(ctx, datasets)
 	if err != nil {
