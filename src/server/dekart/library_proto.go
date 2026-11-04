@@ -175,7 +175,7 @@ func itemToProto(item library.Item, grant *library.Grant) *proto.LibraryItem {
 		LayerStyleJson:  item.LayerStyleJSON,
 		AreaLevels:      nonNil(item.AreaLevels),
 	}
-	// The item total would count categories the workspace is not granted, so taxonomy items leave it out.
+	// Taxonomy totals are filled from granted categories by the read handlers, never from the item total.
 	if !item.HasTaxonomy {
 		result.RowCount = item.RowCount
 	}

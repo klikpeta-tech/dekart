@@ -566,6 +566,10 @@ func TestOrdinaryCommandsRefuseTheLibraryConnection(t *testing.T) {
 // Row counts must not reveal categories the workspace was not granted.
 func TestLibraryRowCountsCoverOnlyGrantedCategories(t *testing.T) {
 	f := newLibraryFixture(t)
+	// The nationwide total includes two categories the workspace cannot read.
+	f.catalogue.taxonomy.Categories[0].RowCount = 10
+	f.catalogue.taxonomy.Categories[1].RowCount = 20
+	f.catalogue.taxonomy.Categories[2].RowCount = 40
 	f.grant(t, libWorkspaceA, itemPlaces, libFarFuture, `["kafe"]`)
 	f.grant(t, libWorkspaceA, itemBoundaries, libFarFuture, `[]`)
 
@@ -580,11 +584,11 @@ func TestLibraryRowCountsCoverOnlyGrantedCategories(t *testing.T) {
 	for _, item := range items.Items {
 		counts[item.Id] = item.RowCount
 	}
-	require.EqualValues(t, map[string]int64{itemPlaces: 0, itemBoundaries: 900}, counts)
+	require.EqualValues(t, map[string]int64{itemPlaces: 10, itemBoundaries: 900}, counts)
 
 	got, err := f.server.GetLibraryItem(f.editor(), &proto.GetLibraryItemRequest{ItemId: itemPlaces})
 	require.NoError(t, err)
-	require.EqualValues(t, 0, got.Item.RowCount)
+	require.EqualValues(t, 10, got.Item.RowCount)
 }
 
 // Without a configured library connection the guard must not match an empty connection id of an unbound dataset.

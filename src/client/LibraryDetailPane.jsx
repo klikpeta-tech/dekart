@@ -59,9 +59,14 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
   }, [dispatch, itemId])
 
   const item = detail?.item
-  const issues = useMemo(() => item && mode !== 'view' ? validateSelection(item, selection, estimate?.rowCount ?? null) : [], [item, mode, selection, estimate])
-  // The estimate is requested once the selection passes the local checks.
-  const countable = item && mode !== 'view' && validateSelection(item, selection, null).length === 0
+  // Area counts describe every granted category before a category is picked; the user's selection stays empty.
+  const countSelection = useMemo(() => item?.hasTaxonomy && selection.areaCode !== '' && selection.categoryIds.length === 0
+    ? { ...selection, categoryIds: detail.taxonomy.categories.map(({ id }) => id) }
+    : selection, [detail, item, selection])
+  const rowCount = item?.hasTaxonomy && selection.categoryIds.length === 0 ? null : estimate?.rowCount ?? null
+  const issues = useMemo(() => item && mode !== 'view' ? validateSelection(item, selection, rowCount) : [], [item, mode, selection, rowCount])
+  // Only the estimate uses the expanded categories; adding still requires an explicit category choice.
+  const countable = item && mode !== 'view' && validateSelection(item, countSelection, null).length === 0
 
   useEffect(() => {
     setEstimate(null)
@@ -70,7 +75,7 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
     }
     let cancelled = false
     const timer = setTimeout(() => {
-      dispatch(countLibrarySelection(itemId, selection)).then(({ response, error }) => {
+      dispatch(countLibrarySelection(itemId, countSelection)).then(({ response, error }) => {
         if (cancelled) {
           return
         }
@@ -86,7 +91,7 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
       cancelled = true
       clearTimeout(timer)
     }
-  }, [dispatch, itemId, countable, selection])
+  }, [dispatch, itemId, countable, countSelection])
 
   // Any change of the selection drops the preview and the last refusal, which no longer describe it.
   const changeSelection = (change) => {
@@ -162,7 +167,7 @@ export default function LibraryDetailPane ({ itemId, datasetId, binding, mode, o
           ? undefined
           : {
               label: mode === 'add'
-                ? addButtonLabel(item.shape.kind, estimate?.rowCount ?? null)
+                ? addButtonLabel(item.shape.kind, rowCount)
                 : `Update to ${estimate ? formatEstimate(item.shape.kind, estimate.rowCount) : 'new selection'}`,
               disabled: !ready,
               onClick: submit

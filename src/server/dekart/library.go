@@ -56,7 +56,18 @@ func (s Server) ListLibraryItems(ctx context.Context, req *proto.ListLibraryItem
 	for _, item := range items {
 		if grant, ok := active[item.ID]; ok {
 			grant := grant
-			response.Items = append(response.Items, itemToProto(item, &grant))
+			entry := itemToProto(item, &grant)
+			// A taxonomy total must include only the categories granted to this workspace.
+			if item.HasTaxonomy {
+				taxonomy, err := catalogue.Taxonomy(ctx, item.ID)
+				if err != nil {
+					return nil, libraryStatus(err)
+				}
+				for _, category := range taxonomyToProto(taxonomy, grant.CategoryIDs).Categories {
+					entry.RowCount += category.RowCount
+				}
+			}
+			response.Items = append(response.Items, entry)
 		}
 	}
 	return response, nil
@@ -83,6 +94,10 @@ func (s Server) GetLibraryItem(ctx context.Context, req *proto.GetLibraryItemReq
 			return nil, libraryStatus(err)
 		}
 		response.Taxonomy = taxonomyToProto(taxonomy, grant.CategoryIDs)
+		// The detail and overview share the same total over granted categories.
+		for _, category := range response.Taxonomy.Categories {
+			response.Item.RowCount += category.RowCount
+		}
 	}
 	return response, nil
 }
