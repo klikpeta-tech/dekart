@@ -59,7 +59,7 @@ and never done by deleting a volume.
 ## Auto-deploy from GitHub
 
 `.github/workflows/deploy-fly.yaml` deploys `release/v0.26-klikpeta` to `klikpeta-geo` on every push to that branch (docs and Markdown-only
-changes are ignored) and on manual `workflow_dispatch`. It fails, telling you to deploy by hand, if Dekart's migration track differs from `v0.26.0`.
+changes are ignored) and on manual `workflow_dispatch`. It fails, telling you to deploy by hand, if Dekart's migration track differs from upstream `v0.26.0` (the fork has no such tag, so the workflow fetches it from dekart-xyz/dekart).
 It does not run tests and takes no pre-deploy snapshot.
 
 - Deploys are fully automatic: every merge to the branch deploys, with no reviewer approval.
