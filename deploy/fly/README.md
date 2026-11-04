@@ -62,7 +62,7 @@ and never done by deleting a volume.
 changes are ignored) and on manual `workflow_dispatch`. It fails, telling you to deploy by hand, if Dekart's migration track differs from `v0.26.0`.
 It does not run tests and takes no pre-deploy snapshot.
 
-- The job uses the GitHub Environment `production`, which must have one required reviewer: a merge starts the run, the approval releases the deploy.
-- `FLY_API_TOKEN` is an environment secret of `production`. Create the token and store it without printing it:
-  `flyctl tokens create deploy --app klikpeta-geo | gh secret set FLY_API_TOKEN --env production -R klikpeta-tech/dekart`
+- Deploys are fully automatic: every merge to the branch deploys, with no reviewer approval.
+- `FLY_API_TOKEN` is a repository secret. Create the token (one year expiry) and store it without printing it:
+  `flyctl tokens create deploy --app klikpeta-geo --expiry 8760h | gh secret set FLY_API_TOKEN -R klikpeta-tech/dekart`
 - After a manual rollback, disable the workflow first (Actions tab, or revert on the branch), or the next merge deploys over the rollback.
