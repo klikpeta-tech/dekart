@@ -55,3 +55,14 @@ This works while the licence key in `DEKART_LICENSE_KEY` is valid (until 2026-11
 
 Restoring data from the pre-deploy snapshot is a manual, captain-approved recovery done case by case. It is never scripted here,
 and never done by deleting a volume.
+
+## Auto-deploy from GitHub
+
+`.github/workflows/deploy-fly.yaml` deploys `release/v0.26-klikpeta` to `klikpeta-geo` on every push to that branch (docs and Markdown-only
+changes are ignored) and on manual `workflow_dispatch`. It fails, telling you to deploy by hand, if Dekart's migration track differs from `v0.26.0`.
+It does not run tests and takes no pre-deploy snapshot.
+
+- Deploys are fully automatic: every merge to the branch deploys, with no reviewer approval.
+- `FLY_API_TOKEN` is a repository secret. Create the token (one year expiry) and store it without printing it:
+  `flyctl tokens create deploy --app klikpeta-geo --expiry 8760h | gh secret set FLY_API_TOKEN -R klikpeta-tech/dekart`
+- After a manual rollback, disable the workflow first (Actions tab, or revert on the branch), or the next merge deploys over the rollback.

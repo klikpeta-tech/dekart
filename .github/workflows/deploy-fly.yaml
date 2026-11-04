@@ -1,0 +1,33 @@
+name: Deploy to Fly (klikpeta-geo)
+
+on:
+  push:
+    branches: [release/v0.26-klikpeta]
+    paths-ignore: ['docs/**', '**/*.md']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-klikpeta-geo
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0 # needs the v0.26.0 tag for the schema check
+      - name: Dekart migration track must still equal v0.26.0
+        run: |
+          out=$(git diff --stat v0.26.0 HEAD -- sqlite/migrations migrations)
+          [ -z "$out" ] || { echo "$out"; echo "::error::Dekart migrations changed vs v0.26.0; deploy by hand"; exit 1; }
+      - uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
+        with:
+          version: 0.4.123
+      - run: touch .npmrc
+      - run: flyctl deploy . --config deploy/fly/fly.toml --dockerfile Dockerfile --app klikpeta-geo --ha=false --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
