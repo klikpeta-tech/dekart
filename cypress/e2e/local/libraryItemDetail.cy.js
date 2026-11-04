@@ -2,6 +2,7 @@
 import {
   AddLibraryDatasetRequest,
   AddLibraryDatasetResponse,
+  CountLibrarySelectionRequest,
   CountLibrarySelectionResponse,
   GetLibraryItemResponse,
   GetLibrarySampleResponse,
@@ -10,6 +11,7 @@ import {
   LibraryCategory,
   LibraryCategoryGroup,
   LibraryCount,
+  LibraryItem,
   LibrarySampleRow,
   LibraryShape,
   LibraryTaxonomy,
@@ -43,16 +45,16 @@ const areas = {
   3273: [['3273010', 'Sukasari', 120]]
 }
 
-function taxonomy () {
+function taxonomy (rowCounts = [1200, 900]) {
   const group = new LibraryCategoryGroup()
   group.setId('makanan')
   group.setTitle('Makanan')
-  const categories = [['kafe', 'Kafe', 1200], ['kopi', 'Kedai kopi', 900]].map(([id, title, count]) => {
+  const categories = [['kafe', 'Kafe'], ['kopi', 'Kedai kopi']].map(([id, title], index) => {
     const category = new LibraryCategory()
     category.setId(id)
     category.setGroupId('makanan')
     category.setTitle(title)
-    category.setRowCount(count)
+    category.setRowCount(rowCounts[index])
     return category
   })
   const brand = new LibraryBrand()
@@ -70,16 +72,24 @@ function taxonomy () {
 // Like the server, it counts every granted category of the area, leaving out those in `state.omit` that have no rows there.
 // A sample answers after `state.sampleDelay` milliseconds.
 function stubLibrary (state) {
+  const item = LibraryItem.deserializeBinary(place.serializeBinary())
+  item.setRowCount(state.itemRows ?? 2100)
+  // Count workflows do not need a remote basemap or Mapbox credentials.
+  cy.intercept('GET', 'https://api.mapbox.com/styles/v1/**', {
+    version: 8,
+    sources: {},
+    layers: []
+  })
   cy.intercept('POST', '**/Dekart/ListLibraryItems', (req) => {
     const response = new ListLibraryItemsResponse()
-    response.setItemsList([place])
+    response.setItemsList([item])
     response.setCatalogueSize(1)
     req.reply(grpcWebReply(response))
   })
   cy.intercept('POST', '**/Dekart/GetLibraryItem', (req) => {
     const response = new GetLibraryItemResponse()
-    response.setItem(place)
-    response.setTaxonomy(taxonomy())
+    response.setItem(item)
+    response.setTaxonomy(taxonomy(state.categoryRows))
     req.reply(grpcWebReply(response))
   })
   cy.intercept('POST', '**/Dekart/ListLibraryAreas', (req) => {
@@ -89,12 +99,18 @@ function stubLibrary (state) {
       const area = new LibraryArea()
       area.setCode(code)
       area.setName(name)
-      area.setRowCount(rowCount)
+      area.setRowCount(state.itemRows === 0 ? 0 : rowCount)
       return area
     }))
     req.reply(grpcWebReply(response))
   })
   cy.intercept('POST', '**/Dekart/CountLibrarySelection', (req) => {
+    const { selection } = grpcWebRequest(req, CountLibrarySelectionRequest)
+    // Like the real count RPC, the fixture refuses an empty category selection.
+    if (selection.categoryIdsList.length === 0) {
+      req.reply(grpcWebError(3, 'pick at least one category'))
+      return
+    }
     const response = new CountLibrarySelectionResponse()
     response.setRowCount(state.rows)
     response.setByCategoryList(['kafe', 'kopi'].filter(id => !(state.omit || []).includes(id)).map(id => {
@@ -106,11 +122,13 @@ function stubLibrary (state) {
     req.reply(grpcWebReply(response))
   }).as('count')
   cy.intercept('POST', '**/Dekart/GetLibrarySample', (req) => {
-    const row = new LibrarySampleRow()
-    row.setValuesList(['Kopi <b>Kenangan</b>', 'Jl. Braga 1'])
     const response = new GetLibrarySampleResponse()
     response.setColumnsList(['nama', 'alamat'])
-    response.setRowsList([row])
+    response.setRowsList((state.sampleRows ?? [['Kopi <b>Kenangan</b>', 'Jl. Braga 1']]).map(values => {
+      const row = new LibrarySampleRow()
+      row.setValuesList(values)
+      return row
+    }))
     req.reply({ ...grpcWebReply(response), delay: state.sampleDelay || 0 })
   }).as('sample')
 }
@@ -140,10 +158,11 @@ function seedLibraryDataset (email, { version = 1, areaCode, name, grantEndsOn =
 }
 
 // openDetail opens the library from the empty dataset tab and then the item.
-function openDetail () {
+function openDetail (rowCount = '2.100') {
   cy.get('#dekart-library', { timeout: 30000 }).should('not.be.disabled').click()
-  cy.contains('li', 'Tempat Usaha 2025').click()
+  cy.contains('li', 'Tempat Usaha 2025').should('contain', `${rowCount} rows`).click()
   cy.contains('h2', 'Tempat Usaha 2025').scrollIntoView().should('be.visible')
+  cy.contains('dt', 'Rows').parent().find('dd').should('have.text', rowCount)
 }
 
 describe('data library item detail', () => {
@@ -223,10 +242,11 @@ describe('data library item detail', () => {
     // Nationwide counts show only while no area is picked; a category without rows in the area shows 0.
     cy.contains('label', 'Kafe (1.200)').scrollIntoView().should('be.visible')
     cy.get('select[aria-label="Provinsi"]').should('contain', 'Jawa Barat').select('Jawa Barat (21.000)')
-    cy.contains('label', 'Kafe').should('not.contain', '(')
-    cy.contains('label', 'Kafe').find('input').check()
     cy.contains('label', 'Kafe (120)').should('exist')
     cy.contains('label', 'Kedai kopi (0)').should('exist')
+    cy.contains('label', 'Kafe').find('input').should('not.be.checked')
+    cy.contains('button', 'Add to map').should('be.disabled')
+    cy.contains('label', 'Kafe').find('input').check()
 
     // A preview that answers after the selection changed is not shown for the new selection.
     cy.contains('button', 'Preview sample').click()
@@ -235,6 +255,38 @@ describe('data library item detail', () => {
     // Waits out the time the browser needs to handle the answer; the table must still be absent.
     cy.wait(500)
     cy.get('table[aria-label="Sample rows"]').should('not.exist')
+
+    // Clearing every category keeps the area's counts without enabling Add.
+    cy.contains('label', 'Kafe').find('input').uncheck()
+    cy.contains('label', 'Kedai kopi').find('input').uncheck()
+    cy.contains('label', 'Kafe (120)').scrollIntoView().should('be.visible')
+    cy.contains('label', 'Kedai kopi (0)').should('be.visible')
+    cy.contains('button', 'Add to map').should('be.disabled')
+  })
+
+  it('shows zero counts and no fabricated sample rows when Places is empty', () => {
+    openMapAsEditor('empty', { rows: 0, itemRows: 0, categoryRows: [0, 0], omit: ['kafe', 'kopi'], sampleRows: [] })
+    openDetail('0')
+    cy.contains('label', 'Kafe (0)').should('exist')
+    cy.get('select[aria-label="Provinsi"]').should('contain', 'Jawa Barat (0)').select('32')
+    cy.contains('label', 'Kafe (0)').should('exist')
+    cy.contains('label', 'Kedai kopi (0)').should('exist')
+    cy.contains('label', 'Kafe').find('input').check()
+    cy.contains('No rows match this selection.').scrollIntoView().should('be.visible')
+    cy.contains('button', 'Add 0 places to map').should('be.disabled')
+    cy.contains('button', 'Preview sample').click()
+    cy.get('table[aria-label="Sample rows"]').should('contain', 'nama').find('tbody tr').should('not.exist')
+  })
+
+  it('renders an empty source preview even when aggregate counts exist', () => {
+    openMapAsEditor('empty-source', { rows: 120, sampleRows: [] })
+    openDetail()
+    cy.get('select[aria-label="Provinsi"]').should('contain', 'Jawa Barat').select('32')
+    cy.contains('label', 'Kafe (120)').should('exist')
+    cy.contains('label', 'Kafe').find('input').check()
+    cy.contains('button', 'Add 120 places to map').should('not.be.disabled')
+    cy.contains('button', 'Preview sample').click()
+    cy.get('table[aria-label="Sample rows"]').should('contain', 'nama').find('tbody tr').should('not.exist')
   })
 
   it('shows the status of an added dataset and changes its area', () => {
