@@ -29,12 +29,10 @@
 
 .postgresFieldWide {
     flex: 65;
-    margin-bottom: 0;
 }
 
 .postgresFieldNarrow {
     flex: 35;
-    margin-bottom: 0;
 }
 
 .postgresSetupHint {

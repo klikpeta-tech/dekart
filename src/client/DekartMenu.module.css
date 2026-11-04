@@ -21,8 +21,24 @@
 .dekartMenu :global(.ant-menu-item-active) {
     background-color: transparent !important;
 }
+.subMenu {
+    padding: 0 !important;
+}
+
+/* antd 4 popup menu rhythm: full width items, 8px between them */
+.subMenu :global(.ant-menu-vertical .ant-menu-item) {
+    width: auto;
+    margin: 4px 0 8px;
+    border-radius: 0;
+}
+
+.subMenu :global(.ant-menu-vertical .ant-menu-item:last-child) {
+    margin-bottom: 4px;
+}
+
 .subMenu :global(.ant-menu-item-divider) {
     opacity: 0.3;
+    border-color: #f0f0f0;
 }
 
 .dekartMenu {

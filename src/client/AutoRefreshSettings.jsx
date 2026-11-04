@@ -97,9 +97,9 @@ export function AutoRefreshSettingsModal ({ visible, onClose }) {
   return (
     <Modal
       title='Auto Refresh Settings'
-      visible={visible}
+      open={visible}
       onCancel={handleCancel}
-      bodyStyle={{ padding: '0px' }}
+      styles={{ body: { padding: '0px' } }}
       footer={
         <div className={shareStyles.modalFooter}>
           <div className={shareStyles.modalFooterSpacer} />

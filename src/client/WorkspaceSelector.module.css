@@ -9,6 +9,8 @@
   /* min-width: 140px; */
   max-width: 160px;
   font-size: 12px;
+  /* antd 5 makes the select root 32px tall, the selector below is 28px */
+  height: 28px;
 }
 
 .select :global(.ant-select-selector) {

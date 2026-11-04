@@ -240,7 +240,6 @@ function EditModeButtons () {
               id='dekart-save-button'
               title={readOnly ? 'Workspace is read-only' : mapConfigConflict || widgetsConflict ? 'Reload before saving' : saving ? 'Saving...' : 'Save this map'}
               type='text'
-              ghost
               icon={saving || changed ? <CloudSyncOutlined /> : <CloudOutlined />}
               disabled={saving || readOnly || mapConfigConflict || widgetsConflict}
               onClick={() => {
@@ -355,7 +354,6 @@ function ViewSelect ({ value }) {
   return (
     <>
       <Select
-        ghost
         className={styles.reportViewSelect}
         value={value}
         onChange={handleChange}
@@ -363,7 +361,7 @@ function ViewSelect ({ value }) {
           { value: 'view', label: <><EyeOutlined /> Viewing</> },
           { value: 'edit', label: <><EditOutlined /> Editing</> }
         ]}
-        dropdownRender={(menu) => (
+        popupRender={(menu) => (
         // add history option to the dropdown after divider
           <ViewSelectDropdown menu={menu} onHistoryClick={handleHistoryClick} />
         )}

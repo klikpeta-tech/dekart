@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import Button from 'antd/es/button'
 import styles from './Downloading.module.css'
 import Modal from 'antd/es/modal'
+import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { addDatasetToMap, cancelDownloading, processDownloadError } from './actions/dataset'
 
 function CancelDownloadingButton () {
@@ -94,6 +95,7 @@ export default function Downloading () {
       const { dataset, res, extension, loaded, prevDatasetsList, label, sourceId, controller } = pendingConfirmation
       mdl.confirm({
         title: `${label} result is larger than ${prettyBites(maxDatasetSize)}`,
+        icon: <ExclamationCircleOutlined />,
         content: `Dataset size is ${prettyBites(loaded)}. Loading this dataset may slow down your browser. Continue?`,
         onOk: () => {
           dispatch(addDatasetToMap(dataset, prevDatasetsList, res, extension, sourceId, controller))

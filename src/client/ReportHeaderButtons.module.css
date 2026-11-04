@@ -58,6 +58,11 @@
     color: inherit;
 }
 
+/* antd 4 greyed the value while the dropdown is open, antd 5 makes it as faint as a placeholder */
+.reportViewSelect :global(.ant-select-open .ant-select-selection-item) {
+    color: #bfbfbf;
+}
+
 .reportViewSelect :global(.ant-select-arrow) {
     color: rgba(255,255,255,0.7);
 }

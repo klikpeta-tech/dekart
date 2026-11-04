@@ -1,4 +1,5 @@
 import Modal from 'antd/es/modal'
+import { ExclamationCircleOutlined } from '@ant-design/icons'
 import Button from 'antd/es/button'
 import styles from './DatasetSettingsModal.module.css'
 import Input from 'antd/es/input'
@@ -33,6 +34,7 @@ function ModalFooter ({ saving, setSaving, name, datasetId }) {
           dispatch(closeDatasetSettingsModal())
           Modal.confirm({
             title: 'Remove dataset from map?',
+            icon: <ExclamationCircleOutlined />,
             okText: 'Yes',
             okType: 'danger',
             cancelText: 'No',

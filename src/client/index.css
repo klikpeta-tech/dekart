@@ -1,5 +1,47 @@
-@import 'antd/dist/antd.css';
+@import 'antd/dist/reset.css';
+@import './antdCompat.css';
 @import-normalize;
+
+/* antd 5 ships no global base styles; keep the body, heading, link and selection styles the app got from antd 4 */
+body {
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    font-variant: tabular-nums;
+    line-height: 1.5715;
+    font-feature-settings: 'tnum';
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: rgba(0, 0, 0, 0.85);
+}
+
+a {
+    color: #1890ff;
+    text-decoration: none;
+    background-color: transparent;
+    outline: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #40a9ff;
+}
+
+a:active {
+    color: #096dd9;
+}
+
+a[disabled] {
+    color: rgba(0, 0, 0, 0.25);
+    cursor: not-allowed;
+}
+
+::selection {
+    color: #fff;
+    background: #1890ff;
+}
 
 html, body, #root {
     width: 100%;
