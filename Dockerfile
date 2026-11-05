@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:18 AS nodedeps
+FROM node:22 AS nodedeps
 WORKDIR /source
 COPY package.json package-lock.json .npmrc ./
 ENV CI=true

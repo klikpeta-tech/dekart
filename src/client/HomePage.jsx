@@ -119,7 +119,9 @@ function FirstReportOnboarding () {
   const isAdmin = useSelector(state => state.user.isAdmin)
   const readOnly = useSelector(state => state.workspace.readOnly)
   const history = useHistory()
-  const sqlConnectionList = useSelector(state => state.connection.list.filter(c => c.connectionType !== ConnectionType.CONNECTION_TYPE_LOCAL))
+  const connectionList = useSelector(state => state.connection.list)
+  // Filter outside the selector so the stored list keeps one stable reference.
+  const sqlConnectionList = useMemo(() => connectionList.filter(c => c.connectionType !== ConnectionType.CONNECTION_TYPE_LOCAL), [connectionList])
   const createDisabled = isViewer || readOnly
   return (
     <>

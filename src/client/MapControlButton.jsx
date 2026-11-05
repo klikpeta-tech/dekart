@@ -1,4 +1,4 @@
-import { MapControlButton as KeplerMapControlButton } from '@kepler.gl/components/dist/common/styled-components'
+import { MapControlButton as KeplerMapControlButton } from '@kepler.gl/components'
 import styles from './MapControlButton.module.css'
 import classnames from 'classnames'
 

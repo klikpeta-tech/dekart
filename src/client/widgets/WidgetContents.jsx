@@ -355,7 +355,7 @@ export default function WidgetContents ({
       )}
       <div
         className={classnames(styles.reportCharts, { [styles.hidden]: builder || settingsOpen })}
-        inert={filterProjectionPending ? '' : undefined}
+        inert={filterProjectionPending || undefined}
       >
         {/* A calculation can start after pointerdown; complete a drag that was already accepted. */}
         <DndContext

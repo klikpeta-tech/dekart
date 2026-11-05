@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import keplerGlReducer, { visStateReducer, createNewDatasetSuccessUpdater, prepareStateForDatasetReplace } from '@kepler.gl/reducers'
-import { createNewDatasetSuccess, createOrUpdateFilter, setFilter, removeFilter, toggleFilterFeature, wrapTo, registerEntry, deleteEntry, removeDataset, updateMap, addLayer, setPolygonFilterLayer } from '@kepler.gl/actions'
+import { createNewDatasetSuccess, createOrUpdateFilter, setFilter, removeFilter, toggleFilterFeature, wrapTo, unwrap, registerEntry, deleteEntry, removeDataset, updateMap, addLayer, setPolygonFilterLayer } from '@kepler.gl/actions'
 import { processRowObject } from '@kepler.gl/processors'
 import { KeplerTable } from '@kepler.gl/table'
 import { createStore, combineReducers } from 'redux'
@@ -70,8 +70,8 @@ async function publishTable (dispatch: Dispatch<AnyAction>, map: string, dataId:
   dispatch(wrapTo(map, fixtureCommand('kepler-filter-restore/fixture-replace', { table })))
 }
 // The forwarding declaration excludes extension actions accepted by Kepler at runtime.
-function fixtureCommand (type: string, payload: Record<string, unknown>): Parameters<typeof wrapTo>[1] {
-  return { type, ...payload } as unknown as Parameters<typeof wrapTo>[1]
+function fixtureCommand (type: string, payload: Record<string, unknown>): Parameters<typeof unwrap>[0] {
+  return { type, ...payload } as unknown as Parameters<typeof unwrap>[0]
 }
 
 describe('Kepler filter restoration', () => {
@@ -313,13 +313,14 @@ describe('Kepler filter restoration', () => {
     }
     context.dispatch(setPolygonFilterLayer(layer, feature))
     const saved = context.getFilters()[0]
-    expect((store.getState().maps.map as KeplerGlState).visState.datasets.a.filteredIndex).toEqual([0])
+    // Kepler 3.3 applies polygon filters per layer, so the dataset filteredIndex keeps every row.
+    expect((store.getState().maps.map as KeplerGlState).visState.datasets.a.filteredIndexByLayer.points).toEqual([0])
     context.dispatch(recovery.capture('a'))
     dropFilter()
     context.dispatch(recovery.restore('a'))
     expect(context.getFilters()[0].id).toBe(saved.id)
     expect(context.getFilters()[0].layerId).toEqual(['points'])
-    expect((store.getState().maps.map as KeplerGlState).visState.datasets.a.filteredIndex).toEqual([0])
+    expect((store.getState().maps.map as KeplerGlState).visState.datasets.a.filteredIndexByLayer.points).toEqual([0])
   })
 
   it('consumes empty captures before later authored selections', async () => {

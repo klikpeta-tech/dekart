@@ -40,6 +40,11 @@ export function shouldUpdateMapConfig (oldMapConfigIn, newMapConfigIn) {
   return !deepCompare(oldMapConfig, newMapConfig)
 }
 
+// Layer order entries are layer ids or layer groups holding nested entries.
+function flattenLayerOrder (layerOrder) {
+  return layerOrder.flatMap(entry => typeof entry === 'string' ? [entry] : flattenLayerOrder(entry.layerOrder || []))
+}
+
 // Kepler exports only bound layers. Preserve authored layers and tooltips still waiting for data.
 export function getMapConfigToSave (kepler, savedMapConfig) {
   const config = KeplerGlSchema.getConfigToSave(kepler)
@@ -54,10 +59,12 @@ export function getMapConfigToSave (kepler, savedMapConfig) {
   const { newLayers, newLayerOrder } = insertLayerAtRightOrder(
     config.config.visState.layers,
     savedVisState.layers.filter(layer => pendingLayerIds.has(layer.id)),
-    config.config.visState.layers.map(layer => layer.id),
+    config.config.visState.layerOrder,
     savedVisState.layers.map(layer => layer.id)
   )
-  config.config.visState.layers = newLayerOrder.map(id => newLayers.find(layer => layer.id === id))
+  // Kepler 3.3 saves layerOrder entries (layer ids or layer groups); layers follow that flattened order.
+  config.config.visState.layerOrder = newLayerOrder
+  config.config.visState.layers = flattenLayerOrder(newLayerOrder).map(id => newLayers.find(layer => layer.id === id))
   const pendingTooltipFields = Object.fromEntries(
     Object.entries(savedVisState.interactionConfig?.tooltip?.fieldsToShow || {})
       .filter(([dataId]) => pendingDatasetIds.has(dataId))
