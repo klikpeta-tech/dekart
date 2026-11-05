@@ -47,7 +47,6 @@ function ConnectionTypeSelectorBottom () {
     return (
       <div>
         <Button
-          type='ghost'
           onClick={() => {
             track('ReturnFromConnectionSelector')
             if (newScreen) {

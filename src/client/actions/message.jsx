@@ -20,13 +20,13 @@ export function downloading (dataset, controller) {
 export function warn (content, transitive = true) {
   track('WarnMessage', { transitive })
   if (!transitive) {
-    message.warn({
+    message.warning({
       content,
       duration: 10000,
       style
     })
   } else {
-    message.warn({
+    message.warning({
       content,
       style
     })

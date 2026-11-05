@@ -9,7 +9,7 @@ import MapPaneHeader from './MapPaneHeader'
 import styles from './ReportPage.module.css'
 import { AutoSizer } from 'react-virtualized'
 import { useDispatch, useSelector } from 'react-redux'
-import { EditOutlined, WarningFilled, MoreOutlined, ReadOutlined } from '@ant-design/icons'
+import { EditOutlined, ExclamationCircleOutlined, WarningFilled, MoreOutlined, ReadOutlined } from '@ant-design/icons'
 import { QueryJob } from 'dekart-proto/dekart_pb'
 import Tabs from 'antd/es/tabs'
 import classnames from 'classnames'
@@ -130,6 +130,7 @@ function getOnTabEditHandler (dispatch, reportId, datasets) {
           track('RemoveReadmeClicked', { reportId })
           Modal.confirm({
             title: 'Remove readme from report?',
+            icon: <ExclamationCircleOutlined />,
             okText: 'Yes',
             okType: 'danger',
             cancelText: 'No',
@@ -180,7 +181,8 @@ function QueryTooltip ({ job, dataset }) {
   )
 }
 
-function getTabPane (dataset, datasets, files, status, queryJobs, duckDBJobStates, queryParamsHash, closable, lastDataset, tabIndex) {
+// getTabItem builds the antd Tabs item of a dataset
+function getTabItem (dataset, datasets, files, status, queryJobs, duckDBJobStates, queryParamsHash, closable, lastDataset, tabIndex) {
   let changed = false
   const title = getDatasetName(dataset, datasets, files)
   let tabIcon = null
@@ -202,25 +204,23 @@ function getTabPane (dataset, datasets, files, status, queryJobs, duckDBJobState
   if (dataset.queryId || dataset.fileId) {
     closeIcon = <span title='Dataset setting'><MoreOutlined /></span>
   }
-  return (
-    <Tabs.TabPane
-      tab={
-        <Tooltip
-          placement='bottom'
-          title={
-            <span className={styles.queryTooltip}>
-              {shortcutLabel ? <span>{shortcutLabel}</span> : null}
-              {tooltip}
-            </span>
-          }
-        >{tabIcon}{tabTitle}
-        </Tooltip>
-      }
-      key={dataset.id}
-      closable={Boolean((closable && !lastDataset) || closeIcon)}
-      closeIcon={closeIcon}
-    />
-  )
+  return {
+    label: (
+      <Tooltip
+        placement='bottom'
+        title={
+          <span className={styles.queryTooltip}>
+            {shortcutLabel ? <span>{shortcutLabel}</span> : null}
+            {tooltip}
+          </span>
+        }
+      >{tabIcon}{tabTitle}
+      </Tooltip>
+    ),
+    key: dataset.id,
+    closable: Boolean((closable && !lastDataset) || closeIcon),
+    closeIcon
+  }
 }
 
 function DatasetSection ({ reportId }) {
@@ -247,20 +247,18 @@ function DatasetSection ({ reportId }) {
 
   if (report.readme) {
     const readmeShortcut = getTabShortcutLabel(0)
-    readmeTab.push(
-      <Tabs.TabPane
-        className={styles.addTabPane}
-        tab={
-          <Tooltip placement='bottom' title={readmeShortcut ? <span>{readmeShortcut}</span> : null}>
-            <>
-              <ReadOutlined /> Readme
-            </>
-          </Tooltip>
-        }
-        key='readme'
-        closable={canMutate}
-      />
-    )
+    readmeTab.push({
+      className: styles.addTabPane,
+      label: (
+        <Tooltip placement='bottom' title={readmeShortcut ? <span>{readmeShortcut}</span> : null}>
+          <>
+            <ReadOutlined /> Readme
+          </>
+        </Tooltip>
+      ),
+      key: 'readme',
+      closable: canMutate
+    })
   }
 
   useEffect(() => {
@@ -305,8 +303,7 @@ function DatasetSection ({ reportId }) {
                   }}
                   hideAdd={!canMutate}
                   onEdit={getOnTabEditHandler(dispatch, reportId, datasets)}
-                >
-                  {readmeTab.concat(datasets.map((dataset, index) => getTabPane(
+                  items={readmeTab.concat(datasets.map((dataset, index) => getTabItem(
                     dataset,
                     datasets,
                     files,
@@ -318,7 +315,7 @@ function DatasetSection ({ reportId }) {
                     lastDataset,
                     index + (report.readme ? 1 : 0)
                   )))}
-                </Tabs>
+                />
               </div>
               {showReadme ? <Readme readme={report.readme} /> : <Dataset dataset={activeDataset} />}
             </div>

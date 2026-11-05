@@ -12,8 +12,6 @@ import { restoreReportSnapshot } from './actions/report'
 import { Loading } from './Loading'
 import { ReportSnapshot } from 'dekart-proto/dekart_pb'
 
-const { Panel } = Collapse
-
 // Format date for display using luxon
 function formatDate (date) {
   const dateOnly = DateTime.fromJSDate(date).startOf('day')
@@ -137,8 +135,7 @@ function DaySection ({ dayLabel, hourGroups, expandedKeys, onToggle, currentVers
         onChange={handleToggle}
         expandIcon={({ isActive }) => <DownOutlined rotate={isActive ? 180 : 0} />}
         className={styles.hourCollapse}
-      >
-        {hourKeys.map(hourKey => {
+        items={hourKeys.map(hourKey => {
           const hourGroup = hourGroups[hourKey]
           const hourLabel = formatHour(new Date(2024, 0, 1, hourGroup.hour))
           const changes = hourGroup.changes.sort((a, b) => b.timestamp - a.timestamp)
@@ -147,50 +144,47 @@ function DaySection ({ dayLabel, hourGroups, expandedKeys, onToggle, currentVers
           // Render if expanded OR if it has been rendered before (lazy render, but keep after first render)
           const shouldRender = isExpanded || hasBeenRendered
 
-          return (
-            <Panel
-              key={hourKey}
-              header={
-                <div className={styles.hourHeader}>
-                  <ClockCircleOutlined className={styles.hourIcon} />
-                  <span className={styles.hourLabel}>{hourLabel}</span>
-                  <span className={styles.hourChangeCount}>{changes.length} change{changes.length !== 1 ? 's' : ''}</span>
-                </div>
-              }
-              className={styles.hourPanel}
-            >
-              {shouldRender && (
-                <div className={styles.changesList}>
-                  {changes.map(change => (
-                    <div key={change.id} className={`${styles.changeItem} ${change.id === currentVersionId ? styles.currentVersion : ''}`}>
-                      <div className={styles.changeTime}>{formatTime(change.timestamp)}</div>
-                      <div className={styles.changeContent}>
-                        <div className={styles.changeTypeBadge}>
-                          {renderChangeTypeTag(change.triggerType)}
-                        </div>
-                        <div className={styles.changeUser}>
-                          <UserOutlined className={styles.userIcon} />
-                          {change.user}
-                        </div>
+          return {
+            key: hourKey,
+            label: (
+              <div className={styles.hourHeader}>
+                <ClockCircleOutlined className={styles.hourIcon} />
+                <span className={styles.hourLabel}>{hourLabel}</span>
+                <span className={styles.hourChangeCount}>{changes.length} change{changes.length !== 1 ? 's' : ''}</span>
+              </div>
+            ),
+            className: styles.hourPanel,
+            children: shouldRender && (
+              <div className={styles.changesList}>
+                {changes.map(change => (
+                  <div key={change.id} className={`${styles.changeItem} ${change.id === currentVersionId ? styles.currentVersion : ''}`}>
+                    <div className={styles.changeTime}>{formatTime(change.timestamp)}</div>
+                    <div className={styles.changeContent}>
+                      <div className={styles.changeTypeBadge}>
+                        {renderChangeTypeTag(change.triggerType)}
                       </div>
-                      <Button
-                        type='text'
-                        size='small'
-                        icon={<RollbackOutlined />}
-                        className={styles.restoreButton}
-                        disabled={restoring}
-                        onClick={() => onRestore(change.id)}
-                      >
-                        Restore
-                      </Button>
+                      <div className={styles.changeUser}>
+                        <UserOutlined className={styles.userIcon} />
+                        {change.user}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </Panel>
-          )
+                    <Button
+                      type='text'
+                      size='small'
+                      icon={<RollbackOutlined />}
+                      className={styles.restoreButton}
+                      disabled={restoring}
+                      onClick={() => onRestore(change.id)}
+                    >
+                      Restore
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )
+          }
         })}
-      </Collapse>
+      />
     </div>
   )
 }
@@ -278,7 +272,7 @@ export function MapChangeHistoryModal () {
       footer={null}
       width={700}
       className={styles.modal}
-      bodyStyle={{ padding: '0px' }}
+      styles={{ body: { padding: '0px' } }}
     >
       <div className={styles.content}>
         {loading && !snapshots && (
@@ -302,22 +296,20 @@ export function MapChangeHistoryModal () {
                 onChange={(keys) => setCurrentExpandedDays(new Set(keys))}
                 expandIcon={({ isActive }) => <DownOutlined rotate={isActive ? 180 : 0} />}
                 className={styles.dayCollapse}
-              >
-                {dayLabels.map(dayLabel => {
+                items={dayLabels.map(dayLabel => {
                   const hourGroups = groupedData[dayLabel]
                   const totalChanges = Object.values(hourGroups).reduce((sum, hg) => sum + hg.changes.length, 0)
 
-                  return (
-                    <Panel
-                      key={dayLabel}
-                      header={
-                        <div className={styles.dayPanelHeader}>
-                          <span className={styles.dayPanelLabel}>{dayLabel}</span>
-                          <span className={styles.dayPanelCount}>{totalChanges} change{totalChanges !== 1 ? 's' : ''}</span>
-                        </div>
-                      }
-                      className={styles.dayPanel}
-                    >
+                  return {
+                    key: dayLabel,
+                    label: (
+                      <div className={styles.dayPanelHeader}>
+                        <span className={styles.dayPanelLabel}>{dayLabel}</span>
+                        <span className={styles.dayPanelCount}>{totalChanges} change{totalChanges !== 1 ? 's' : ''}</span>
+                      </div>
+                    ),
+                    className: styles.dayPanel,
+                    children: (
                       <DaySection
                         dayLabel={dayLabel}
                         hourGroups={hourGroups}
@@ -344,10 +336,10 @@ export function MapChangeHistoryModal () {
                           setExpandedHours(newExpanded)
                         }}
                       />
-                    </Panel>
-                  )
+                    )
+                  }
                 })}
-              </Collapse>
+              />
             </div>
           </>
         )}

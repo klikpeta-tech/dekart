@@ -1,0 +1,74 @@
+/* Geometry antd 5 changed and the theme tokens in antdTheme.js cannot restore, so the app keeps its antd 4 layout. */
+
+/* Modal footer padding */
+.ant-modal .ant-modal-footer {
+    padding: 10px 16px;
+}
+
+/* Dropdown menus and Select popups: no inner gutter, square items */
+.ant-dropdown .ant-dropdown-menu,
+.ant-select-dropdown.ant-select-dropdown {
+    padding: 4px 0;
+}
+
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item,
+.ant-select-dropdown .ant-select-item {
+    border-radius: 0;
+}
+
+/* DatePicker calendar: antd 4 sizes (280px panel, 30px rows) and its light header arrows */
+.ant-picker-dropdown .ant-picker-date-panel {
+    width: 280px;
+}
+
+.ant-picker-dropdown .ant-picker-date-panel .ant-picker-body {
+    padding: 8px 12px;
+}
+
+.ant-picker-dropdown .ant-picker-cell {
+    padding: 3px 0;
+}
+
+.ant-picker-dropdown .ant-picker-date-panel .ant-picker-content {
+    width: 252px;
+}
+
+.ant-picker-dropdown .ant-picker-content thead th {
+    height: 32px;
+    padding: 1px;
+    line-height: 30px;
+}
+
+.ant-picker-dropdown .ant-picker-header > button:not(.ant-picker-header-view) {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+.ant-picker-dropdown .ant-picker-header > button:not(.ant-picker-header-view):hover {
+    color: rgba(0, 0, 0, 0.85);
+}
+
+/* Result: antd 4 title and subtitle line heights, no title margin */
+.ant-result .ant-result-title {
+    margin: 0;
+    line-height: 1.8;
+}
+
+.ant-result .ant-result-subtitle {
+    line-height: 1.6;
+}
+
+/* Confirm dialogs: antd 5 reserves an 8px gap for the content even when there is none */
+.ant-modal-confirm .ant-modal-confirm-paragraph {
+    gap: 0;
+}
+
+.ant-modal-confirm .ant-modal-confirm-content:not(:empty) {
+    margin-top: 8px;
+}
+
+/* antd 4 gave these titles weight 500, antd 5 uses 600 */
+.ant-modal .ant-modal-title,
+.ant-card .ant-card-head,
+.ant-table-wrapper .ant-table-thead > tr > th {
+    font-weight: 500;
+}

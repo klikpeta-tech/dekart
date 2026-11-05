@@ -14,10 +14,16 @@
 .datasetSelectorInner {
     margin-bottom: 10px;
 }
+/* the content overflows the column, antd 5 buttons have no vertical padding and would shrink below their 32px height */
+.datasetSelector > :global(.ant-btn) {
+    flex-shrink: 0;
+}
 .datasetSelector .datasetSelectorInner  :global(.ant-btn) {
     font-size: 1.4em;
     height: 80px;
     margin: 0.5em;
+    /* antd 5 large buttons have no vertical padding, the content sat 6.4px below the top edge */
+    padding-block: 6.4px;
 }
 .selectorButtons>* {
     margin: 10px;

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import Button from 'antd/es/button'
 import DatePicker from 'antd/es/date-picker'
 import Switch from 'antd/es/switch'
@@ -79,7 +79,7 @@ export default function LibraryGrantRow ({ row, nowSeconds, readOnly }) {
         placeholder='Access until'
         allowClear={!granted}
         disabled={disabled}
-        value={endsOn ? moment(endsOn, DAY_FORMAT) : null}
+        value={endsOn ? dayjs(endsOn) : null}
         disabledDate={(day) => !isPickedDayAllowed(day, today)}
         onChange={(day) => {
           const picked = day ? day.format(DAY_FORMAT) : ''

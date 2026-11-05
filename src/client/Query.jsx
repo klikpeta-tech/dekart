@@ -28,7 +28,6 @@ function CancelButton ({ queryJob }) {
   return (
     <Button
       size='small'
-      type='ghost'
       onClick={() => {
         track('QueryCancelled', { jobId: queryJob.id })
         dispatch(cancelJob(queryJob.id))

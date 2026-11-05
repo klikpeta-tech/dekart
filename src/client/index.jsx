@@ -4,6 +4,8 @@ import App from './App'
 import './index.css'
 import { createStore, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
+import ConfigProvider from 'antd/es/config-provider'
+import { antdTheme } from './antdTheme'
 import thunk from 'redux-thunk'
 import reducer from './reducers/rootReducer'
 import { enhanceReduxMiddleware } from '@kepler.gl/reducers'
@@ -23,7 +25,9 @@ setTrackEventToServer(trackEventToServer)
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <ConfigProvider theme={antdTheme}>
+      <App />
+    </ConfigProvider>
   </Provider>
   ,
   document.getElementById('root')

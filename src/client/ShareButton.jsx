@@ -546,10 +546,10 @@ export default function ShareButton () {
       </Button>
       <Modal
         title='Share Map'
-        visible={modalOpen}
+        open={modalOpen}
         onOk={() => setModalOpen(false)}
         onCancel={() => setModalOpen(false)}
-        bodyStyle={{ padding: '0px' }}
+        styles={{ body: { padding: '0px' } }}
         footer={
           <div className={styles.modalFooter}>
             {workspaceId && !isSnowpark ? <Button icon='+ ' type='primary' href='/workspace/members' disabled={readOnly} title={readOnly ? 'Workspace is read-only' : undefined} onClick={() => track('AddUsersToWorkspaceFromShareModal')}>Add users to workspace</Button> : null}

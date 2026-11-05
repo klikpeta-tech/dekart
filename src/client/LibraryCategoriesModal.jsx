@@ -50,9 +50,12 @@ export default function LibraryCategoriesModal ({ itemId, title, initial, okText
               {selected.length === 0 ? 'Pick at least one category.' : `${selected.length} selected`}
             </div>
             <Checkbox.Group className={styles.groups} value={selected} onChange={setSelected}>
-              <Collapse>
-                {groupCategories(taxonomy).map(group => (
-                  <Collapse.Panel key={group.id} header={group.title} forceRender>
+              <Collapse
+                items={groupCategories(taxonomy).map(group => ({
+                  key: group.id,
+                  label: group.title,
+                  forceRender: true,
+                  children: (
                     <div className={styles.categories}>
                       {group.categories.map(category => (
                         <Checkbox key={category.id} value={category.id}>
@@ -60,9 +63,9 @@ export default function LibraryCategoriesModal ({ itemId, title, initial, okText
                         </Checkbox>
                       ))}
                     </div>
-                  </Collapse.Panel>
-                ))}
-              </Collapse>
+                  )
+                }))}
+              />
             </Checkbox.Group>
           </>
           )

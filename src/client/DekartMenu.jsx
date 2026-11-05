@@ -19,65 +19,49 @@ export default function DekartMenu () {
   const user = useSelector(state => state.user)
   const { isViewer } = user
   const readOnly = useSelector(state => state.workspace.readOnly)
+  // main menu entries, each follows the visibility rules of the page it opens
+  const children = [
+    ...(authEnabled
+      ? [
+          { key: 'my', label: <Link to='/'>My Maps</Link>, onClick: () => track('NavigateToMyMaps') },
+          { key: 'shared', label: <Link to='/shared'>Shared Maps</Link>, disabled: isPlayground, onClick: () => track('NavigateToSharedMaps') }
+        ]
+      : [
+          { key: 'reports', label: <Link to='/'>Maps</Link>, onClick: () => track('NavigateToMaps') },
+          { key: 'shared-disabled', label: <span>Shared Maps</span>, disabled: true }
+        ]),
+    ...(userDefinedConnection && canViewConnections(user)
+      ? [{ key: 'connections', label: <Link to='/connections'>Connections</Link>, onClick: () => track('NavigateToConnections') }]
+      : []),
+    ...(canManageLibraryAccess(user)
+      ? [{ key: 'library', label: <Link to='/library'>Data Library</Link>, onClick: () => track('NavigateToDataLibrary') }]
+      : []),
+    {
+      key: 'create',
+      label: 'New Map',
+      disabled: isViewer || readOnly,
+      onClick: () => {
+        track('CreateNewMap')
+        dispatch(createReport())
+      }
+    },
+    { type: 'divider' },
+    {
+      key: 'source',
+      label: <a target='_blank' rel='noopener noreferrer' href='https://github.com/klikpeta-tech/dekart'>Source - Based on Dekart (AGPL-3.0)</a>,
+      onClick: () => track('ClickedSource')
+    }
+  ]
+  const items = [{
+    key: 'home',
+    label: <MenuOutlined />,
+    popupOffset,
+    popupClassName: styles.subMenu,
+    children
+  }]
   return (
     <div className={styles.dekartMenu}>
-      <Menu mode='horizontal' theme='dark'>
-        <Menu.SubMenu
-          id='dekart-main-menu'
-          popupOffset={popupOffset}
-          popupClassName={styles.subMenu} title={<MenuOutlined />} key='home' active='yes'
-        >
-          {authEnabled
-            ? (
-              <>
-                <Menu.Item key='my' onClick={() => track('NavigateToMyMaps')}>
-                  <Link to='/'>My Maps</Link>
-                </Menu.Item>
-                <Menu.Item key='shared' disabled={isPlayground} onClick={() => track('NavigateToSharedMaps')}>
-                  <Link to='/shared'>Shared Maps</Link>
-                </Menu.Item>
-              </>
-              )
-            : (
-              <>
-                <Menu.Item key='reports' onClick={() => track('NavigateToMaps')}>
-                  <Link to='/'>Maps</Link>
-                </Menu.Item>
-                <Menu.Item key='shared-disabled' disabled>
-                  <span>Shared Maps</span>
-                </Menu.Item>
-              </>
-              )}
-          {userDefinedConnection && canViewConnections(user)
-            ? (
-              <Menu.Item key='connections' onClick={() => track('NavigateToConnections')}>
-                <Link to='/connections'>Connections</Link>
-              </Menu.Item>
-              )
-            : null}
-          {canManageLibraryAccess(user)
-            ? (
-              <Menu.Item key='library' onClick={() => track('NavigateToDataLibrary')}>
-                <Link to='/library'>Data Library</Link>
-              </Menu.Item>
-              )
-            : null}
-          <Menu.Item
-            key='create'
-            disabled={isViewer || readOnly}
-            onClick={() => {
-              track('CreateNewMap')
-              dispatch(createReport())
-            }}
-          >
-            New Map
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item key='source' onClick={() => track('ClickedSource')}>
-            <a target='_blank' rel='noopener noreferrer' href='https://github.com/klikpeta-tech/dekart'>Source - Based on Dekart (AGPL-3.0)</a>
-          </Menu.Item>
-        </Menu.SubMenu>
-      </Menu>
+      <Menu mode='horizontal' theme='dark' items={items} />
     </div>
   )
 }

@@ -49,9 +49,9 @@ export default function WorkspaceSelector () {
         onChange={handleChange}
         className={styles.select}
         showSearch={false}
-        dropdownMatchSelectWidth={false}
+        popupMatchSelectWidth={false}
         optionLabelProp='label'
-        dropdownRender={(menu) => (
+        popupRender={(menu) => (
           <div
             className={classNames(
               styles.dropdown,
