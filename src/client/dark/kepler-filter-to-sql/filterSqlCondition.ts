@@ -22,6 +22,8 @@ export interface Filter {
   layerId?: string[]
   /** False disables this filter's SQL condition. */
   enabled?: boolean
+  /** True keeps the rows this filter would otherwise remove, including rows whose value is null. */
+  inverted?: boolean
 }
 /** Mosaic SQL expression; identifiers and literals are escaped by mosaic-sql. */
 export type SqlCondition = ExprNode

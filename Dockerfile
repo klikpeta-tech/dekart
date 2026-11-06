@@ -16,7 +16,7 @@ COPY src/setupTests.js src/setupTests.js
 COPY vitest.config.js vite.config.js ./
 
 FROM nodedeps AS nodebuilder
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 RUN npm run build
 
 FROM nodedeps AS nodetest

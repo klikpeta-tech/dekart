@@ -4,6 +4,7 @@ import { duckDBJobStates, queries, queryExecutionsPending, queryJobs, queryParam
 import { setUsage } from '../actions/usage'
 import { setEnv } from '../actions/env'
 import keplerGl from './keplerReducer'
+import { aiAssistantReducer as aiAssistant } from '@openassistant/kepler-assistant'
 import stream from './streamReducer'
 import widgets from './widgetsReducer'
 import token from './tokenReducer'
@@ -89,6 +90,7 @@ function env (state = defaultEnv, action) {
 
 export default combineReducers({
   keplerGl,
+  aiAssistant,
   widgets,
   report,
   reportStatus,

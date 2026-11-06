@@ -1,0 +1,8 @@
+.dock {
+    flex: 0 0 420px;
+    width: 420px;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    border-left: 1px solid #2a3a4a;
+}

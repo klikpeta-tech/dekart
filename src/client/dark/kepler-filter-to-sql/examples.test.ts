@@ -15,6 +15,13 @@ describe('executable filter contracts', () => {
     expect(String(scalarClause({ ...category, value: [] }).sqlCondition)).toBe('FALSE')
     expect(scalarClause({ ...category, enabled: false }).sqlCondition).toBeNull()
   })
+  it('inverted', () => {
+    const range: Filter = { ...category, type: 'range', value: [10.5, 20.5], inverted: true }
+    // A null verdict counts as rejected, so an inverted filter keeps those rows.
+    expect(String(scalarClause(range).sqlCondition)).toBe('(NOT coalesce(("category" BETWEEN 10.5 AND 20.5), FALSE))')
+    expect(scalarClause({ ...range, enabled: false }).sqlCondition).toBeNull()
+    expect(String(scalarClause({ ...range, inverted: false }).sqlCondition)).toBe('("category" BETWEEN 10.5 AND 20.5)')
+  })
   it('hostile', () => {
     const hostile = { ...category, name: ['odd"field'], value: ["O'Brien\\<script>"] }
     expect(String(scalarClause(hostile).sqlCondition)).toBe('("odd""field" IN (\'O\'\'Brien\\<script>\'))')

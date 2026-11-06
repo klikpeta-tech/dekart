@@ -5,7 +5,9 @@ import { createFilterRestore } from '../dark/kepler-filter-restore/index'
 const customKeplerGlReducer = keplerGlReducer.initialState({
   uiState: {
     currentModal: null,
-    activeSidePanel: null
+    activeSidePanel: null,
+    // The AI assistant control opens its panel from this map control entry.
+    mapControls: { ...uiStateUpdaters.DEFAULT_MAP_CONTROLS, aiAssistant: { active: false, show: true } }
   },
   mapStyle: {
     styleType: 'dark'

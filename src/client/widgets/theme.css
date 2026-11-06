@@ -1,5 +1,6 @@
 @import '@sqlrooms/ui/tailwind-preset.css' source(none);
 @source '../../../node_modules/@sqlrooms';
+@source '../../../node_modules/@openassistant';
 @source './';
 
 /* Tailwind preflight vertically centers every SVG; Ant icons expect the

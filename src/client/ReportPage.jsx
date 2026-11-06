@@ -1,8 +1,9 @@
 import { useHistory, useParams } from 'react-router-dom'
 import Input from 'antd/es/input'
-import { lazy, Suspense, useEffect, useState, Component, useMemo, useRef } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState, Component, useMemo, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import { injectComponents, MapContainerFactory } from '@kepler.gl/components'
+import { DekartMapControlFactory, MapControlFactory } from './KeplerMapControl'
 import { addFilter, toggleSidePanel } from '@kepler.gl/actions'
 import FilterStrip from './widgets/FilterStrip'
 import MapPaneHeader from './MapPaneHeader'
@@ -39,6 +40,9 @@ import { UNKNOWN_EMAIL } from './lib/constants'
 import { track } from './lib/tracking'
 import { getDefaultMapStyles } from '@kepler.gl/reducers'
 import { getApplicationConfig } from '@kepler.gl/utils'
+import { WebMercatorViewport } from '@deck.gl/core'
+import { setMapBoundary } from '@openassistant/kepler-assistant'
+import AiAssistantDock from './AiAssistantDock'
 import UserPositionOverlay from './UserPositionOverlay'
 import { useBasemapReady } from './lib/useBasemapReady'
 import { useSnapshotReady } from './lib/useSnapshotReady'
@@ -70,7 +74,7 @@ function MapContainerWithRenderFactory (...dependencies) {
   }
 }
 MapContainerWithRenderFactory.deps = MapContainerFactory.deps
-const KeplerGl = injectComponents([[MapContainerFactory, MapContainerWithRenderFactory]])
+const KeplerGl = injectComponents([[MapContainerFactory, MapContainerWithRenderFactory], [MapControlFactory, DekartMapControlFactory]])
 
 // Build keyboard hint text for tab tooltips.
 function getTabShortcutLabel (tabIndex) {
@@ -453,6 +457,11 @@ function Kepler ({ snapshot, interactionDisabled, onSnapshotBasemapReadyChange }
   const keplerMapState = useSelector(state => state.keplerGl.kepler?.mapState)
   const dispatch = useDispatch()
   const [mapboxRef, setMapboxRef] = useState(null)
+  // The AI assistant filters vector tile data by the visible map boundary.
+  const onViewStateChange = useCallback(viewState => {
+    const viewport = new WebMercatorViewport(viewState)
+    dispatch(setMapBoundary(viewport.unproject([0, 0]), viewport.unproject([viewport.width, viewport.height])))
+  }, [dispatch])
   useBasemapReady(snapshot, mapboxRef, onSnapshotBasemapReadyChange, keplerMapState)
 
   // Filter out MapLibre styles (dark-matter, positron, voyager) only when isSnowpark is true
@@ -501,30 +510,34 @@ function Kepler ({ snapshot, interactionDisabled, onSnapshotBasemapReadyChange }
       onKeyDownCapture={event => handleSidePanelInteraction(event, interactionDisabled, dispatch)}
       onPointerDownCapture={event => handleSidePanelInteraction(event, interactionDisabled, dispatch)}
     >
-      {!snapshot
-        ? (
-          <div className={styles.mapControlButtons}>
-            <ToggleFullscreenButton />
-            <ShowMyLocationButton />
-          </div>
-          )
-        : null}
-      <AutoSizer>
-        {({ height, width }) => (
-          <CatchKeplerError onError={(err) => dispatch(setError(err))}>
-            <KeplerGl
-              id='kepler'
-              mapboxApiAccessToken={env.variables.MAPBOX_TOKEN}
-              width={width}
-              height={height}
-              mapStyles={mapStylesWithoutMapLibre}
-              mapStylesReplaceDefault={isSnowpark || undefined}
-              getMapboxRef={setMapboxRef}
-            />
-            {mapboxRef && <UserPositionOverlay map={mapboxRef} />}
-          </CatchKeplerError>
-        )}
-      </AutoSizer>
+      <div className={styles.keplerMap}>
+        {!snapshot
+          ? (
+            <div className={styles.mapControlButtons}>
+              <ToggleFullscreenButton />
+              <ShowMyLocationButton />
+            </div>
+            )
+          : null}
+        <AutoSizer>
+          {({ height, width }) => (
+            <CatchKeplerError onError={(err) => dispatch(setError(err))}>
+              <KeplerGl
+                id='kepler'
+                mapboxApiAccessToken={env.variables.MAPBOX_TOKEN}
+                width={width}
+                height={height}
+                mapStyles={mapStylesWithoutMapLibre}
+                mapStylesReplaceDefault={isSnowpark || undefined}
+                getMapboxRef={setMapboxRef}
+                onViewStateChange={onViewStateChange}
+              />
+              {mapboxRef && <UserPositionOverlay map={mapboxRef} />}
+            </CatchKeplerError>
+          )}
+        </AutoSizer>
+      </div>
+      {!snapshot ? <AiAssistantDock /> : null}
     </div>
   )
 }

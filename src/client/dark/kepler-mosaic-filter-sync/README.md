@@ -118,6 +118,7 @@ Other Kepler filter properties passed through without interpretation.
 | <a id="api-enabled"></a> `enabled?` | `boolean` | False disables this filter's SQL condition. | `Filter.enabled` |
 | <a id="api-fieldidx"></a> `fieldIdx?` | `number`[] | Field positions for each entry in dataId. | - |
 | <a id="api-id"></a> `id` | `string` | Stable identity carried into the derived FilterClause. | `Filter.id` |
+| <a id="api-inverted"></a> `inverted?` | `boolean` | True keeps the rows this filter would otherwise remove, including rows whose value is null. | `Filter.inverted` |
 | <a id="api-layerid"></a> `layerId?` | `string`[] | Layer IDs used to derive a polygon filter's spatial condition. | `Filter.layerId` |
 | <a id="api-name"></a> `name` | `string`[] | Filter field names paired with dataId entries. | `Filter.name` |
 | <a id="api-type"></a> `type` | `string` | Kepler filter kind, such as select, multiSelect, range, or polygon. | `Filter.type` |

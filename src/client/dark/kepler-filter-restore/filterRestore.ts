@@ -101,7 +101,7 @@ function applyRecovery (instance: Instance, action: AnyAction, pending: Pending 
     case 'kepler-filter-restore/capture': {
       if (pending?.[action.dataId] !== undefined || instance.visState === undefined) return { instance, pending }
       const saved = instance.visState.filters.filter(filter => filter.dataId.includes(action.dataId))
-        .map(({ id, type, dataId, name, value, enabled, layerId }) => ({ id, type, dataId, name, value, enabled, layerId }))
+        .map(({ id, type, dataId, name, value, enabled, inverted, layerId }) => ({ id, type, dataId, name, value, enabled, inverted, layerId }))
       return { instance, pending: { ...pending, [action.dataId]: structuredClone(saved) } }
     }
     case 'kepler-filter-restore/restore': {
