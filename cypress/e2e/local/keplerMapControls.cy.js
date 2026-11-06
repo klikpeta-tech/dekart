@@ -43,6 +43,12 @@ describe('Kepler 3.3 map controls', () => {
       cy.get('.map-scale').should($scale => {
         expect($scale[0].getBoundingClientRect().left).to.be.lessThan(paneRight)
       })
+      // The scale at the map edge must not be drawn over the last-updated timestamp.
+      cy.get('[data-testid="map-meta"]').then($meta => {
+        cy.get('.map-scale').should($scale => {
+          expect($scale[0].getBoundingClientRect().bottom).to.be.at.most($meta[0].getBoundingClientRect().top)
+        })
+      })
       cy.get('[data-testid="widgets-tab"]').click()
     })
 

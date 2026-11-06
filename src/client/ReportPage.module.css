@@ -285,8 +285,8 @@ cursor: default !important;
 .mapSettingsDisabled :global(#kepler-gl__kepler .side-panel--container) { pointer-events: none; opacity: 0.65; }
 .keplerBlock :global(#kepler-gl__kepler .side-panel--container) { padding: 0; width: var(--pane-width); top: calc(var(--pane-top) + 44px + var(--filter-strip-height, 0px)); left: var(--pane-left); height: calc(100% - var(--pane-top) - 56px - var(--filter-strip-height, 0px)); border-radius: 0 0 5px 5px; overflow: hidden; }
 .keplerBlock :global(#kepler-gl__kepler .side-bar__close) { display: none; }
-/* Kepler offsets the map scale by its own 300px side panel, so anchor it to the shared pane instead: beside the open pane, else at the map edge. */
-.keplerBlock :global(#kepler-gl__kepler .maps > :first-child > :has(> .map-scale)) { left: var(--pane-left); }
+/* Kepler offsets the map scale by its own 300px side panel, so anchor it to the shared pane instead: beside the open pane, else at the map edge, always above the last-updated timestamp. */
+.keplerBlock :global(#kepler-gl__kepler .maps > :first-child > :has(> .map-scale)) { left: var(--pane-left); bottom: 28px; }
 .paneOpen .keplerBlock :global(#kepler-gl__kepler .maps > :first-child > :has(> .map-scale)) { left: calc(var(--pane-left) * 2 + var(--pane-width)); }
 .keplerBlock :global(#kepler-gl__kepler .side-bar) { width: 100% !important; max-width: none !important; }
 

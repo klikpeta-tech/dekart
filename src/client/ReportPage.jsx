@@ -705,7 +705,7 @@ export default function ReportPage ({ edit, snapshot }) {
             />
             {!snapshot
               ? (
-                <div className={styles.meta}>
+                <div className={styles.meta} data-testid='map-meta'>
                   {updatedAt ? <span className={styles.lastUpdated} title={`${updatedAtDate.toISOString()}`}>{updatedAtDate.toLocaleString()}</span> : null}
                   {updatedAt && report.authorEmail !== UNKNOWN_EMAIL ? <span className={styles.dot}> | </span> : null}
                   {report.authorEmail !== UNKNOWN_EMAIL ? <span className={styles.author} title='Map author'>{report.authorEmail}</span> : null}
