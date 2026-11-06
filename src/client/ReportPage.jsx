@@ -679,7 +679,7 @@ export default function ReportPage ({ edit, snapshot }) {
         : null}
       <div className={classnames(styles.body, { [styles.snapshotBody]: snapshot })}>
         {/* Hide Kepler settings whenever the shared left pane is assigned to widgets or collapsed. */}
-        <div className={classnames(styles.keplerFlexWrapper, { [styles.hideMapSettings]: leftPanel !== 'map' || !paneOpen })}>
+        <div className={classnames(styles.keplerFlexWrapper, { [styles.hideMapSettings]: leftPanel !== 'map' || !paneOpen, [styles.paneOpen]: paneOpen })}>
           <div className={styles.keplerFlex}>
             {/*  Mount the shared pane header and authoritative filter strip outside snapshot mode; a snapshot renders charts without their controls. */}
             {!snapshot && <MapPaneHeader selected={leftPanel} expanded={paneOpen} onSelect={selectPane} onToggle={() => { paneChoiceMade.current = true; paneOpen ? setPaneCollapsed(true) : selectPane(leftPanel) }} />}

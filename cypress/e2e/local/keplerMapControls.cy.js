@@ -33,6 +33,19 @@ describe('Kepler 3.3 map controls', () => {
     })
     cy.get('[data-testid="number-value"]', { timeout: 120000 }).should('have.text', '8,276')
 
+    // The map scale sits beside the open control pane and returns to the map edge when the pane collapses.
+    cy.get('[aria-label="Map panels"]').then($pane => {
+      const paneRight = $pane[0].getBoundingClientRect().right
+      cy.get('.map-scale').should($scale => {
+        expect($scale[0].getBoundingClientRect().left).to.be.at.least(paneRight)
+      })
+      cy.get('[aria-label="Collapse control pane"]').click()
+      cy.get('.map-scale').should($scale => {
+        expect($scale[0].getBoundingClientRect().left).to.be.lessThan(paneRight)
+      })
+      cy.get('[data-testid="widgets-tab"]').click()
+    })
+
     // Each control of the Kepler demo map opens its own panel.
     cy.get('.map-control-button.toggle-annotation', { timeout: 60000 }).click()
     cy.contains('Annotations', { timeout: 20000 }).should('be.visible')
