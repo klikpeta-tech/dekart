@@ -16,7 +16,7 @@ export default function AiAssistantDock () {
     return null
   }
   return (
-    <div className={styles.dock} data-testid='ai-assistant-panel'>
+    <div className={styles.dock} data-testid='ai-assistant-panel' data-map-edit-panel>
       <AiAssistantPanel reduxStore={store} stateAccessors={stateAccessors} />
     </div>
   )

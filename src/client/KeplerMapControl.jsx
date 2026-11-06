@@ -76,7 +76,7 @@ function DekartMapControlFactory (EffectControl, EffectManager, AnnotationManage
         <StyledMapControlPanel>
           <MapControl {...props} top={0} actionComponents={actionComponents} />
         </StyledMapControlPanel>
-        <StyledMapControlContextPanel>
+        <StyledMapControlContextPanel data-map-edit-panel>
           {showAnnotations ? <AnnotationManager /> : null}
           {showCharts ? <ChartManager panelActive={showChartsPanel} isExport={isExport} /> : null}
           {showEffects ? <EffectManager /> : null}

@@ -430,7 +430,12 @@ function buildMapboxStaticIconURL (styleURL, token) {
 }
 
 // Treat interaction with an automatically opened Kepler panel as explicit user map work.
+// Annotation, effect, chart and AI assistant panels edit the map outside the side panel, so they count too.
 function handleSidePanelInteraction (event, interactionDisabled, dispatch) {
+  if (event.target.closest('[data-map-edit-panel]')) {
+    dispatch(markKeplerPanelInteracted())
+    return
+  }
   if (!event.target.closest('.side-panel--container')) return
   if (interactionDisabled) {
     event.preventDefault()
