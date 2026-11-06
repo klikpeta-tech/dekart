@@ -36,7 +36,6 @@ import Modal from 'antd/es/modal'
 import { Loading } from './Loading'
 import ToggleFullscreenButton from './ToggleFullscreenButton'
 import ShowMyLocationButton from './ShowMyLocationButton'
-import { UNKNOWN_EMAIL } from './lib/constants'
 import { track } from './lib/tracking'
 import { getDefaultMapStyles } from '@kepler.gl/reducers'
 import { getApplicationConfig } from '@kepler.gl/utils'
@@ -552,8 +551,6 @@ export default function ReportPage ({ edit, snapshot }) {
   const history = useHistory()
 
   const report = useSelector(state => state.report)
-  const files = useSelector(state => state.files || [])
-  const queries = useSelector(state => state.queries || [])
   const [leftPanel, setLeftPanel] = useState('widgets')
   const [paneCollapsed, setPaneCollapsed] = useState(true)
   const [widgetFilterPending, setWidgetFilterPending] = useState(false)
@@ -573,13 +570,6 @@ export default function ReportPage ({ edit, snapshot }) {
   const [snapshotChartsSettled, setSnapshotChartsSettled] = useState(false)
   const snapshotViewportApplied = useSnapshotViewportOverride(snapshot, id, setSnapshotBasemapReady)
   const { reportDepsReady } = useSnapshotReady(snapshot, id, snapshotBasemapReady && snapshotViewportApplied && (!snapshotWidgets || snapshotChartsSettled))
-  const updatedAt = [].concat(files, queries).reduce((updatedAt, item) => {
-    if (item.updatedAt > updatedAt) {
-      return item.updatedAt
-    }
-    return updatedAt
-  }, 0)
-  const updatedAtDate = new Date(updatedAt * 1000)
 
   const dispatch = useDispatch()
 
@@ -703,15 +693,6 @@ export default function ReportPage ({ edit, snapshot }) {
               interactionDisabled={queriesRunning}
               onSnapshotBasemapReadyChange={setSnapshotBasemapReady}
             />
-            {!snapshot
-              ? (
-                <div className={styles.meta} data-testid='map-meta'>
-                  {updatedAt ? <span className={styles.lastUpdated} title={`${updatedAtDate.toISOString()}`}>{updatedAtDate.toLocaleString()}</span> : null}
-                  {updatedAt && report.authorEmail !== UNKNOWN_EMAIL ? <span className={styles.dot}> | </span> : null}
-                  {report.authorEmail !== UNKNOWN_EMAIL ? <span className={styles.author} title='Map author'>{report.authorEmail}</span> : null}
-                </div>
-                )
-              : null}
           </div>
         </div>
         {!snapshot && !fullscreen ? <DatasetSection reportId={id} /> : null}

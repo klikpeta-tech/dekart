@@ -33,20 +33,23 @@ describe('Kepler 3.3 map controls', () => {
     })
     cy.get('[data-testid="number-value"]', { timeout: 120000 }).should('have.text', '8,276')
 
-    // The map scale sits beside the open control pane and returns to the map edge when the pane collapses.
-    cy.get('[aria-label="Map panels"]').then($pane => {
-      const paneRight = $pane[0].getBoundingClientRect().right
+    // The map scale sits beside the open control pane, on the pane's bottom baseline, and returns to the map edge on that baseline when the pane collapses.
+    cy.get('[aria-label="Map panels"]').then($header => {
+      const paneRight = $header[0].getBoundingClientRect().right
       cy.get('.map-scale').should($scale => {
         expect($scale[0].getBoundingClientRect().left).to.be.at.least(paneRight)
       })
-      cy.get('[aria-label="Collapse control pane"]').click()
-      cy.get('.map-scale').should($scale => {
-        expect($scale[0].getBoundingClientRect().left).to.be.lessThan(paneRight)
-      })
-      // The scale at the map edge must not be drawn over the last-updated timestamp.
-      cy.get('[data-testid="map-meta"]').then($meta => {
+      cy.get('[data-testid="map-settings-tab"]').click()
+      cy.get('.side-panel--container').should('be.visible').then($panel => {
+        const paneBottom = $panel[0].getBoundingClientRect().bottom
         cy.get('.map-scale').should($scale => {
-          expect($scale[0].getBoundingClientRect().bottom).to.be.at.most($meta[0].getBoundingClientRect().top)
+          expect($scale[0].getBoundingClientRect().bottom).to.be.closeTo(paneBottom, 1)
+        })
+        cy.get('[aria-label="Collapse control pane"]').click()
+        cy.get('.map-scale').should($scale => {
+          const box = $scale[0].getBoundingClientRect()
+          expect(box.left).to.be.lessThan(paneRight)
+          expect(box.bottom).to.be.closeTo(paneBottom, 1)
         })
       })
       cy.get('[data-testid="widgets-tab"]').click()
