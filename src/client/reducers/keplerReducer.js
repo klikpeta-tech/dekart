@@ -1,12 +1,13 @@
-import keplerGlReducer from '@kepler.gl/reducers'
+import keplerGlReducer, { uiStateUpdaters } from '@kepler.gl/reducers'
 import { ActionTypes as KeplerActionTypes } from '@kepler.gl/actions'
-import { setUserMapboxAccessTokenUpdater } from '@kepler.gl/reducers/dist/ui-state-updaters'
 import { createFilterRestore } from '../dark/kepler-filter-restore/index'
 
 const customKeplerGlReducer = keplerGlReducer.initialState({
   uiState: {
     currentModal: null,
-    activeSidePanel: null
+    activeSidePanel: null,
+    // The AI assistant control opens its panel from this map control entry.
+    mapControls: { ...uiStateUpdaters.DEFAULT_MAP_CONTROLS, aiAssistant: { active: false, show: true } }
   },
   mapStyle: {
     styleType: 'dark'
@@ -34,7 +35,7 @@ function keplerGl (state, action) {
       }
     case KeplerActionTypes.REGISTER_ENTRY:
       // set mapbox token for map export
-      newState.kepler.uiState = setUserMapboxAccessTokenUpdater(newState.kepler.uiState, {
+      newState.kepler.uiState = uiStateUpdaters.setUserMapboxAccessTokenUpdater(newState.kepler.uiState, {
         payload: newState.kepler.mapStyle.mapboxApiAccessToken
       })
       return newState

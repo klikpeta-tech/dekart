@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import keplerGlReducer, { createNewDatasetSuccessUpdater } from '@kepler.gl/reducers'
-import { createNewDatasetSuccess, createOrUpdateFilter, registerEntry, removeFilter, setFilter, wrapTo } from '@kepler.gl/actions'
+import { createNewDatasetSuccess, createOrUpdateFilter, registerEntry, removeFilter, setFilter, wrapTo, unwrap } from '@kepler.gl/actions'
 import { processRowObject } from '@kepler.gl/processors'
 import { KeplerTable } from '@kepler.gl/table'
 import { Selection } from '@uwdata/mosaic-core'
@@ -21,7 +21,7 @@ interface Fixture {
   flush: () => Promise<void>
   queue: Array<{ apply: () => boolean, cancelled: boolean }>
   errors: string[]
-  command: (action: Parameters<typeof wrapTo>[1]) => void
+  command: (action: Parameters<typeof unwrap>[0]) => void
   addTable: (id: string) => Promise<void>
   readonly projected: number
   readonly edits: number
@@ -46,12 +46,12 @@ async function setup (): Promise<Fixture> {
   const table = new KeplerTable({ info: { id: 'a', label: 'a' }, color: [1, 2, 3] })
   await table.importData({ data: rows })
   const fixtureAction = { type: 'fixture/table', table }
-  store.dispatch(wrapTo('map', fixtureAction as Parameters<typeof wrapTo>[1]))
+  store.dispatch(wrapTo('map', fixtureAction as Parameters<typeof unwrap>[0]))
   const addTable = async (id: string): Promise<void> => {
     const next = new KeplerTable({ info: { id, label: id }, color: [1, 2, 3] })
     await next.importData({ data: rows })
     const action = { type: 'fixture/table', table: next }
-    store.dispatch(wrapTo('map', action as Parameters<typeof wrapTo>[1]))
+    store.dispatch(wrapTo('map', action as Parameters<typeof unwrap>[0]))
   }
   const selection = Selection.crossfilter()
   const mark = (field: string): { plot: { markSet: Set<object> }, channelField: () => { field: string, as: string } } => {
@@ -119,7 +119,7 @@ async function setup (): Promise<Fixture> {
     await selection.pending('value')
     await selection.pending('value')
   }
-  const command = (action: Parameters<typeof wrapTo>[1]): void => { store.dispatch(wrapTo('map', action)) }
+  const command = (action: Parameters<typeof unwrap>[0]): void => { store.dispatch(wrapTo('map', action)) }
   return {
     sync,
     selection,

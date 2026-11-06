@@ -101,7 +101,7 @@ function applyRecovery (instance: Instance, action: AnyAction, pending: Pending 
     case 'kepler-filter-restore/capture': {
       if (pending?.[action.dataId] !== undefined || instance.visState === undefined) return { instance, pending }
       const saved = instance.visState.filters.filter(filter => filter.dataId.includes(action.dataId))
-        .map(({ id, type, dataId, name, value, enabled, layerId }) => ({ id, type, dataId, name, value, enabled, layerId }))
+        .map(({ id, type, dataId, name, value, enabled, inverted, layerId }) => ({ id, type, dataId, name, value, enabled, inverted, layerId }))
       return { instance, pending: { ...pending, [action.dataId]: structuredClone(saved) } }
     }
     case 'kepler-filter-restore/restore': {
@@ -128,9 +128,11 @@ function applyRecovery (instance: Instance, action: AnyAction, pending: Pending 
 // Include the pre-removal index and polygon changes performed internally by Kepler.
 function cancelEditedFilters (pending: Pending | undefined, action: AnyAction,
   before: SavedFilter[], after: SavedFilter[]): Pending | undefined {
-  const explicit = [ActionTypes.REMOVE_FILTER, ActionTypes.SET_FILTER, ActionTypes.CREATE_OR_UPDATE_FILTER,
+  // Widen Kepler's literal action-type union so any redux action type can be tested.
+  const explicitTypes: readonly string[] = [ActionTypes.REMOVE_FILTER, ActionTypes.SET_FILTER, ActionTypes.CREATE_OR_UPDATE_FILTER,
     ActionTypes.SET_FEATURES, ActionTypes.DELETE_FEATURE, ActionTypes.SET_POLYGON_FILTER_LAYER,
-    ActionTypes.TOGGLE_FILTER_FEATURE].includes(action.type)
+    ActionTypes.TOGGLE_FILTER_FEATURE]
+  const explicit = explicitTypes.includes(action.type)
   if (pending === undefined || !explicit) return pending
   const changed = new Set([action.id, before[action.idx]?.id,
     ...before.filter(filter => after.find(current => current.id === filter.id) !== filter).map(filter => filter.id)])

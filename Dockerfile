@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:18 AS nodedeps
+FROM node:22 AS nodedeps
 WORKDIR /source
 COPY package.json package-lock.json .npmrc ./
 ENV CI=true
@@ -16,7 +16,7 @@ COPY src/setupTests.js src/setupTests.js
 COPY vitest.config.js vite.config.js ./
 
 FROM nodedeps AS nodebuilder
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 RUN npm run build
 
 FROM nodedeps AS nodetest

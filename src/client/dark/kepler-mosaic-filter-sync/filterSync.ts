@@ -131,7 +131,7 @@ function nativeFilterInputs (table: NonNullable<CurrentFilterInputs['table']>, f
   for (const filter of filters) {
     const index = filter.fieldIdx?.[filter.dataId.indexOf(table.id)]
     const field = index === undefined ? undefined : table.fields[index]
-    inputs.push(filter.id, filter.type, filter.enabled, index, JSON.stringify(filter.value), field?.valueAccessor, field?.format, JSON.stringify(field?.filterProps?.mappedValue))
+    inputs.push(filter.id, filter.type, filter.enabled, filter.inverted, index, JSON.stringify(filter.value), field?.valueAccessor, field?.format, JSON.stringify(field?.filterProps?.mappedValue))
     // Polygon predicates also depend on the bound geometry, including in-place layer edits.
     if (filter.type === 'polygon') {
       for (const id of filter.layerId ?? []) {
@@ -150,7 +150,7 @@ function projectionKey (input: CurrentFilterInputs, dataId: string): unknown[] {
   const key: unknown[] = []
   for (const binding of input.bindings ?? []) key.push(binding.filterId, binding.field, binding.categorical, ...binding.clients, binding.clients.length)
   key.push(input.bindings?.length)
-  for (const filter of filters) key.push(filter.id, filter.type, filter.enabled, JSON.stringify(filter.value), ...filter.dataId, ...filter.name, filter.dataId.length, filter.name.length)
+  for (const filter of filters) key.push(filter.id, filter.type, filter.enabled, filter.inverted, JSON.stringify(filter.value), ...filter.dataId, ...filter.name, filter.dataId.length, filter.name.length)
   for (const table of input.tables) key.push(table.dataId, ...table.fields.flatMap(field => [field.name, field.type]))
   key.push(filters.length)
   if (input.table != null) key.push(...nativeFilterInputs(input.table, filters, input.layers, input.columnTypes))

@@ -606,7 +606,7 @@ The area level a region code addresses.
 
 ```ts
 function AreaPicker(props):
-  | ReactElement<any, string | JSXElementConstructor<any>>
+  | ReactElement<unknown, string | JSXElementConstructor<any>>
   | null;
 ```
 
@@ -624,7 +624,7 @@ option shows the row count of its region when the loader supplies one. Names are
 
 #### Returns
 
-  \| `ReactElement`\<`any`, `string` \| `JSXElementConstructor`\<`any`\>\>
+  \| `ReactElement`\<`unknown`, `string` \| `JSXElementConstructor`\<`any`\>\>
   \| `null`
 
 The picker element, or `null` when `levels` has no known level.

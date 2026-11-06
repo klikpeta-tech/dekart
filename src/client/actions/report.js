@@ -1,3 +1,4 @@
+import { flushSync } from 'react-dom'
 import { filterRestore } from '../reducers/keplerReducer'
 import { cleanupExportImage, setExportImageSetting, startExportingImage } from '@kepler.gl/actions'
 
@@ -337,7 +338,7 @@ export function reportUpdate (reportStreamResponse) {
     // Drop the removed dataset from Kepler before the map config below is reconciled,
     // so its layers are already gone and the incoming map is not seen as a remote change.
     const removedDatasetsCleanup = Promise.all([...removedDatasetIds].map(datasetId => dispatch(cleanupRemovedDataset(datasetId))))
-    dispatch({
+    const reportUpdateAction = {
       type: reportUpdate.name,
       report,
       queriesList,
@@ -354,7 +355,13 @@ export function reportUpdate (reportStreamResponse) {
       initialAutoCreateLayerIds: initialAutoCreateLayerIds(datasetsList, queriesList, filesList, queryJobsList),
       newDatasetIds: datasetsList.filter(dataset => !prevDatasetsList.find(previous => previous.id === dataset.id)).map(dataset => dataset.id),
       hasRemoteMapConflict
-    })
+    }
+    if (initialHydration) {
+      // The report mounts Kepler, which registers its state in an effect; the map config below needs that state now.
+      flushSync(() => dispatch(reportUpdateAction))
+    } else {
+      dispatch(reportUpdateAction)
+    }
     if (hasRemoteMapConflict) {
       dispatch(showMapConfigConflictMessage())
     }

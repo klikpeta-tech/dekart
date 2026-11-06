@@ -125,12 +125,21 @@
 
 .keplerBlock {
     position: absolute;
+    display: flex;
     width: 100%;
     height: 100%;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+/* The map keeps its own column so the AI assistant dock shrinks it instead of covering it. */
+.keplerMap {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
 }
 
 .queryTooltip span{
@@ -276,7 +285,7 @@ cursor: default !important;
 .mapSettingsDisabled :global(#kepler-gl__kepler .side-panel--container) { pointer-events: none; opacity: 0.65; }
 .keplerBlock :global(#kepler-gl__kepler .side-panel--container) { padding: 0; width: var(--pane-width); top: calc(var(--pane-top) + 44px + var(--filter-strip-height, 0px)); left: var(--pane-left); height: calc(100% - var(--pane-top) - 56px - var(--filter-strip-height, 0px)); border-radius: 0 0 5px 5px; overflow: hidden; }
 .keplerBlock :global(#kepler-gl__kepler .side-bar__close) { display: none; }
-.keplerBlock :global(#kepler-gl__kepler .side-bar) { width: 100% !important; }
+.keplerBlock :global(#kepler-gl__kepler .side-bar) { width: 100% !important; max-width: none !important; }
 
 @media (max-width: 760px) {
     .body { flex-wrap: wrap; overflow-y: auto; }

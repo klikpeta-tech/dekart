@@ -1,3 +1,4 @@
+import { coalesce, literal, not } from '@uwdata/mosaic-sql'
 import { filterField, filterSqlCondition } from './filterSqlCondition'
 import type { Filter, SqlCondition } from './filterSqlCondition'
 import { polygonFilterSqlCondition } from './polygonFilterSqlCondition'
@@ -20,7 +21,8 @@ export interface FilterClause {
  * finite coordinates; H3 uses valid cell centers; GeoArrow needs fixed-size float arrays;
  * text GeoJSON/WKT uses geometry-bound centers; native GEOMETRY/BLOB yields false.
  * Unsupported or unbound layers contribute no condition. Column types are needed only for
- * GeoArrow, text geometry, and H3 string conversions. Inputs are unchanged. Mosaic SQL
+ * GeoArrow, text geometry, and H3 string conversions. An inverted filter negates its condition and keeps rows
+ * whose verdict is null. Inputs are unchanged. Mosaic SQL
  * builders escape scalar and spatial identifiers and values; no SQL is executed.
  *
  * @example
@@ -51,7 +53,12 @@ export function deriveFilterClauses (
     filterId: filter.id,
     field: filterField(filter, dataId),
     sqlCondition: filter.enabled !== false && activeFilterIds.has(filter.id)
-      ? filter.type === 'polygon' ? polygonFilterSqlCondition(filter as PolygonFilter, dataId, spatial.layers, spatial.columnTypes) : filterSqlCondition(filter, dataId)
+      ? invertCondition(filter, filter.type === 'polygon' ? polygonFilterSqlCondition(filter as PolygonFilter, dataId, spatial.layers, spatial.columnTypes) : filterSqlCondition(filter, dataId))
       : null
   }))
+}
+
+// An inverted filter keeps every row the condition rejects; a null verdict counts as rejected, as in Kepler.
+function invertCondition (filter: Filter, condition: SqlCondition | null): SqlCondition | null {
+  return filter.inverted === true && condition !== null ? not(coalesce(condition, literal(false))) : condition
 }

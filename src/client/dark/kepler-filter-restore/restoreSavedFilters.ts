@@ -5,7 +5,7 @@ import type { Filter } from '@kepler.gl/types'
 import type { AnyAction, Reducer } from 'redux'
 
 type VisState = KeplerGlState['visState']
-export type SavedFilter = Pick<Filter, 'id' | 'type' | 'dataId' | 'name' | 'value'> & { enabled?: boolean, layerId?: string[] }
+export type SavedFilter = Pick<Filter, 'id' | 'type' | 'dataId' | 'name' | 'value'> & { enabled?: boolean, inverted?: boolean, layerId?: string[] }
 // The SDK reducer declaration incorrectly types actions as VisState.
 const reduce = visStateReducer as unknown as Reducer<VisState, AnyAction>
 
@@ -42,6 +42,8 @@ export function restoreSavedFilters (state: VisState, saved: SavedFilter[]): { s
     // Data replacement can clear or clamp an authored selection without an explicit edit.
     if (JSON.stringify(live.value) !== JSON.stringify(filter.value)) state = updateFilter(state, filter.id, 'value', filter.value)
     if ((live.enabled) !== (filter.enabled !== false)) state = updateFilter(state, filter.id, 'enabled', filter.enabled !== false)
+    // Filter out is an authored selection too.
+    if (Boolean(live.inverted) !== Boolean(filter.inverted)) state = updateFilter(state, filter.id, 'inverted', Boolean(filter.inverted))
   }
   return { state, pending }
 }

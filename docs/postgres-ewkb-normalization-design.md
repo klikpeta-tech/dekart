@@ -18,7 +18,7 @@ Normalization does not transform coordinates: EPSG:2154 coordinates would remain
 - PostGIS returns geometry in hex-encoded EWKB. The reproduced `MULTIPOLYGON` is `0106000020E610000001000000010300000001000000040000009A99999999992A400000000000404A40CDCCCCCCCCCC2A400000000000404A40CDCCCCCCCCCC2A40CDCCCCCCCC4C4A409A99999999992A400000000000404A40`: type 6, the EWKB SRID flag, SRID 4326, and one polygon.
 - Kepler recognizes the value as hex WKB and delegates it to loaders.gl, but loaders.gl calculates an ISO WKB type before removing EWKB flags. The SRID bit is therefore interpreted as an invalid ISO dimension and parsing fails.
 - `ST_AsGeoJSON(geom)` and `ST_AsText(geom)` both render because they avoid the failing EWKB parser path.
-- Dekart currently pins Kepler 3.2.6 and loaders.gl 4.3.4. The faulty parser order is unchanged in loaders.gl 4.4.3, Kepler 3.3.0 alpha, and loaders.gl `master`, so a dependency upgrade does not fix the issue.
+- Dekart currently pins Kepler 3.3.0-alpha.19 and loaders.gl 4.4.1. The faulty parser order is unchanged in loaders.gl 4.4.3, Kepler 3.3.0 alpha, and loaders.gl `master`, so a dependency upgrade does not fix the issue.
 
 ## Proposed Behavior
 

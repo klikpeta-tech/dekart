@@ -277,7 +277,7 @@ jobs:
               -e DEKART_ALLOW_FILE_UPLOAD=1 \
 
           - id: local-file-upload-readme-persistence
-            spec: cypress/e2e/local/downloadErrorClearsMessage.cy.js,cypress/e2e/local/mapConfigAutoLayers.cy.js,cypress/e2e/local/fileUploadPersistenceMcp.cy.js,cypress/e2e/local/geojsonDatasetLabelNoExtension.cy.js,cypress/e2e/local/mcpGeoJSONUpload.cy.js,cypress/e2e/local/mcpSnapshotViewport.cy.js,cypress/e2e/local/readmeMarkdown.cy.js
+            spec: cypress/e2e/local/downloadErrorClearsMessage.cy.js,cypress/e2e/local/mapConfigAutoLayers.cy.js,cypress/e2e/local/fileUploadPersistenceMcp.cy.js,cypress/e2e/local/geojsonDatasetLabelNoExtension.cy.js,cypress/e2e/local/mcpGeoJSONUpload.cy.js,cypress/e2e/local/mcpSnapshotViewport.cy.js,cypress/e2e/local/readmeMarkdown.cy.js,cypress/e2e/local/keplerMapControls.cy.js
             skip_postgres: true
 
           - id: local-duckdb-a

@@ -62,6 +62,7 @@ Invalid polygon geometry may throw during SQL derivation.
 | <a id="api-dataid"></a> `dataId` | `string`[] | Data binding IDs; each position corresponds to the same position in name. |
 | <a id="api-enabled"></a> `enabled?` | `boolean` | False disables this filter's SQL condition. |
 | <a id="api-id"></a> `id` | `string` | Stable identity carried into the derived FilterClause. |
+| <a id="api-inverted"></a> `inverted?` | `boolean` | True keeps the rows this filter would otherwise remove, including rows whose value is null. |
 | <a id="api-layerid"></a> `layerId?` | `string`[] | Layer IDs used to derive a polygon filter's spatial condition. |
 | <a id="api-name"></a> `name` | `string`[] | Filter field names paired with dataId entries. |
 | <a id="api-type"></a> `type` | `string` | Kepler filter kind, such as select, multiSelect, range, or polygon. |
@@ -140,7 +141,8 @@ scalar types and invalid value shapes throw. Point/icon and numeric endpoint lay
 finite coordinates; H3 uses valid cell centers; GeoArrow needs fixed-size float arrays;
 text GeoJSON/WKT uses geometry-bound centers; native GEOMETRY/BLOB yields false.
 Unsupported or unbound layers contribute no condition. Column types are needed only for
-GeoArrow, text geometry, and H3 string conversions. Inputs are unchanged. Mosaic SQL
+GeoArrow, text geometry, and H3 string conversions. An inverted filter negates its condition and keeps rows
+whose verdict is null. Inputs are unchanged. Mosaic SQL
 builders escape scalar and spatial identifiers and values; no SQL is executed.
 
 #### Parameters
