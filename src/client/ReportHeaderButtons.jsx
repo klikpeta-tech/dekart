@@ -20,7 +20,6 @@ import classNames from 'classnames'
 import { goToPresent, goToSource } from './lib/navigation'
 import { toggleSnapshotModal } from './actions/snapshots'
 import { useQueriesRunning } from './lib/useQueriesRunning'
-import { datasetNeedsConnection } from './lib/datasetNeedsConnection'
 
 function formatIntervalLabel (seconds) {
   if (seconds === 0) return 'None'
@@ -93,12 +92,6 @@ function RefreshButton ({ showAutoRefreshSettings = false }) {
   const readOnly = useSelector(state => state.workspace.readOnly)
   const queriesRunning = useQueriesRunning()
   const numQueries = useSelector(state => state.queries.length)
-  const queries = useSelector(state => state.queries)
-  const datasets = useSelector(state => state.dataset.list)
-  const userDefinedConnection = useSelector(state => state.connection.userDefined)
-  const isPlayground = useSelector(state => state.user.isPlayground)
-  // A dataset copied without its connection cannot run, and the server fails the whole refresh because of it.
-  const needsConnection = datasets.some(dataset => datasetNeedsConnection(dataset, queries.find(q => q.id === dataset.queryId), { userDefinedConnection, isPlayground }))
   const dispatch = useDispatch()
   const { canWrite } = useSelector(state => state.report)
   const edit = useSelector(state => state.reportStatus.edit)
@@ -116,11 +109,10 @@ function RefreshButton ({ showAutoRefreshSettings = false }) {
   const items = [
     {
       label: 'Refresh Now',
-      title: needsConnection ? 'Choose a connection for every dataset first' : undefined,
       key: 'refresh',
       id: 'dekart-refresh-now-button',
       icon: queriesRunning ? <LoadingOutlined /> : <ReloadOutlined />,
-      disabled: queriesRunning || readOnly || needsConnection,
+      disabled: queriesRunning || readOnly,
       onClick: handleRefresh
     },
     {
