@@ -23,7 +23,7 @@ Server side of the Klikpeta Data Library (ENG-2164). The design and decisions ar
 - Admin commands (`ListLibraryGrants`, `GetLibraryTaxonomy`, `SetLibraryGrant`, `RevokeLibraryGrant`, `SetLibraryGrantCategories`) need the workspace Admin role and the caller's email to equal `DEKART_DEFAULT_WORKSPACE_ADMIN` (Klikpeta staff). An unset setting refuses everyone.
 - Count metadata of ungranted categories is protected: for taxonomy items `ListLibraryAreas` counts only granted categories, and `ListLibraryItems` / `GetLibraryItem` return their summed nationwide count in `LibraryItem.row_count`. These totals describe aggregate metadata independently of source sample availability.
 - Items with a taxonomy (Places) need at least one granted category; other items take none.
-- `DEKART_LIBRARY_CONNECTION_ID` names the staff-owned library connection. `CreateQuery`, `CreateFile` and `UpdateQuery` refuse it, so user SQL never runs on it.
+- `DEKART_LIBRARY_CONNECTION_ID` names the staff-owned library connection. `CreateQuery`, `CreateFile` and `UpdateQuery` refuse it, so user SQL never runs on it. The connection list marks it (`Connection.is_library`) and never makes it the default; the client keeps it out of the SQL sources of the dataset selector and shows it as reserved on the connections page.
 - Every library command answers `Unavailable` until a catalogue reader is set. `main.go` sets one when `DEKART_LIBRARY_CONNECTION_ID` is configured.
 
 ## Catalogue reader

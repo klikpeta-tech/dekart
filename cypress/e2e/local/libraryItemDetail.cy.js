@@ -23,16 +23,14 @@ import {
   UpdateLibraryDatasetSelectionResponse
 } from 'dekart-proto/dekart_pb'
 import { createReport } from './duckdbHelpers'
-import { ROLE_EDITOR, grpcWebError, grpcWebReply, grpcWebRequest, libraryItem, setRole, workspaceId } from './libraryStubs'
+import { ROLE_EDITOR, grpcWebError, grpcWebReply, grpcWebRequest, libraryConnectionId, libraryItem, setRole, workspaceId } from './libraryStubs'
 
-// The server decorates a dataset as a library dataset when it sits on this connection (DEKART_LIBRARY_CONNECTION_ID of the lane).
-const libraryConnectionId = '11111111-1111-4111-8111-111111111111'
 // Hash of a map without parameters: the job a library dataset shows is the one with this hash.
 const noParamsHash = 'd41d8cd98f00b204e9800998ecf8427e'
 const itemId = 'places'
 
 const place = libraryItem({ id: itemId, title: 'Tempat Usaha 2025', category: 'Places', kind: LibraryShape.Kind.KIND_POINTS, areaLevels: ['provinsi', 'kabkota', 'kecamatan'], rowCount: 0, hasTaxonomy: true })
-place.setDescriptionMd('Tempat usaha di seluruh Indonesia.\n\nDiperbarui setiap kuartal.')
+place.setDescriptionMd('**Tempat usaha** di seluruh Indonesia.\n\nDiperbarui setiap kuartal.')
 place.setAttribution('Sumber: OpenStreetMap')
 place.setCadence('Kuartalan')
 place.setSourceUpdatedAt(Date.UTC(2026, 9, 1) / 1000)
@@ -160,9 +158,15 @@ function seedLibraryDataset (email, { version = 1, areaCode, name, grantEndsOn =
 // openDetail opens the library from the empty dataset tab and then the item.
 function openDetail (rowCount = '2.100') {
   cy.get('#dekart-library', { timeout: 30000 }).should('not.be.disabled').click()
-  cy.contains('li', 'Tempat Usaha 2025').should('contain', `${rowCount} rows`).click()
+  cy.contains('li', 'Tempat Usaha 2025').should(rowCount === '' ? 'not.contain' : 'contain', 'rows').click()
   cy.contains('h2', 'Tempat Usaha 2025').scrollIntoView().should('be.visible')
-  cy.contains('dt', 'Rows').parent().find('dd').should('have.text', rowCount)
+  if (rowCount === '') {
+    // An unknown count (0) is left out instead of shown as a zero.
+    cy.contains('dt', 'Provider').should('be.visible')
+    cy.contains('dt', 'Rows').should('not.exist')
+  } else {
+    cy.contains('dt', 'Rows').parent().find('dd').should('have.text', rowCount)
+  }
 }
 
 describe('data library item detail', () => {
@@ -188,6 +192,9 @@ describe('data library item detail', () => {
 
     // The detail describes the item without any SQL or connection.
     cy.contains('Tempat usaha di seluruh Indonesia.').scrollIntoView().should('be.visible')
+    // The description is Markdown: emphasis is rendered, no literal asterisks are left.
+    cy.contains('strong', 'Tempat usaha').should('be.visible')
+    cy.contains('**').should('not.exist')
     cy.contains('dt', 'Rows').scrollIntoView().should('be.visible')
     cy.contains('dd', 'Kuartalan').scrollIntoView().should('be.visible')
     cy.contains('1 Oktober 2026').scrollIntoView().should('be.visible')
@@ -204,7 +211,8 @@ describe('data library item detail', () => {
     cy.get('select[aria-label="Kabupaten/Kota"]').should('contain', 'Kota Bandung (2.100)').select('Kota Bandung (2.100)')
     cy.contains('label', 'Kafe').find('input').check()
     cy.contains('label', 'Kedai kopi').find('input').check()
-    cy.contains('button', 'Starbucks').click()
+    // Brands sit under their category, so equal brand titles of several categories stay apart.
+    cy.get('[role="group"][aria-label="Kedai kopi brands"]').should('contain', 'Kedai kopi').contains('button', 'Starbucks').click()
     cy.contains('Tab name: Tempat Usaha 2025 · Starbucks · Kota Bandung').scrollIntoView().should('be.visible')
     cy.contains('button', 'Add 2.100 places to map').should('not.be.disabled')
 
@@ -266,7 +274,7 @@ describe('data library item detail', () => {
 
   it('shows zero counts and no fabricated sample rows when Places is empty', () => {
     openMapAsEditor('empty', { rows: 0, itemRows: 0, categoryRows: [0, 0], omit: ['kafe', 'kopi'], sampleRows: [] })
-    openDetail('0')
+    openDetail('')
     cy.contains('label', 'Kafe (0)').should('exist')
     cy.get('select[aria-label="Provinsi"]').should('contain', 'Jawa Barat (0)').select('32')
     cy.contains('label', 'Kafe (0)').should('exist')

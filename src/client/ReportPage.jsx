@@ -217,7 +217,7 @@ function getTabItem (dataset, datasets, files, status, queryJobs, duckDBJobState
             {tooltip}
           </span>
         }
-      >{tabIcon}{tabTitle}
+      >{tabIcon}<span className={styles.tabTitle}>{tabTitle}</span>
       </Tooltip>
     ),
     key: dataset.id,

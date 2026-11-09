@@ -34,6 +34,12 @@ describe('LibraryBrowser', () => {
     expect(screen.getAllByText('Available')).toHaveLength(2)
   })
 
+  it('leaves out the row count of an item whose count is unknown', () => {
+    render(<LibraryBrowser items={[{ ...items[1], rowCount: 0 }]} query={emptyLibraryQuery()} onQueryChange={() => {}} />)
+    expect(screen.getByText('Tempat · Points')).toBeTruthy()
+    expect(screen.queryByText(/0 rows/)).toBeNull()
+  })
+
   it('renders hostile text as text', () => {
     const { container } = render(<Harness />)
     expect(screen.getByText('<img src=x onerror=alert(1)>')).toBeTruthy()

@@ -27,7 +27,8 @@ function withCount (title: string, count: number | undefined): string {
  * Picks categories, and optionally brands, from grouped lists.
  *
  * Categories are listed in collapsible groups; a group opens by default when it is the first or holds a pick. Brands
- * of the picked categories appear in a second row and narrow the selection further; picking none keeps every brand.
+ * of the picked categories appear below, in one labelled group per category (several categories can hold brands of the
+ * same title), and narrow the selection further; picking none keeps every brand.
  * At least one category is expected: the picker says so while none is picked, and {@link validateSelection} reports
  * it. Titles are rendered as text, never as markup.
  *
@@ -46,7 +47,11 @@ export function CategoryPicker ({ taxonomy, categoryIds, brandIds, categoryCount
   const toggleBrand = (id: string): void => {
     onChange({ categoryIds: [...categoryIds], brandIds: brandIds.includes(id) ? brandIds.filter(other => other !== id) : [...brandIds, id] })
   }
-  const brands = taxonomy.brands.filter(brand => categoryIds.includes(brand.categoryId))
+  // Brands of the picked categories, grouped under their category in display order so equal brand titles stay distinguishable.
+  const brandGroups = taxonomy.categories
+    .filter(category => categoryIds.includes(category.id))
+    .map(category => ({ category, brands: taxonomy.brands.filter(brand => brand.categoryId === category.id) }))
+    .filter(({ brands }) => brands.length > 0)
   return (
     <div className={styles.picker}>
       <div className={styles.hint}>{categoryIds.length === 0 ? 'Pick at least one category.' : `${categoryIds.length} selected`}</div>
@@ -67,14 +72,21 @@ export function CategoryPicker ({ taxonomy, categoryIds, brandIds, categoryCount
           </details>
         )
       })}
-      {brands.length > 0 && (
+      {brandGroups.length > 0 && (
         <div>
           <h3 className={styles.sectionTitle}>Brands (optional)</h3>
-          <div className={styles.brands} role='group' aria-label='Brands'>
-            {brands.map(brand => (
-              <button key={brand.id} type='button' className={brandIds.includes(brand.id) ? styles.chipOn : styles.chip} aria-pressed={brandIds.includes(brand.id)} onClick={() => toggleBrand(brand.id)}>
-                {withCount(brand.title, brandCounts[brand.id])}
-              </button>
+          <div className={styles.brandGroups}>
+            {brandGroups.map(({ category, brands }) => (
+              <div key={category.id} className={styles.brandGroup} role='group' aria-label={`${category.title} brands`}>
+                <div className={styles.brandGroupTitle}>{category.title}</div>
+                <div className={styles.brands}>
+                  {brands.map(brand => (
+                    <button key={brand.id} type='button' className={brandIds.includes(brand.id) ? styles.chipOn : styles.chip} aria-pressed={brandIds.includes(brand.id)} onClick={() => toggleBrand(brand.id)}>
+                      {withCount(brand.title, brandCounts[brand.id])}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>

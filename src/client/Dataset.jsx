@@ -51,9 +51,10 @@ function DatasetSelector ({ dataset }) {
   const connectionList = useSelector(state => state.connection.list)
 
   // LOCAL is upload-only and should not be shown as SQL datasource option.
+  // The Data Library connection is reached through the library browser only, never as a SQL source.
   // In Dekart Cloud we also hide system/default connection to avoid free BigQuery path.
   const filteredConnectionList = connectionList.filter((c) => {
-    if (c.connectionType === ConnectionType.CONNECTION_TYPE_LOCAL) {
+    if (c.connectionType === ConnectionType.CONNECTION_TYPE_LOCAL || c.isLibrary) {
       return false
     }
     if (DEKART_CLOUD && isSystemConnectionID(c.id)) {

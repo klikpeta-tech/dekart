@@ -49,6 +49,33 @@ describe('LibraryItemDetail', () => {
     expect(screen.getByText('Sumber: OpenStreetMap')).toBeTruthy()
   })
 
+  it('renders the description as Markdown, keeps raw HTML as text and opens links in a new tab', () => {
+    const { container } = render(
+      <LibraryItemDetail item={{ ...item, description: '**TEST DATA** - synthetic, see [the source](https://example.com).\n\n- one\n- two\n\n![pixel](https://example.com/p.png) <script>alert(1)</script>' }} />
+    )
+    expect(screen.getByText('TEST DATA').tagName).toBe('STRONG')
+    expect(container.textContent).not.toContain('**')
+    const link = screen.getByRole('link', { name: 'the source' })
+    expect(link.getAttribute('href')).toBe('https://example.com')
+    expect(link.getAttribute('target')).toBe('_blank')
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer')
+    expect(Array.from(screen.getByText('one').closest('ul')?.children ?? []).map(li => li.textContent)).toEqual(['one', 'two'])
+    expect(container.querySelector('img, script')).toBeNull()
+  })
+
+  it('shows a link to anything but a web, mail or phone address as plain text', () => {
+    render(<LibraryItemDetail item={{ ...item, description: '[run](javascript:alert(1)) and [mail](mailto:geo@example.com) and [file](data:text/html,x)' }} />)
+    expect(screen.getByText('run').closest('a')).toBeNull()
+    expect(screen.getByText('file').closest('a')).toBeNull()
+    expect(screen.getByRole('link', { name: 'mail' }).getAttribute('href')).toBe('mailto:geo@example.com')
+  })
+
+  it('leaves out the row count when it is unknown', () => {
+    render(<LibraryItemDetail item={{ ...item, rowCount: 0 }} />)
+    expect(screen.queryByText('Rows')).toBeNull()
+    expect(screen.queryByText('0')).toBeNull()
+  })
+
   it('leaves out facts with no value', () => {
     render(<LibraryItemDetail item={{ ...item, cadence: '', sourceUpdatedAt: 0, attribution: '', columns: [] }} />)
     expect(screen.queryByText('Refresh cadence')).toBeNull()
@@ -168,15 +195,44 @@ describe('CategoryPicker', () => {
   it('offers brands of the picked categories only and drops them with their category', () => {
     const onChange = vi.fn()
     render(<Picking onChange={onChange} />)
-    expect(screen.queryByRole('group', { name: 'Brands' })).toBeNull()
+    expect(screen.queryByRole('group', { name: 'Kedai kopi brands' })).toBeNull()
     fireEvent.click(screen.getByLabelText('Kedai kopi'))
-    const brands = screen.getByRole('group', { name: 'Brands' })
-    expect(within(brands).queryByText('Kimia Farma')).toBeNull()
+    const brands = screen.getByRole('group', { name: 'Kedai kopi brands' })
+    expect(screen.queryByText('Kimia Farma')).toBeNull()
     fireEvent.click(within(brands).getByRole('button', { name: 'Starbucks' }))
     expect(onChange).toHaveBeenLastCalledWith({ categoryIds: ['kopi'], brandIds: ['starbucks'] })
     fireEvent.click(screen.getByLabelText('Kedai kopi'))
     expect(onChange).toHaveBeenLastCalledWith({ categoryIds: [], brandIds: [] })
-    expect(screen.queryByRole('group', { name: 'Brands' })).toBeNull()
+    expect(screen.queryByRole('group', { name: 'Kedai kopi brands' })).toBeNull()
+  })
+
+  it('groups brands under their category so equal brand titles are told apart', () => {
+    const onChange = vi.fn()
+    render(
+      <CategoryPicker
+        taxonomy={{
+          groups: [{ id: 'g', title: 'Makanan' }],
+          categories: [{ id: 'kafe', groupId: 'g', title: 'Kafe' }, { id: 'restoran', groupId: 'g', title: 'Restoran' }],
+          brands: [
+            { id: 'kafe_independen', categoryId: 'kafe', title: 'Independen' },
+            { id: 'restoran_independen', categoryId: 'restoran', title: 'Independen' }
+          ]
+        }}
+        categoryIds={['restoran', 'kafe']}
+        brandIds={[]}
+        brandCounts={{ kafe_independen: 3, restoran_independen: 7 }}
+        onChange={onChange}
+      />
+    )
+    const kafe = screen.getByRole('group', { name: 'Kafe brands' })
+    const restoran = screen.getByRole('group', { name: 'Restoran brands' })
+    expect(within(kafe).getByText('Kafe')).toBeTruthy()
+    expect(within(restoran).getByText('Restoran')).toBeTruthy()
+    // Groups follow the category order of the taxonomy, not the order of the picks.
+    expect(kafe.compareDocumentPosition(restoran) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    fireEvent.click(within(restoran).getByRole('button', { name: 'Independen (7)' }))
+    expect(onChange).toHaveBeenLastCalledWith({ categoryIds: ['restoran', 'kafe'], brandIds: ['restoran_independen'] })
+    expect(within(kafe).getByRole('button', { name: 'Independen (3)' }).getAttribute('aria-pressed')).toBe('false')
   })
 
   it('renders hostile titles as text', () => {

@@ -441,7 +441,9 @@ func (s Server) getUserConnections(ctx context.Context) ([]*proto.Connection, er
 			errtype.LogError(err, "scan failed")
 			return nil, fmt.Errorf("scan failed: %w", err)
 		}
-		if isDefault {
+		// The library connection is reserved for the Data Library: it is never a user's default connection.
+		connection.IsLibrary = isLibraryConnection(ID.String)
+		if isDefault && !connection.IsLibrary {
 			if lastDefaultIndex == -1 {
 				lastDefaultIndex = len(connections)
 			}
@@ -481,9 +483,14 @@ func (s Server) getUserConnections(ctx context.Context) ([]*proto.Connection, er
 
 	if lastDefaultIndex != -1 {
 		connections[lastDefaultIndex].IsDefault = true
-	} else if len(connections) > 0 {
-		// if no default connection is set, set the first one as default
-		connections[len(connections)-1].IsDefault = true
+	} else {
+		// if no default connection is set, set the first one (the oldest) as default, skipping the library connection
+		for i := len(connections) - 1; i >= 0; i-- {
+			if !connections[i].IsLibrary {
+				connections[i].IsDefault = true
+				break
+			}
+		}
 	}
 
 	return connections, nil

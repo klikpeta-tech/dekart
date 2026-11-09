@@ -2,6 +2,9 @@
 import { LibraryItem, LibraryShape } from 'dekart-proto/dekart_pb'
 
 export const workspaceId = '00000000-0000-0000-0000-000000000000'
+// The server treats a connection with this id as the staff-owned library connection (DEKART_LIBRARY_CONNECTION_ID of the lane).
+export const libraryConnectionId = '11111111-1111-4111-8111-111111111111'
+export const ROLE_ADMIN = 1
 export const ROLE_EDITOR = 2
 export const ROLE_VIEWER = 3
 

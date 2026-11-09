@@ -601,3 +601,37 @@ func TestLibraryConnectionGuardIgnoresUnsetConfiguration(t *testing.T) {
 	requireCode(t, refuseLibraryConnection(libConnection), codes.PermissionDenied)
 	require.NoError(t, refuseLibraryConnection(""))
 }
+
+// The library connection is reserved for the Data Library: the list marks it, and it is never a user's default.
+func TestConnectionListMarksTheLibraryConnectionAndNeverDefaultsToIt(t *testing.T) {
+	f := newLibraryFixture(t)
+	t.Setenv("DEKART_DATASOURCE", "USER")
+	t.Setenv("DEKART_ALLOW_FILE_UPLOAD", "0")
+
+	list := func() map[string]*proto.Connection {
+		response, err := f.server.GetConnectionList(f.editor(), &proto.GetConnectionListRequest{})
+		require.NoError(t, err)
+		byID := map[string]*proto.Connection{}
+		for _, connection := range response.Connections {
+			byID[connection.Id] = connection
+		}
+		return byID
+	}
+
+	// The library connection is the only connection of the workspace, so the "first one is the default" fallback must skip it.
+	connections := list()
+	require.True(t, connections[libConnection].IsLibrary)
+	require.False(t, connections[libConnection].IsDefault)
+
+	// A user connection created later is the default; a stored default flag on the library connection does not count.
+	_, err := f.server.db.Exec(`update connections set is_default=true where id=$1`, libConnection)
+	require.NoError(t, err)
+	_, err = f.server.db.Exec(`insert into connections (id, connection_name, workspace_id, connection_type, postgres_host, postgres_username, postgres_database, postgres_port)
+		values ('22222222-2222-4222-8222-222222222222', 'Warehouse', $1, $2, 'warehouse.example.internal', 'user', 'warehouse', 5432)`,
+		libWorkspaceA, int(proto.ConnectionType_CONNECTION_TYPE_POSTGRES))
+	require.NoError(t, err)
+	connections = list()
+	require.False(t, connections[libConnection].IsDefault)
+	require.False(t, connections["22222222-2222-4222-8222-222222222222"].IsLibrary)
+	require.True(t, connections["22222222-2222-4222-8222-222222222222"].IsDefault)
+}
