@@ -109,6 +109,21 @@
     border-top-color: #FFCCC7;
 }
 
+.warning {
+    background-color: #FFFBE6;
+    border-top-color: #FFE58F;
+}
+
+.hint {
+    font-size: 0.8em;
+    line-height: 1.4;
+    margin-top: 2px;
+    color: #595959;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
 .errorMessage {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     font-size: 0.85em;

@@ -22,6 +22,15 @@ import { track } from './lib/tracking'
 import { DUCKDB_DATASOURCE, DuckDBJobStatus, isDuckDBQuery } from './lib/duckdb/constants'
 import { getDuckDBSources, registerDuckDBCompleter } from './lib/duckdb/datasets'
 import SampleQuery from './SampleQuery'
+import { datasetNeedsConnection } from './lib/datasetNeedsConnection'
+
+// useQueryNeedsConnection is true when the dataset of the query lost its connection in a copy across workspaces.
+function useQueryNeedsConnection (query) {
+  const dataset = useSelector(state => state.dataset.list.find(d => d.queryId === query.id))
+  const userDefinedConnection = useSelector(state => state.connection.userDefined)
+  const isPlayground = useSelector(state => state.user.isPlayground)
+  return datasetNeedsConnection(dataset, query, { userDefinedConnection, isPlayground })
+}
 
 function CancelButton ({ queryJob }) {
   const dispatch = useDispatch()
@@ -249,7 +258,8 @@ function QueryStatus ({ children, query }) {
   const isDuckDB = isDuckDBQuery(query)
   const duckDBJobState = useSelector(state => state.duckDBJobStates[queryJob?.id])
   const queryExecutionPending = useSelector(state => state.queryExecutionsPending[query.id])
-  let message, errorMessage, action, style
+  const needsConnection = useQueryNeedsConnection(query)
+  let message, errorMessage, action, style, hint
   let icon = null
   const dispatch = useDispatch()
 
@@ -297,7 +307,13 @@ function QueryStatus ({ children, query }) {
     }
   }, [isDuckDB, duckDBJobState?.status, duckDBJobState?.totalRows, query.id, queryJob?.id])
 
-  if (isDuckDB && queryExecutionPending) {
+  if (needsConnection) {
+    // The server blanks the connection of a map copied across workspaces; say what to do instead of failing on run.
+    icon = <ExclamationCircleTwoTone className={styles.icon} twoToneColor='#FAAD14' />
+    message = 'Choose a connection'
+    style = styles.warning
+    hint = 'This map was copied from another workspace, so its connection was not carried over. Add a dataset with one of your connections and paste this SQL there to run it.'
+  } else if (isDuckDB && queryExecutionPending) {
     icon = <ClockCircleTwoTone className={styles.icon} twoToneColor='#B8B8B8' />
     message = 'Running'
     style = styles.info
@@ -398,7 +414,12 @@ function QueryStatus ({ children, query }) {
                 </div>
               </div>
               )
-            : <div id='dekart-query-status-message' className={styles.message}>{message}</div>}
+            : (
+              <div id='dekart-query-status-message' className={styles.message}>
+                {message}
+                {hint ? <div id='dekart-query-status-hint' className={styles.hint}>{hint}</div> : null}
+              </div>
+              )}
           <div className={styles.spacer} />
           {action ? <div className={styles.action}>{action}</div> : null}
         </div>
@@ -427,13 +448,14 @@ export default function Query ({ query }) {
   const dispatch = useDispatch()
   const canMutate = canWrite && edit && !readOnly
   const isDuckDB = isDuckDBQuery(query)
+  const needsConnection = useQueryNeedsConnection(query)
   const duckDBJobBusy = isDuckDB &&
     queryJob?.jobStatus === QueryJob.JobStatus.JOB_STATUS_DONE &&
     ![
       DuckDBJobStatus.DUCKDB_JOB_STATUS_READY,
       DuckDBJobStatus.DUCKDB_JOB_STATUS_ERROR
     ].includes(duckDBJobState?.status)
-  const canExecute = canMutate && canRun && (!isDuckDB || !changed) && !queryExecutionPending && !duckDBJobBusy && queryText
+  const canExecute = canMutate && canRun && (!isDuckDB || !changed) && !queryExecutionPending && !duckDBJobBusy && !needsConnection && queryText
   const executeQuery = useCallback(() => {
     track('QueryExecute', { queryId: query.id })
     dispatch(isDuckDB
