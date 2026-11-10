@@ -25,7 +25,7 @@ export interface CatalogueItem {
   coverageSummary: string
   /** What one row is. */
   shape: ItemShape
-  /** Number of rows in the whole item. Never negative. */
+  /** Number of rows in the whole item. Never negative. `0` means unknown and is not shown. */
   rowCount: number
   /** Area levels the item can be narrowed to: any of `provinsi`, `kabkota`, `kecamatan`. */
   areaLevels: string[]
@@ -63,7 +63,7 @@ export interface CategoryCount {
 
 /** A catalogue item with everything the detail view shows. */
 export interface ItemDetail extends CatalogueItem {
-  /** Description as plain text. Blank lines separate paragraphs; it is rendered as text, never as markup. */
+  /** Description as CommonMark Markdown. Raw HTML in it is shown as text, never as markup; images are not rendered; only web, mail and phone links stay links. */
   description: string
   /** Credit line for the data source. Empty when there is none. */
   attribution: string

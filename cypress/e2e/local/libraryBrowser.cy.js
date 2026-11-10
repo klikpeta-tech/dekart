@@ -9,7 +9,7 @@ import {
   ListLibraryItemsResponse
 } from 'dekart-proto/dekart_pb'
 import { createReport } from './duckdbHelpers'
-import { ROLE_EDITOR, ROLE_VIEWER, grpcWebReply, libraryItem, setRole } from './libraryStubs'
+import { ROLE_ADMIN, ROLE_EDITOR, ROLE_VIEWER, grpcWebReply, libraryConnectionId, libraryItem, setRole, workspaceId } from './libraryStubs'
 
 // libraryRows selects the dataset rows of the browser, each marked by its access badge.
 function libraryRows () {
@@ -113,6 +113,28 @@ describe('data library browser', () => {
       .and('contain', 'Klikpeta is preparing your library')
   })
 
+  it('keeps the library connection out of the SQL sources and never marks it as the default', () => {
+    const email = `library-connection-${runId}@example.com`
+    cy.setDevClaimsEmail(email)
+    cy.visit('/')
+    setRole(email, ROLE_ADMIN)
+    stubLibrary(grantedItems, 12)
+    // The staff-owned library connection is the only connection of the workspace.
+    cy.exec(`sqlite3 data/dekart.db "INSERT OR REPLACE INTO connections (id, connection_name, workspace_id, connection_type, postgres_host, postgres_username, postgres_database, postgres_port) VALUES ('${libraryConnectionId}', 'Klikpeta Data Library', '${workspaceId}', 5, 'library.example.internal', 'reader', 'library', 5432)"`)
+    createReport()
+
+    cy.get('#dekart-library', { timeout: 30000 }).should('be.visible').and('not.be.disabled')
+    cy.contains('Upload File').should('be.visible')
+    cy.contains('Run SQL directly').should('not.exist')
+    cy.contains('Klikpeta Data Library').should('not.exist')
+
+    cy.visit('/connections')
+    cy.contains('Klikpeta Data Library', { timeout: 30000 }).should('be.visible')
+    cy.contains('Reserved for the Data Library').should('be.visible')
+    cy.contains('Used by default').should('not.exist')
+    cy.contains('button', 'Set default').should('not.exist')
+  })
+
   it('does not show the library to a viewer', () => {
     const email = `library-viewer-${runId}@example.com`
     cy.setDevClaimsEmail(email)
@@ -134,5 +156,10 @@ describe('data library browser', () => {
     cy.get('#dekart-library').should('not.exist')
     // The library is never requested for a viewer.
     cy.get('@listLibraryItems.all').should('have.length', 1)
+  })
+
+  after(() => {
+    // The connection row would change what the dataset selector offers in later specs of the lane.
+    cy.exec(`sqlite3 data/dekart.db "DELETE FROM connections WHERE id='${libraryConnectionId}'"`)
   })
 })

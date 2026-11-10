@@ -116,7 +116,7 @@ export default function DeviceAuthorizePage () {
   const connectionListLoaded = useSelector(state => state.connection.listLoaded)
   const connectionList = useSelector(state => state.connection.list)
   // Filter outside the selector so the stored list keeps one stable reference.
-  const sqlConnectionList = useMemo(() => connectionList.filter(c => c.connectionType !== ConnectionType.CONNECTION_TYPE_LOCAL), [connectionList])
+  const sqlConnectionList = useMemo(() => connectionList.filter(c => c.connectionType !== ConnectionType.CONNECTION_TYPE_LOCAL && !c.isLibrary), [connectionList])
 
   useEffect(() => {
     if (!deviceID) {

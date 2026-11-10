@@ -15564,7 +15564,8 @@ proto.Connection.toObject = function(includeInstance, msg) {
     postgresPassword: (f = msg.getPostgresPassword()) && proto.Secret.toObject(includeInstance, f),
     postgresDatabase: jspb.Message.getFieldWithDefault(msg, 25, ""),
     postgresPort: jspb.Message.getFieldWithDefault(msg, 26, 0),
-    postgresSslMode: jspb.Message.getFieldWithDefault(msg, 27, "")
+    postgresSslMode: jspb.Message.getFieldWithDefault(msg, 27, ""),
+    isLibrary: jspb.Message.getBooleanFieldWithDefault(msg, 28, false)
   };
 
   if (includeInstance) {
@@ -15713,6 +15714,10 @@ proto.Connection.deserializeBinaryFromReader = function(msg, reader) {
     case 27:
       var value = /** @type {string} */ (reader.readString());
       msg.setPostgresSslMode(value);
+      break;
+    case 28:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setIsLibrary(value);
       break;
     default:
       reader.skipField();
@@ -15934,6 +15939,13 @@ proto.Connection.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       27,
+      f
+    );
+  }
+  f = message.getIsLibrary();
+  if (f) {
+    writer.writeBool(
+      28,
       f
     );
   }
@@ -16518,6 +16530,24 @@ proto.Connection.prototype.getPostgresSslMode = function() {
  */
 proto.Connection.prototype.setPostgresSslMode = function(value) {
   return jspb.Message.setProto3StringField(this, 27, value);
+};
+
+
+/**
+ * optional bool is_library = 28;
+ * @return {boolean}
+ */
+proto.Connection.prototype.getIsLibrary = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 28, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.Connection} returns this
+ */
+proto.Connection.prototype.setIsLibrary = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 28, value);
 };
 
 

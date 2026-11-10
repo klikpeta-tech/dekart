@@ -519,6 +519,7 @@ message Connection {
     string postgres_database = 25;
     int32 postgres_port = 26;
     string postgres_ssl_mode = 27;
+    bool is_library = 28; // the staff-owned Data Library connection: never the default, never offered for SQL
 }
 
 message Secret {

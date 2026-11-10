@@ -54,6 +54,34 @@ function ArchiveReportButton ({ report }) {
   )
 }
 
+// Shows whether a connection is the default one; the library connection is reserved and can never be the default.
+function ConnectionDefaultStatus ({ connection }) {
+  const dispatch = useDispatch()
+  if (connection.isLibrary) {
+    return <span>Reserved for the Data Library</span>
+  }
+  if (connection.isDefault) {
+    return (
+      <>
+        <CheckOutlined />
+        <span>Used by default</span>
+      </>
+    )
+  }
+  return (
+    <Button
+      type='text'
+      className={styles.connectionCardSetDefaultButton}
+      onClick={(event) => {
+        event.stopPropagation()
+        track('SetDefaultConnection', { connectionId: connection.id })
+        dispatch(setDefaultConnection(connection.id))
+      }}
+    >Set default
+    </Button>
+  )
+}
+
 function ConnectionCard ({ connection }) {
   const dispatch = useDispatch()
   const updatedDate = new Date(connection.updatedAt * 1000)
@@ -79,25 +107,7 @@ function ConnectionCard ({ connection }) {
       <div className={styles.connectionCardDivider} />
       <div className={styles.connectionCardFooter}>
         <div className={styles.connectionCardDefaultStatus}>
-          {connection.isDefault
-            ? (
-              <>
-                <CheckOutlined />
-                <span>Used by default</span>
-              </>
-              )
-            : (
-              <Button
-                type='text'
-                className={styles.connectionCardSetDefaultButton}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  track('SetDefaultConnection', { connectionId: connection.id })
-                  dispatch(setDefaultConnection(connection.id))
-                }}
-              >Set default
-              </Button>
-              )}
+          <ConnectionDefaultStatus connection={connection} />
         </div>
         <Button
           size='small'
@@ -121,7 +131,7 @@ function FirstReportOnboarding () {
   const history = useHistory()
   const connectionList = useSelector(state => state.connection.list)
   // Filter outside the selector so the stored list keeps one stable reference.
-  const sqlConnectionList = useMemo(() => connectionList.filter(c => c.connectionType !== ConnectionType.CONNECTION_TYPE_LOCAL), [connectionList])
+  const sqlConnectionList = useMemo(() => connectionList.filter(c => c.connectionType !== ConnectionType.CONNECTION_TYPE_LOCAL && !c.isLibrary), [connectionList])
   const createDisabled = isViewer || readOnly
   return (
     <>

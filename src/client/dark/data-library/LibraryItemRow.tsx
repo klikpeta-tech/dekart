@@ -18,6 +18,7 @@ export interface LibraryItemRowProps {
 
 /**
  * Compact row for one catalogue item: title, category, shape, row count, coverage and an {@link AccessBadge}.
+ * The row count is left out when it is `0` (unknown).
  *
  * @param props - See {@link LibraryItemRowProps}.
  * @returns A list item; a button inside it when `onSelect` is given.
@@ -28,7 +29,7 @@ export function LibraryItemRow ({ item, added = false, addedLabel, onSelect }: L
       <span className={styles.rowMain}>
         <span className={styles.rowTitle}>{item.title}</span>
         <span className={styles.rowMeta}>
-          {[item.category, shapeLabel(item.shape), `${formatCount(item.rowCount)} rows`].join(' · ')}
+          {[item.category, shapeLabel(item.shape), ...(item.rowCount > 0 ? [`${formatCount(item.rowCount)} rows`] : [])].join(' · ')}
         </span>
         {item.coverageSummary !== '' && <span className={styles.rowMeta}>{item.coverageSummary}</span>}
       </span>

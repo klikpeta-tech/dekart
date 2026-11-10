@@ -187,7 +187,7 @@ One browsable catalogue entry. Every field is display or filter data; ids are op
 | <a id="api-coveragesummary"></a> `coverageSummary` | `string` | Short description of the covered region. Searchable. |
 | <a id="api-id"></a> `id` | `string` | Opaque, unique id. Passed back unchanged to `onSelectItem`. |
 | <a id="api-provider"></a> `provider` | `string` | Organisation that provides the data. Searchable. |
-| <a id="api-rowcount-1"></a> `rowCount` | `number` | Number of rows in the whole item. Never negative. |
+| <a id="api-rowcount-1"></a> `rowCount` | `number` | Number of rows in the whole item. Never negative. `0` means unknown and is not shown. |
 | <a id="api-searchterms"></a> `searchTerms?` | `string`[] | Extra searchable words that are not shown, for example the titles of sub-categories inside the item. |
 | <a id="api-shape"></a> `shape` | [`ItemShape`](#api-itemshape) | What one row is. |
 | <a id="api-title"></a> `title` | `string` | Display title. The year, when relevant, is part of the title. |
@@ -248,12 +248,12 @@ A catalogue item with everything the detail view shows.
 | <a id="api-category-2"></a> `category` | `string` | Display category used for the category chips. Compared exactly, so equal categories must be spelled equally. | [`CatalogueItem`](#api-catalogueitem).[`category`](#api-category) |
 | <a id="api-columns"></a> `columns` | `string`[] | Names of the columns a row has. | - |
 | <a id="api-coveragesummary-1"></a> `coverageSummary` | `string` | Short description of the covered region. Searchable. | [`CatalogueItem`](#api-catalogueitem).[`coverageSummary`](#api-coveragesummary) |
-| <a id="api-description"></a> `description` | `string` | Description as plain text. Blank lines separate paragraphs; it is rendered as text, never as markup. | - |
+| <a id="api-description"></a> `description` | `string` | Description as CommonMark Markdown. Raw HTML in it is shown as text, never as markup; images are not rendered; only web, mail and phone links stay links. | - |
 | <a id="api-hastaxonomy"></a> `hasTaxonomy` | `boolean` | True when rows carry categories (and optional brands) that must be picked. | - |
 | <a id="api-id-1"></a> `id` | `string` | Opaque, unique id. Passed back unchanged to `onSelectItem`. | [`CatalogueItem`](#api-catalogueitem).[`id`](#api-id) |
 | <a id="api-maxrows"></a> `maxRows` | `number` | Largest selection that can be added, in rows. `0` means no limit. | - |
 | <a id="api-provider-1"></a> `provider` | `string` | Organisation that provides the data. Searchable. | [`CatalogueItem`](#api-catalogueitem).[`provider`](#api-provider) |
-| <a id="api-rowcount-2"></a> `rowCount` | `number` | Number of rows in the whole item. Never negative. | [`CatalogueItem`](#api-catalogueitem).[`rowCount`](#api-rowcount-1) |
+| <a id="api-rowcount-2"></a> `rowCount` | `number` | Number of rows in the whole item. Never negative. `0` means unknown and is not shown. | [`CatalogueItem`](#api-catalogueitem).[`rowCount`](#api-rowcount-1) |
 | <a id="api-searchterms-1"></a> `searchTerms?` | `string`[] | Extra searchable words that are not shown, for example the titles of sub-categories inside the item. | [`CatalogueItem`](#api-catalogueitem).[`searchTerms`](#api-searchterms) |
 | <a id="api-shape-1"></a> `shape` | [`ItemShape`](#api-itemshape) | What one row is. | [`CatalogueItem`](#api-catalogueitem).[`shape`](#api-shape) |
 | <a id="api-sourceupdatedat"></a> `sourceUpdatedAt` | `number` | When the source data was last updated, in Unix seconds. `0` when unknown. | - |
@@ -335,7 +335,7 @@ Props of [LibraryItemDetail](#api-libraryitemdetail).
 | ------ | ------ | ------ |
 | <a id="api-children"></a> `children?` | `ReactNode` | Pickers or other controls, rendered between the column list and the action row. |
 | <a id="api-issues"></a> `issues?` | readonly [`SelectionIssue`](#api-selectionissue)[] | Reasons the current selection cannot be added. Shown as a list above the action row. |
-| <a id="api-item"></a> `item` | [`ItemDetail`](#api-itemdetail) | The item to describe. All text is rendered as text, never as markup. |
+| <a id="api-item"></a> `item` | [`ItemDetail`](#api-itemdetail) | The item to describe. The description is rendered as Markdown; every other text is rendered as text, never as markup. |
 | <a id="api-notice"></a> `notice?` | `string` | An error to show above the action row, for example the text of a refused command. Empty for none. |
 | <a id="api-onback-1"></a> `onBack?` | () => `void` | Called when the back button is pressed. Without it no back button is shown. |
 | <a id="api-onpreviewsample"></a> `onPreviewSample?` | () => `void` | Called when "Preview sample" is pressed. Without it the button is not shown. |
@@ -642,7 +642,8 @@ function CategoryPicker(props): ReactElement;
 Picks categories, and optionally brands, from grouped lists.
 
 Categories are listed in collapsible groups; a group opens by default when it is the first or holds a pick. Brands
-of the picked categories appear in a second row and narrow the selection further; picking none keeps every brand.
+of the picked categories appear below, in one labelled group per category (several categories can hold brands of the
+same title), and narrow the selection further; picking none keeps every brand.
 At least one category is expected: the picker says so while none is picked, and [validateSelection](#api-validateselection) reports
 it. Titles are rendered as text, never as markup.
 
@@ -889,8 +890,13 @@ function LibraryItemDetail(props): ReactElement;
 Detail view of one catalogue item: description, a grid of facts, the column names and the source credit, with room
 for pickers, a "Preview sample" button and one primary action.
 
-Facts with no value are left out. The row count is shown with Indonesian digit grouping and the update date as a long
-Indonesian date. Nothing about how the data is stored or queried is shown.
+The description is rendered as CommonMark Markdown (emphasis, lists, links and so on). Raw HTML in it is shown as
+text, never as markup, and images are not rendered. Links to `http`, `https`, `mailto` and `tel` addresses open in a
+new tab; a link to anything else, such as a `javascript:` address, is shown as plain text.
+
+Facts with no value are left out, including the row count when it is `0` (unknown). The row count is shown with
+Indonesian digit grouping and the update date as a long Indonesian date. Nothing about how the data is stored or
+queried is shown.
 
 #### Parameters
 
@@ -915,6 +921,7 @@ function LibraryItemRow(props): ReactElement;
 ```
 
 Compact row for one catalogue item: title, category, shape, row count, coverage and an [AccessBadge](#api-accessbadge).
+The row count is left out when it is `0` (unknown).
 
 #### Parameters
 
