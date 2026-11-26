@@ -453,7 +453,7 @@ export function runDuckDBGraph (changedDatasetIds = null) {
               const urlQuery = resolvedURL === null ? '' : `?url=${encodeURIComponent(resolvedURL)}`
               const response = await get(
                 `/dataset-source/${node.dataset.id}/${source.sourceId}.${source.extension}${urlQuery}`,
-                state.token, null, null, state.user.claimEmailCookie, reportId, state.user.loginHint
+                state.token, null, null, state.user.claimEmailCookie, reportId, state.user.loginHint, state.user.preferredWorkspaceId
               ).catch(error => { throw new Error(error.errorDetails || 'HTTP source download was interrupted. Try executing the query again.') })
               if (!executionIsCurrent()) return
               await runtime.registerHTTPSource(source, new Uint8Array(await response.arrayBuffer()))

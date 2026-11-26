@@ -1,6 +1,7 @@
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { processDownloadError } from './dataset'
+import { downloadDataset, processDownloadError } from './dataset'
+import { get } from '../lib/api'
 import { grpcCall } from './grpc'
 import { failDuckDBSource } from './duckdb'
 import { info, setError } from './message'
@@ -12,6 +13,7 @@ vi.mock('./duckdb', () => ({
   registerDuckDBSource: vi.fn(),
   removeDuckDBSource: vi.fn()
 }))
+vi.mock('../lib/api', () => ({ get: vi.fn() }))
 vi.mock('./message', () => ({
   info: vi.fn(() => ({ type: 'info' })),
   setError: vi.fn(() => ({ type: 'setError' })),
@@ -64,5 +66,36 @@ describe('missing query result recovery', () => {
       expect(failDuckDBSource).toHaveBeenCalledOnce()
       expect(setError).toHaveBeenCalledWith(error)
     }
+  })
+})
+
+describe('downloadDataset', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    get.mockReset()
+    get.mockResolvedValue(new window.Response('a,b\n1,2\n'))
+  })
+
+  // A shared map is opened by a member whose newest workspace is not the map's workspace;
+  // without the selected workspace the server resolves the wrong one and answers 404.
+  it('downloads the dataset source in the selected workspace', async () => {
+    const dataset = { id: 'dataset-1' }
+    const state = {
+      files: [],
+      dataset: { list: [dataset], downloading: [] },
+      token: { access_token: 'token' },
+      report: { id: 'report-1' },
+      reportStatus: { snapshotMode: false },
+      user: { claimEmailCookie: null, loginHint: 'david@example.com', preferredWorkspaceId: 'workspace-b7' }
+    }
+
+    await downloadDataset(dataset, 'source-1', 'csv', [])(vi.fn(), () => state)
+
+    expect(get).toHaveBeenCalledTimes(1)
+    const [endpoint, , , , , reportId, loginHint, workspaceId] = get.mock.calls[0]
+    expect(endpoint).toBe('/dataset-source/dataset-1/source-1.csv')
+    expect(reportId).toBe('report-1')
+    expect(loginHint).toBe('david@example.com')
+    expect(workspaceId).toBe('workspace-b7')
   })
 })
