@@ -17,6 +17,7 @@ export default function AnalyticsModal () {
   const dispatch = useDispatch()
   const report = useSelector(state => state.report)
   const token = useSelector(state => state.token)
+  const preferredWorkspaceId = useSelector(state => state.user.preferredWorkspaceId)
   const buttonRef = useRef(null)
   const [loading, setLoading] = useState(false)
 
@@ -32,7 +33,7 @@ export default function AnalyticsModal () {
       return
     }
     setLoading(true)
-    get(`/report/${report.id}/analytics.csv`, token).then(response => response.blob())
+    get(`/report/${report.id}/analytics.csv`, token, null, null, null, '', null, preferredWorkspaceId).then(response => response.blob())
       .then(blob => {
         const url = URL.createObjectURL(blob)
         const a = buttonRef.current
@@ -44,7 +45,7 @@ export default function AnalyticsModal () {
         dispatch(setError(err))
         setLoading(false)
       })
-  }, [modalOpen, analytics, userStream, dispatch, token, report.id])
+  }, [modalOpen, analytics, userStream, dispatch, token, report.id, preferredWorkspaceId])
 
   if (!userStream) {
     return null
