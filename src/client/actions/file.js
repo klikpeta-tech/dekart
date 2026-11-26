@@ -61,7 +61,7 @@ export function uploadFile (fileId, file) {
     dispatch(uploadFileStart(fileId, file))
     dispatch(uploadFilePhase(fileId, 'starting'))
     track('FileUploadStarted', { fileId, fileSize: file.size })
-    const { token } = getState()
+    const { token, user: { preferredWorkspaceId } } = getState()
     const normalizedFile = file.type
       ? file
       : new window.File([file], file.name, {
@@ -72,6 +72,7 @@ export function uploadFile (fileId, file) {
         fileId,
         file: normalizedFile,
         token,
+        workspaceId: preferredWorkspaceId,
         dispatch,
         actions: {
           uploadFilePhase,

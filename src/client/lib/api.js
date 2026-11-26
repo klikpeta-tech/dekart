@@ -17,24 +17,26 @@ export class AbortError extends Error {
 }
 
 // post sends authenticated JSON payloads to Dekart HTTP API and returns parsed JSON body.
-export async function post (endpoint, body, token = null) {
-  return requestJSON('POST', endpoint, token, body)
+export async function post (endpoint, body, token = null, workspaceId = '') {
+  return requestJSON('POST', endpoint, token, body, workspaceId)
 }
 
 // del sends authenticated DELETE requests to Dekart HTTP API and returns parsed JSON body when present.
-export async function del (endpoint, token = null) {
-  return requestJSON('DELETE', endpoint, token)
+export async function del (endpoint, token = null, workspaceId = '') {
+  return requestJSON('DELETE', endpoint, token, undefined, workspaceId)
 }
 
 // put sends authenticated PUT requests to Dekart HTTP API and returns parsed JSON body when present.
-export async function put (endpoint, body, token = null, contentType = 'application/json') {
+export async function put (endpoint, body, token = null, contentType = 'application/json', workspaceId = '') {
   if (contentType === 'application/json') {
-    return requestJSON('PUT', endpoint, token, body)
+    return requestJSON('PUT', endpoint, token, body, workspaceId)
   }
-  return requestRaw('PUT', endpoint, token, body, contentType)
+  return requestRaw('PUT', endpoint, token, body, contentType, workspaceId)
 }
 
-export function get (endpoint, token = null, signal = null, onProgress = null, claimEmailCookie = null, reportId = '', loginHint = null) {
+// get downloads a Dekart API resource; workspaceId is the selected workspace (same value the gRPC path sends)
+// so the server resolves access in that workspace instead of the user's most recently joined one.
+export function get (endpoint, token = null, signal = null, onProgress = null, claimEmailCookie = null, reportId = '', loginHint = null, workspaceId = '') {
   return new Promise((resolve, reject) => {
     const xhr = new window.XMLHttpRequest()
     const { VITE_API_HOST } = import.meta.env
@@ -54,6 +56,9 @@ export function get (endpoint, token = null, signal = null, onProgress = null, c
     }
     if (loginHint && loginHint !== UNKNOWN_EMAIL) {
       xhr.setRequestHeader('X-Dekart-Logged-In', 'true')
+    }
+    if (workspaceId) {
+      xhr.setRequestHeader('X-Dekart-Workspace-Id', workspaceId)
     }
     xhr.responseType = 'arraybuffer'
 
@@ -118,7 +123,7 @@ function parseHeaders (headersString) {
 }
 
 // requestJSON is a shared HTTP JSON helper for authenticated Dekart API calls.
-async function requestJSON (method, endpoint, token = null, body = undefined) {
+async function requestJSON (method, endpoint, token = null, body = undefined, workspaceId = '') {
   const { VITE_API_HOST } = import.meta.env
   const host = VITE_API_HOST || ''
   const url = `${host}/api/v1${endpoint}`
@@ -134,6 +139,9 @@ async function requestJSON (method, endpoint, token = null, body = undefined) {
   const reportId = getReportIdFromUrl()
   if (reportId) {
     headers['X-Dekart-Report-Id'] = reportId
+  }
+  if (workspaceId) {
+    headers['X-Dekart-Workspace-Id'] = workspaceId
   }
   const response = await window.fetch(url, {
     method,
@@ -152,7 +160,7 @@ async function requestJSON (method, endpoint, token = null, body = undefined) {
 }
 
 // requestRaw is a shared HTTP helper for authenticated non-JSON Dekart API calls.
-async function requestRaw (method, endpoint, token = null, body = undefined, contentType = null) {
+async function requestRaw (method, endpoint, token = null, body = undefined, contentType = null, workspaceId = '') {
   const { VITE_API_HOST } = import.meta.env
   const host = VITE_API_HOST || ''
   const url = `${host}/api/v1${endpoint}`
@@ -168,6 +176,9 @@ async function requestRaw (method, endpoint, token = null, body = undefined, con
   const reportId = getReportIdFromUrl()
   if (reportId) {
     headers['X-Dekart-Report-Id'] = reportId
+  }
+  if (workspaceId) {
+    headers['X-Dekart-Workspace-Id'] = workspaceId
   }
   const response = await window.fetch(url, {
     method,
