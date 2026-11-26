@@ -34,11 +34,12 @@ export async function runFileUploadSession ({
   fileId,
   file,
   token,
+  workspaceId,
   dispatch,
   actions,
   track
 }) {
-  const uploadSession = await createFileUploadSession(fileId, file, token)
+  const uploadSession = await createFileUploadSession(fileId, file, token, workspaceId)
   const uploadSessionId = uploadSession.upload_session_id
   const maxPartSize = Number(uploadSession.max_part_size)
   if (!uploadSessionId || !Number.isFinite(maxPartSize) || maxPartSize <= 0) {
@@ -59,7 +60,7 @@ export async function runFileUploadSession ({
     for (const part of parts) {
       const blob = sliceFilePart(file, part.offset, part.size)
       const uploadedPart = await withRetry(
-        () => uploadPart(fileId, uploadSessionId, part.partNumber, part.size, blob, token),
+        () => uploadPart(fileId, uploadSessionId, part.partNumber, part.size, blob, token, workspaceId),
         uploadRetryCount
       )
       manifest.push({
@@ -79,48 +80,49 @@ export async function runFileUploadSession ({
 
     dispatch(actions.uploadFilePhase(fileId, 'completing'))
     const completeResponse = await withRetry(
-      () => completeFileUploadSession(fileId, uploadSessionId, manifest, file.size, token),
+      () => completeFileUploadSession(fileId, uploadSessionId, manifest, file.size, token, workspaceId),
       uploadRetryCount
     )
     dispatch(actions.uploadFileDone(fileId, completeResponse))
     track('FileUploadSessionCompleted', { fileId, uploadSessionId, size: completeResponse?.size || file.size })
   } catch (error) {
-    await abortFileUploadSession(fileId, uploadSessionId, token).catch(() => {})
+    await abortFileUploadSession(fileId, uploadSessionId, token, workspaceId).catch(() => {})
     track('FileUploadSessionAborted', { fileId, uploadSessionId })
     throw error
   }
 }
 
 // uploadPart uploads one chunk to server and returns manifest metadata.
-export async function uploadPart (fileId, uploadSessionId, partNumber, partSize, blob, token) {
+export async function uploadPart (fileId, uploadSessionId, partNumber, partSize, blob, token, workspaceId = '') {
   return put(
     `/file/${fileId}/upload-sessions/${uploadSessionId}/parts/${partNumber}?part_size=${partSize}`,
     blob,
     token,
-    'application/octet-stream'
+    'application/octet-stream',
+    workspaceId
   )
 }
 
 // createFileUploadSession requests a new server-side upload session for one file.
-async function createFileUploadSession (fileId, file, token) {
+async function createFileUploadSession (fileId, file, token, workspaceId = '') {
   return post(`/file/${fileId}/upload-sessions`, {
     name: file.name,
     mime_type: file.type,
     total_size: file.size
-  }, token)
+  }, token, workspaceId)
 }
 
 // completeFileUploadSession finalizes uploaded parts and promotes provider object to ready file.
-async function completeFileUploadSession (fileId, uploadSessionId, parts, totalSize, token) {
+async function completeFileUploadSession (fileId, uploadSessionId, parts, totalSize, token, workspaceId = '') {
   return post(`/file/${fileId}/upload-sessions/${uploadSessionId}/complete`, {
     parts,
     total_size: totalSize
-  }, token)
+  }, token, workspaceId)
 }
 
 // abortFileUploadSession aborts an in-progress upload session for cleanup.
-async function abortFileUploadSession (fileId, uploadSessionId, token) {
-  return del(`/file/${fileId}/upload-sessions/${uploadSessionId}`, token)
+async function abortFileUploadSession (fileId, uploadSessionId, token, workspaceId = '') {
+  return del(`/file/${fileId}/upload-sessions/${uploadSessionId}`, token, workspaceId)
 }
 
 // withRetry retries transient upload operations with simple linear backoff.

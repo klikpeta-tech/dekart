@@ -167,7 +167,7 @@ export function querySource (queryId, querySourceId, queryText) {
 export function downloadQuerySource (query) {
   return async (dispatch, getState) => {
     dispatch({ type: downloadQuerySource.name, query })
-    const { queries, token, report, user: { claimEmailCookie } } = getState()
+    const { queries, token, report, user: { claimEmailCookie, loginHint, preferredWorkspaceId } } = getState()
     const i = queries.findIndex(q => q.id === query.id)
     if (i < 0) {
       return
@@ -179,7 +179,9 @@ export function downloadQuerySource (query) {
         null,
         null,
         claimEmailCookie,
-        report?.id || ''
+        report?.id || '',
+        loginHint,
+        preferredWorkspaceId
       )
       const queryText = await res.text()
       dispatch(querySource(query.id, query.querySourceId, queryText))
